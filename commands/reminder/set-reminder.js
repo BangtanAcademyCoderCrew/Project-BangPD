@@ -14,6 +14,20 @@ module.exports = class ReminderCommand extends Command {
 					key: 'deadline',
 					prompt: 'When is the deadline?',
 					type: 'string',
+					validate: deadline => {
+						const deadlineDateTime = DateTime.fromSQL(deadline, { zone: 'America/Chicago' });
+						if (!deadlineDateTime.isValid) {
+							return 'Invalid deadline provided. Please enter deadline in correct format. YYYY-MM-DD HH:MM';
+						}
+						
+						const deadlineInUTC = deadlineDateTime.toUTC();
+        				const currentTimeUTC = DateTime.utc();
+
+						if (currentTimeUTC > deadlineInUTC) {
+							return 'Deadline is in past. Invalid datetime provided.';
+						}
+						return true;
+					},
 				},
 				{
 					key: 'channelID',
@@ -34,17 +48,7 @@ module.exports = class ReminderCommand extends Command {
         const targetChannel = discordClient.channels.cache.get(channelID);
 
 		const deadlineDateTime = DateTime.fromSQL(deadline, { zone: 'America/Chicago' });
-
-        if (!deadlineDateTime.isValid) {
-            return message.reply('Invalid deadline provided. Please enter deadline in correct format. YYYY-MM-DD HH:MM');
-        }
-
 		const deadlineInUTC = deadlineDateTime.toUTC();
-        const currentTimeUTC = DateTime.utc();
-
-        if (currentTimeUTC > deadlineInUTC) {
-            return message.reply('Deadline is in past. Invalid datetime provided.');
-        }
 
         const oneHourBeforeDeadlineUTC = deadlineInUTC.minus({ hours: 1 });
         const oneHourBeforeDeadlineCST = oneHourBeforeDeadlineUTC.setZone('America/Chicago');
