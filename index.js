@@ -23,7 +23,7 @@ client.registry
 
 client.once('ready', () => {
 	console.log(`Bang PD is online!`);
-	client.user.setActivity('Streaming BE');
+	client.user.setActivity('BE', { type: 'LISTENING' });
 });
 
 // CATCH RAW REACTION
