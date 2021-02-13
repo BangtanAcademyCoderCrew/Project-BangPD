@@ -7,14 +7,16 @@
   "license": "AGPL-3.0-only",
   "private": false,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js;"
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
     "detect-libc": "^1.0.3",
     "discord.js": "^12.5.1",
     "discord.js-commando": "^0.12.2",
+    "dotenv": "^8.2.0",
     "elementtree": "^0.1.7",
     "krdict-api": "0.0.4",
     "luxon": "^1.25.0",
