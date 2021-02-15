@@ -4,15 +4,14 @@ const DiscordUtil = require('../../common/discordutil.js');
 const { Command } = require('discord.js-commando');
 const Paginator = require('../../common/paginator');
 
-module.exports = class SejongCommand extends Command {
+module.exports = class DictionaryCommand extends Command {
   constructor(client) {
     super(client, {
       name: 'hanja',
-      group: 'sejong',
+      group: 'dictionary',
       memberName: 'hanja',
       description: 'Search for Hanja in English, Korean, or Hanja itself.',
       details: 'Searches the hanja database for meanings of hanjas and related words that occur in the provided argument.\r\n Use the reactions below the message to browse pages or bookmark the result to DMs.',
-      group: 'sejong',
       aliases: ['h'],
       args: [ {
         key:'word',

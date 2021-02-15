@@ -2,14 +2,15 @@ const DiscordUtil = require('../../common/discordutil');
 const { Command } = require('discord.js-commando');
 
 
-module.exports = class SejongCommand extends Command {
+module.exports = class DictionaryCommand extends Command {
   constructor(client) {
     super(client, {
-      name: 'sejong-help',
+      name: 'dictionary-help',
       cooldown: 3,
-      group: 'sejong',
-      memberName: 'sejong-help',
-      description: 'shows options and examples for all sejong commands',
+      group: 'dictionary',
+      aliases: ['dict-h', 'dict-help'],
+      memberName: 'dictionary-help',
+      description: 'shows options and examples for all dictionary commands',
       args: [
         {
           key:'command',
@@ -22,7 +23,7 @@ module.exports = class SejongCommand extends Command {
 
   run(message, args) {
     args = [args.command];
-    const commands = message.client.registry.groups.get('sejong').commands;
+    const commands = message.client.registry.groups.get('dictionary').commands;
 
     if (!args.length) {
       const helpEmbed = DiscordUtil.createHelpEmbed(commands);

@@ -4,13 +4,13 @@ const PapagoApi = require('../../api/papagoapi.js');
 const langs = require('../../common/langs.js');
 const { prefix } = require('../../config.json');
 
-module.exports = class SejongCommand extends Command {
+module.exports = class DictionaryCommand extends Command {
   constructor(client) {
     super(client, {
     name: 'papago',
-    group: 'sejong',
+    group: 'dictionary',
     memberName: 'papago',
-    description: `Translate a text using Papago. (default: ko>en) \r\nSee ${prefix}sejong-help papago for other options.`,
+    description: `Translate a text using Papago. (default: ko>en) \r\nSee ${prefix}dictionary-help papago for other options.`,
     details: `Translate a sentence using Papago. Use ${prefix}papago to translate from Korean to English (default).
     \r\nUse ${prefix}papago [source]>[target] [text] to specify both the target and source language.\r\n
     The available language codes are: ko (Korean), en (English), zh-CN (Chinese), zh-TW (Taiwanese), es (Spanish), fr (French), vi (Vietnamese), th (Thai), id (Indonesian).

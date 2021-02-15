@@ -3,12 +3,12 @@ const { Command } = require('discord.js-commando');
 const ExampleSentenceAPI = require('../../api/exampleapi.js');
 const { prefix } = require('../../config.json');
 
-module.exports = class SejongCommand extends Command {
+module.exports = class DictionaryCommand extends Command {
   constructor(client) {
     super(client, {
       name: 'examples',
       aliases: ['e', 'ex'],
-      group: 'sejong',
+      group: 'dictionary',
       memberName: 'examples',
       description: 'Search the dictionary for example sentences.',
       details: 'Searches the dictionary for example sentences including the Korean word provided.\r\n\r\nResults come from the National Institute of Korean Language\'s Korean-English Learners\' Dictionary.\r\n\r\nUse the book reaction to bookmark the message to DMs.',

@@ -3,7 +3,7 @@ const Discord = require('discord.js');
 const DiscordUtil = require('./common/discordutil');
 const path = require('path');
 const {
-	prefix, enabledCommands, status, devIds, llkId, devServerId, enableSejongReply, token
+	prefix, enabledCommands, status, devIds, llkId, devServerId, enableDictionaryReply, token
   } = require('./config.json');
 
 const client = new CommandoClient({
@@ -15,7 +15,7 @@ client.registry
 	.registerDefaultTypes()
 	.registerGroups([
 		['reminder', 'Command Group for Reminder functionalities'],
-		['sejong', 'Command Group for Sejong functionalities']
+		['dictionary', 'Command Group for Dictionary functionalities']
 	])
 	.registerDefaultGroups()
 	.registerDefaultCommands()

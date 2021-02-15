@@ -161,7 +161,7 @@ module.exports = {
   },
 
   createHelpEmbed(commands) {
-    const embed = this.createBasicEmbed('BangPD').setDescription(`Use **${prefix}sejong-help <command>** to see information about a specific command.`);
+    const embed = this.createBasicEmbed('BangPD').setDescription(`Use **${prefix}dictionary-help <command>** to see information about a specific command.`);
     commands.forEach((c) => {
       if (c.name === 'help') return;
       if (c.devOnly) return;
