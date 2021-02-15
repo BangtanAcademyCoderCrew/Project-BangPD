@@ -35,7 +35,7 @@ module.exports = {
   createBasicEmbed(name) {
     return new Discord.MessageEmbed()
       .setColor(accentColor)
-      .setAuthor(name || 'Sejong', 'https://i.imgur.com/v95B0db.jpg');
+      .setAuthor(name || 'BangPD', 'https://i.imgur.com/UwOpFvr.png');
   },
 
   setEmbedFooter(embed, footer) {
@@ -119,7 +119,7 @@ module.exports = {
     const pageCount = pages.length;
     if (pageCount > 1) {
       pages.forEach((page, index) => {
-        page.setAuthor(`Sejong (Page ${index + 1} of ${pageCount})`, 'https://i.imgur.com/v95B0db.jpg');
+        page.setAuthor(`BangPD (Page ${index + 1} of ${pageCount})`, 'https://i.imgur.com/UwOpFvr.png');
         this.setEmbedFooter(page, `${username} can browse pages. ${!isDM ? 'Anyone can bookmark this message.' : ''}`);
       });
     } else if (pageCount === 1 && !isEmpty) {
@@ -161,7 +161,7 @@ module.exports = {
   },
 
   createHelpEmbed(commands) {
-    const embed = this.createBasicEmbed('Sejong').setDescription(`Use **${prefix}sejong-help <command>** to see information about a specific command.`);
+    const embed = this.createBasicEmbed('BangPD').setDescription(`Use **${prefix}sejong-help <command>** to see information about a specific command.`);
     commands.forEach((c) => {
       if (c.name === 'help') return;
       if (c.devOnly) return;
