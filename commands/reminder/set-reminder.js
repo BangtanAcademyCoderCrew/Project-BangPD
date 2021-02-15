@@ -8,11 +8,13 @@ module.exports = class ReminderCommand extends Command {
       aliases: ["reminder", "remind"],
       group: "reminder",
       memberName: "set-reminder",
-      description: "Sets a reminder 1 hour before deadline.",
+      description: "Sets a reminder",
+      clientPermissions: ['ADMINISTRATOR'],
+      userPermissions: ['ADMINISTRATOR'],
       args: [
         {
           key: "deadline",
-          prompt: "When is the deadline?",
+          prompt: "When is the deadline in CST?",
           type: "string",
           validate: (deadline) => {
             const deadlineDateTime = DateTime.fromSQL(deadline, {
@@ -41,6 +43,7 @@ module.exports = class ReminderCommand extends Command {
           prompt:
             "How much time before the deadline would you like the reminder to set off?",
           type: "string",
+          oneOf: ['30m', '1h', '1d'],
         },
         {
           key: "reminderMessage",
@@ -51,30 +54,43 @@ module.exports = class ReminderCommand extends Command {
     });
   }
 
-  run(message, { deadline, channelID, reminderMessage }) {
+  run(message, { deadline, channelID, reminderMessage, timeInAdvance }) {
     const discordClient = message.client;
     const targetChannel = discordClient.channels.cache.get(channelID);
+    const cst = "America/Chicago";
 
     const deadlineDateTime = DateTime.fromSQL(deadline, {
-      zone: "America/Chicago",
+      zone: cst,
     });
     const deadlineInUTC = deadlineDateTime.toUTC();
 
-    const oneHourBeforeDeadlineUTC = deadlineInUTC.minus({ hours: 1 });
-    const oneHourBeforeDeadlineCST = oneHourBeforeDeadlineUTC.setZone(
-      "America/Chicago"
-    );
+    var reminderTime;
 
-    this.sendReminder(oneHourBeforeDeadlineUTC, targetChannel, reminderMessage);
+    switch (timeInAdvance) {
+      case "30m":
+        reminderTime = deadlineInUTC.minus({ minutes: 30 });
+        break;
+      case "1h":
+        reminderTime = deadlineInUTC.minus({ hours: 1 });
+        break;
+      case "1d":
+        reminderTime = deadlineInUTC.minus({ days: 1 });
+        break;
+    }
+
+    const reminderTimeCST = reminderTime.setZone(cst);
+
+
+    this.sendReminder(reminderTime, targetChannel, reminderMessage);
 
     const deadlineMessage =
-      "Deadline: " + deadline.toLocaleString(DateTime.DATETIME_SHORT);
+      "Deadline (CST): " + deadlineDateTime.toLocaleString(DateTime.DATETIME_SHORT);
     const reminderHourBeforeMessage =
-      "Reminder set to one hour before deadline: " +
-      oneHourBeforeDeadlineCST.toLocaleString(DateTime.DATETIME_SHORT);
+      "Reminder will trigger at (CST): " +
+      reminderTimeCST.toLocaleString(DateTime.DATETIME_SHORT);
     const reminderPromise =
       "I will send reminder " +
-      oneHourBeforeDeadlineCST.toRelative() +
+      reminderTimeCST.toRelative() +
       " in channel : " +
       targetChannel.name;
     const newLine = "\n";
