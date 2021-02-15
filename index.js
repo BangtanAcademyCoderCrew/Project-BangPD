@@ -2,13 +2,11 @@ const { CommandoClient } = require('discord.js-commando');
 const Discord = require('discord.js');
 const DiscordUtil = require('./common/discordutil');
 const path = require('path');
-const {
-	prefix, enabledCommands, status, devIds, llkId, devServerId, enableSejongReply, token
-  } = require('./config.json');
+const { prefix, token, webhookUserId } = require("./config.json");
 
 const client = new CommandoClient({
 	commandPrefix: prefix,
-	owner: '708723153605754910',
+	owner: '708723153605754910'
 });
 
 client.registry
@@ -24,6 +22,20 @@ client.registry
 client.once('ready', () => {
 	console.log(`Bang PD is online!`);
 	client.user.setActivity('BE', { type: 'LISTENING' });
+});
+
+//This is a hack to set reminders without needing to setup a webhook for every channel
+client.on("message", (message) => {
+  if (
+    message.content.startsWith("{") &&
+    message.content.endsWith("}") &&
+    message.author.bot &&
+    message.author.id == webhookUserId
+  ) {
+    const jsonObj = JSON.parse(message);
+    const targetChannel = client.channels.cache.get(jsonObj.targetChannelId);
+    targetChannel.send(jsonObj.reminderMessage);
+  }
 });
 
 // CATCH RAW REACTION

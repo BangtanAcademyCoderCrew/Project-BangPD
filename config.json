@@ -5,5 +5,10 @@
     "enabledCommands": ["word", "hanja", "examples", "papago", "help", "msg"],
     "devIds": ["104905437614223360"],
     "llkId": "529232226546745344",
-    "enableSejongReply": true
+    "enableSejongReply": true,
+    "aws_access_key_id": "",
+    "aws_secret_access_key": "",
+    "region": "us-east-2",
+    "webhookUserId": "",
+    "reminderStateMachineArn": "arn:aws:states:us-east-2:142313674583:stateMachine:BA-Reminder"
 }

@@ -1,5 +1,8 @@
 const { Command } = require("discord.js-commando");
 const { DateTime } = require("luxon");
+const AWS = require("aws-sdk");
+const { reminderStateMachineArn } = require("../../config.json");
+
 
 module.exports = class ReminderCommand extends Command {
   constructor(client) {
@@ -36,12 +39,14 @@ module.exports = class ReminderCommand extends Command {
           prompt: "What channel would you like me to send the reminder?",
           type: "string",
         },
+        /*
         {
           key: "timeInAdvance",
           prompt:
             "How much time before the deadline would you like the reminder to set off?",
           type: "string",
         },
+        */
         {
           key: "reminderMessage",
           prompt: "What reminder message would you like me to send ?",
@@ -64,8 +69,8 @@ module.exports = class ReminderCommand extends Command {
     const oneHourBeforeDeadlineCST = oneHourBeforeDeadlineUTC.setZone(
       "America/Chicago"
     );
-
-    this.sendReminder(oneHourBeforeDeadlineUTC, targetChannel, reminderMessage);
+    
+    this.setReminder(oneHourBeforeDeadlineUTC, targetChannel, reminderMessage, message.author.id, message);
 
     const deadlineMessage =
       "Deadline: " + deadline.toLocaleString(DateTime.DATETIME_SHORT);
@@ -89,20 +94,38 @@ module.exports = class ReminderCommand extends Command {
     return message.reply(fullMessage);
   }
 
-  sendReminder(timeBeforeDeadline, channel, reminderMessage) {
-    const currentTimeUTC = DateTime.utc();
+  setReminder(timeBeforeDeadline, channel, reminderMessage, author, message) {
+    AWS.config.loadFromPath("./config.json");
+    AWS.config.update({ region: "us-east-2" });
 
+    const stepFunctions = new AWS.StepFunctions();
+
+    const name_prefix_divider = "-";
+    const name_sf = channel.name.concat(
+      name_prefix_divider,
+      author,
+      name_prefix_divider,
+      channel.id,
+      name_prefix_divider,
+      timeBeforeDeadline.toMillis()
+    );
+
+    const currentTimeUTC = DateTime.utc();
     const delay = timeBeforeDeadline.toMillis() - currentTimeUTC.toMillis();
-    // TODO: Maybe can use Duration
+
     if (delay > 0) {
-      setTimeout(
-        function () {
-          channel.send(reminderMessage);
-        },
-        delay,
-        channel,
-        reminderMessage
-      );
+      var params = {
+        stateMachineArn: reminderStateMachineArn,
+        input: JSON.stringify({
+          messageToRemind: reminderMessage,
+          targetChannel: channel.id,
+          deadline: timeBeforeDeadline.toISO(),
+        }),
+        name: name_sf,
+      };
+      stepFunctions.startExecution(params, function (err, data) {
+        if (err) message.reply("An error was encountered when setting up the reminder. Please try again.");
+      });
     }
   }
 };
