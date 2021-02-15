@@ -34,7 +34,8 @@ client.on("message", (message) => {
   ) {
     const jsonObj = JSON.parse(message);
     const targetChannel = client.channels.cache.get(jsonObj.targetChannelId);
-    targetChannel.send(jsonObj.reminderMessage);
+    targetChannel.send("\n<@&" + jsonObj.mentionRole +
+    ">\n" +jsonObj.reminderMessage);
   }
 });
 

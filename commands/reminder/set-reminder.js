@@ -39,14 +39,21 @@ module.exports = class ReminderCommand extends Command {
           prompt: "What channel would you like me to send the reminder?",
           type: "string",
         },
-        /*
+        
         {
           key: "timeInAdvance",
           prompt:
             "How much time before the deadline would you like the reminder to set off?",
           type: "string",
+          oneOf: ['30m', '1h', '1d'],
         },
-        */
+        {
+          key: "mentionRole",
+          prompt:
+            "Would you like to mention any role with this reminder message?",
+          type: "string",
+        },
+        
         {
           key: "reminderMessage",
           prompt: "What reminder message would you like me to send ?",
@@ -56,30 +63,49 @@ module.exports = class ReminderCommand extends Command {
     });
   }
 
-  run(message, { deadline, channelID, reminderMessage }) {
+  run(message, { deadline, channelID, reminderMessage, timeInAdvance, mentionRole}) {
     const discordClient = message.client;
     const targetChannel = discordClient.channels.cache.get(channelID);
+    const cst = "America/Chicago";
 
     const deadlineDateTime = DateTime.fromSQL(deadline, {
-      zone: "America/Chicago",
+      zone: cst,
     });
     const deadlineInUTC = deadlineDateTime.toUTC();
 
-    const oneHourBeforeDeadlineUTC = deadlineInUTC.minus({ hours: 1 });
-    const oneHourBeforeDeadlineCST = oneHourBeforeDeadlineUTC.setZone(
-      "America/Chicago"
+    var reminderTime;
+
+    switch (timeInAdvance) {
+      case "30m":
+        reminderTime = deadlineInUTC.minus({ minutes: 30 });
+        break;
+      case "1h":
+        reminderTime = deadlineInUTC.minus({ hours: 1 });
+        break;
+      case "1d":
+        reminderTime = deadlineInUTC.minus({ days: 1 });
+        break;
+    }
+
+    const reminderTimeCST = reminderTime.setZone(cst);
+
+    this.setReminder(
+      reminderTime,
+      targetChannel,
+      reminderMessage,
+      message.author.id,
+      message,
+      mentionRole
     );
-    
-    this.setReminder(oneHourBeforeDeadlineUTC, targetChannel, reminderMessage, message.author.id, message);
 
     const deadlineMessage =
-      "Deadline: " + deadline.toLocaleString(DateTime.DATETIME_SHORT);
+      "Deadline: " + deadlineDateTime.toLocaleString(DateTime.DATETIME_SHORT);
     const reminderHourBeforeMessage =
-      "Reminder set to one hour before deadline: " +
-      oneHourBeforeDeadlineCST.toLocaleString(DateTime.DATETIME_SHORT);
+      "Reminder will trigger at: " +
+      reminderTimeCST.toLocaleString(DateTime.DATETIME_SHORT);
     const reminderPromise =
       "I will send reminder " +
-      oneHourBeforeDeadlineCST.toRelative() +
+      reminderTimeCST.toRelative() +
       " in channel : " +
       targetChannel.name;
     const newLine = "\n";
@@ -94,7 +120,7 @@ module.exports = class ReminderCommand extends Command {
     return message.reply(fullMessage);
   }
 
-  setReminder(timeBeforeDeadline, channel, reminderMessage, author, message) {
+  setReminder(reminderTime, channel, reminderMessage, author, message, mentionRole) {
     AWS.config.loadFromPath("./config.json");
     AWS.config.update({ region: "us-east-2" });
 
@@ -107,25 +133,35 @@ module.exports = class ReminderCommand extends Command {
       name_prefix_divider,
       channel.id,
       name_prefix_divider,
-      timeBeforeDeadline.toMillis()
+      reminderTime.toMillis()
     );
 
     const currentTimeUTC = DateTime.utc();
-    const delay = timeBeforeDeadline.toMillis() - currentTimeUTC.toMillis();
 
-    if (delay > 0) {
+    if (currentTimeUTC < reminderTime) {
       var params = {
         stateMachineArn: reminderStateMachineArn,
         input: JSON.stringify({
           messageToRemind: reminderMessage,
           targetChannel: channel.id,
-          deadline: timeBeforeDeadline.toISO(),
+          deadline: reminderTime.toISO(),
+          mentionRole: mentionRole,
         }),
         name: name_sf,
       };
       stepFunctions.startExecution(params, function (err, data) {
-        if (err) message.reply("An error was encountered when setting up the reminder. Please try again.");
+        if (err) {
+          message.reply(
+            "An error was encountered when setting up the reminder. Please try again."
+          );
+          console.log(err);
+        }
       });
+    } else{
+      message.reply(
+        "The reminder is invalid as it is set to before the current time."
+      );
     }
+
   }
 };
