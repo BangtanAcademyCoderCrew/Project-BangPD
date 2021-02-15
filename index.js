@@ -3,6 +3,7 @@ const Discord = require('discord.js');
 const DiscordUtil = require('./common/discordutil');
 const path = require('path');
 const { prefix, token, webhookUserId } = require("./config.json");
+const { json } = require('sequelize/types');
 
 const client = new CommandoClient({
 	commandPrefix: prefix,
@@ -34,8 +35,11 @@ client.on("message", (message) => {
   ) {
     const jsonObj = JSON.parse(message);
     const targetChannel = client.channels.cache.get(jsonObj.targetChannelId);
-    targetChannel.send("\n<@&" + jsonObj.mentionRole +
-    ">\n" +jsonObj.reminderMessage);
+    var mention = jsonObj.mentionRole;
+    if (mention.trim()){
+      mention = "\n<@&" + jsonObj.mentionRole + ">\n";
+    }
+    targetChannel.send(mention +jsonObj.reminderMessage);
   }
 });
 

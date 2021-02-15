@@ -52,6 +52,7 @@ module.exports = class ReminderCommand extends Command {
           prompt:
             "Would you like to mention any role with this reminder message?",
           type: "string",
+          default: '',
         },
         
         {
@@ -121,8 +122,9 @@ module.exports = class ReminderCommand extends Command {
   }
 
   setReminder(reminderTime, channel, reminderMessage, author, message, mentionRole) {
-    AWS.config.loadFromPath("./config.json");
-    AWS.config.update({ region: "us-east-2" });
+    var path = require('path');
+    var pathToJson = path.resolve(__dirname, '../../aws_config.json');
+    AWS.config.loadFromPath(pathToJson);
 
     const stepFunctions = new AWS.StepFunctions();
 
@@ -155,10 +157,11 @@ module.exports = class ReminderCommand extends Command {
             "An error was encountered when setting up the reminder. Please try again."
           );
           console.log(err);
+          return;
         }
       });
     } else{
-      message.reply(
+      return message.reply(
         "The reminder is invalid as it is set to before the current time."
       );
     }
