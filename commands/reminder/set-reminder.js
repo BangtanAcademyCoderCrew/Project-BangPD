@@ -9,8 +9,7 @@ module.exports = class ReminderCommand extends Command {
       group: "reminder",
       memberName: "set-reminder",
       description: "Sets a reminder",
-      clientPermissions: ['ADMINISTRATOR'],
-      userPermissions: ['ADMINISTRATOR'],
+      userPermissions: ['MANAGE_CHANNELS'],
       args: [
         {
           key: "deadline",
