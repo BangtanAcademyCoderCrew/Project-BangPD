@@ -14,7 +14,10 @@ module.exports = class DictionaryCommand extends Command {
     aliases: ['w'],
     group: 'dictionary',
     examples: [`${prefix}word 나무`],
-    cooldown: 5,
+    throttling: {
+      usages: 1,
+      duration: 20
+    },
   })
 }
   run(message, args) {

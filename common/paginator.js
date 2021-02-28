@@ -48,7 +48,7 @@ module.exports = class Paginator {
 
           this.collector = this.message.createReactionCollector(reactionFilter, { time: 300000 });
           this.collector.on('collect', (reaction, user) => {
-            if (!this.hasPermission) {
+            if (!this.hasPermission && this.message.channel.type != "dm") {
               reaction.remove(this.author);
             }
             switch (reaction.emoji.toString()) {
@@ -96,7 +96,7 @@ module.exports = class Paginator {
 
           this.collector = this.message.createReactionCollector(reactionFilter, { time: 300000 });
           this.collector.on('collect', (reaction) => {
-            if (!this.hasPermission) {
+            if (!this.hasPermission && this.message.channel.type != "dm") {
               reaction.remove(this.author);
             }
             switch (reaction.emoji.toString()) {

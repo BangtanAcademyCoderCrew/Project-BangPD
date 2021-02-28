@@ -2,6 +2,7 @@ const { CommandoClient } = require('discord.js-commando');
 const Discord = require('discord.js');
 const DiscordUtil = require('./common/discordutil');
 const path = require('path');
+const got = require('got');
 const {
 	prefix, enabledCommands, status, devIds, llkId, devServerId, enableDictionaryReply, token
   } = require('./config.json');
