@@ -52,9 +52,8 @@ module.exports = class KrDicApi {
       const entrySenses = [];
       let j;
       for(j = 0; j < senses.length; j += 3) {
-        const current = senses.eq(j).children();
         const sense = {};
-        sense.meaning = senses.eq(j).text().trim().replace(/^[0-9]\./, '').replace(/\s+/g, ' ').trim();
+        sense.meaning = senses.eq(j).text().trim().replace(/\d+/g, '').replace(/\s+/g, ' ').replace('. ', '').trim();
         sense.definition = senses.eq(j + 1).text().replace(/\s+/g, ' ').trim();
         sense.translation = senses.eq(j + 2).text().replace(/\s+/g, ' ').trim();  
         entrySenses.push(sense);
