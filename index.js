@@ -24,7 +24,8 @@ client.registry
 
 client.once('ready', () => {
 	console.log(`Bang PD is online!`);
-	client.user.setActivity('BE', { type: 'LISTENING' });
+  const time = new Date().toLocaleString();
+	client.user.setActivity(time, { type: 'PLAYING' });
 });
 
 // CATCH RAW REACTION
