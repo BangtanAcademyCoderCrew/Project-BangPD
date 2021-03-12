@@ -3,6 +3,7 @@ const Discord = require('discord.js');
 const DiscordUtil = require('./common/discordutil');
 const path = require('path');
 const got = require('got');
+const { DateTime } = require("luxon");
 const {
 	prefix, enabledCommands, status, devIds, llkId, devServerId, enableDictionaryReply, token
   } = require('./config.json');
@@ -24,8 +25,13 @@ client.registry
 
 client.once('ready', () => {
 	console.log(`Bang PD is online!`);
-  const time = new Date().toLocaleString();
-	client.user.setActivity(time, { type: 'PLAYING' });
+  try {
+    const time = DateTime.utc().setZone('America/Chicago').toLocaleString(DateTime.DATETIME_SHORT);
+    client.user.setActivity(time, { type: 'PLAYING' });
+  } catch (error) {
+    console.log(error);
+  }
+
 });
 
 // CATCH RAW REACTION
