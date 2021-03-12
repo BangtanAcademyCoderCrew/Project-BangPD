@@ -26,8 +26,8 @@ client.registry
 client.once('ready', () => {
 	console.log(`Bang PD is online!`);
   try {
-    const time = DateTime.utc().setZone('America/Chicago').toLocaleString(DateTime.DATETIME_SHORT);
-    client.user.setActivity(time, { type: 'PLAYING' });
+    setInterval(() =>
+    client.user.setActivity(DateTime.utc().setZone('America/Chicago').toLocaleString(DateTime.DATETIME_SHORT), { type: 'PLAYING' }), 60);
   } catch (error) {
     console.log(error);
   }
