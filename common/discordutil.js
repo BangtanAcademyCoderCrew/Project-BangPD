@@ -25,7 +25,7 @@ module.exports = {
     const embed = new Discord.MessageEmbed()
       .setColor(0xDF2B40)
       .setAuthor(`${message.author.username} said:`, message.author.avatarURL ? message.author.avatarURL : undefined)
-      .setDescription(`${message.content}${image ? `\r\n\r\n${image}` : ''}`)
+      .setDescription(`${message.content}${image ? `\r\n\r\n${image}` : ''} \r\n\r\n **Message link:** ${message.url}`)
       .setImage(image)
       .setTimestamp(message.editedTimestamp || message.createdTimestamp);
 
