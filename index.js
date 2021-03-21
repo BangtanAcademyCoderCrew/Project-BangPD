@@ -11,6 +11,7 @@ const {
 const client = new CommandoClient({
 	commandPrefix: prefix,
 	owner: '708723153605754910',
+  partials: ['MESSAGE', 'CHANNEL', 'REACTION']
 });
 
 client.registry
@@ -25,12 +26,7 @@ client.registry
 
 client.once('ready', () => {
 	console.log(`Bang PD is online!`);
-  try {
-    setInterval(() =>
-    client.user.setActivity(DateTime.utc().setZone('America/Chicago').toLocaleString(DateTime.DATETIME_SHORT), { type: 'PLAYING' }), 60);
-  } catch (error) {
-    console.log(error);
-  }
+  client.user.setActivity('BE', { type: 'LISTENING' });
 
 });
 
@@ -55,7 +51,19 @@ client.on('raw', async (event) => {
   }
 });
 
-client.on('messageReactionAdd', (reaction, user) => {
+client.on('messageReactionAdd', async (reaction, user) => {
+  // When we receive a reaction we check if the reaction is partial or not
+	if (reaction.partial) {
+		// If the message this reaction belongs to was removed the fetching might result in an API error, which we need to handle
+		try {
+			await reaction.fetch();
+		} catch (error) {
+			console.error('Something went wrong when fetching the message: ', error);
+			// Return as `reaction.message.author` may be undefined/null
+			return;
+		}
+	}
+
   if (reaction.message.author.id === client.user.id && reaction.emoji.name === '❌' && reaction.message.channel.type !== 'text') {
     if (user.id !== client.user.id) {
       reaction.message.delete();
