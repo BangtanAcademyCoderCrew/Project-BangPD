@@ -84,44 +84,70 @@ client.on('messageReactionAdd', async (reaction, user) => {
 });
 
 //log voice channel join/leave activities
-client.on('voiceStateUpdate', (oldMember, newMember) => {
-  
-  const newUserChannel = newMember.channelID;
-  const oldUserChannel = oldMember.channelID;
+client.on('voiceStateUpdate', (oldVoiceState, newVoiceState) => {
+  const newVoiceChannel = newVoiceState.channelID;
+  const oldVoiceChannel = oldVoiceState.channelID;
 
   //TODO: Update these channel IDs to the correct ones
-  const voiceChannelId = '788198695279132676';
+  const voiceChannelId = '825428308749058119';
   const logChannelId = '807333762433548328';
 
   const logChannel = client.channels.cache.get(logChannelId);
   const voiceChannel = client.channels.cache.get(voiceChannelId);
-  const memberId = newMember.member.user.id;
+  const memberId = newVoiceState.member.user.id;
+  const username = newVoiceState.member.user.tag;
 
-  const cst = "America/Chicago";
-
-  if(!oldUserChannel && newUserChannel === voiceChannelId)
+  // User joins a voice channel
+  if(!oldVoiceChannel && newVoiceChannel === voiceChannelId)
   { 
-      // User Joins a voice channel
-      const currentTimeUTC = DateTime.utc();
-      const currentTimeCST = currentTimeUTC.setZone(cst);
-
-      const joinEmbed = new Discord.MessageEmbed()
-      .setColor('GREEN')
-      .setDescription(`<@${memberId}> joined ${voiceChannel.name} at ${currentTimeCST.toLocaleString(DateTime.DATETIME_FULL)}`);
-
+    const joinEmbed = DiscordUtil.createLoggingEmbed(
+      `:arrow_right: <@${memberId}> - ${username} joined **${voiceChannel.name}**`,
+      'GREEN'
+    );
       logChannel.send(joinEmbed);
     
   }
-  else if(!newUserChannel && oldUserChannel === voiceChannelId) {
-      // User leaves a voice channel
-      const currentTimeUTC = DateTime.utc();
-      const currentTimeCST = currentTimeUTC.setZone(cst);
+  // User leaves a voice channel
+  else if(!newVoiceChannel && oldVoiceChannel === voiceChannelId) {
 
-      const leaveEmbed = new Discord.MessageEmbed()
-      .setColor('RED')
-      .setDescription(`<@${memberId}> left ${voiceChannel.name} at ${currentTimeCST.toLocaleString(DateTime.DATETIME_FULL)}`);
-
+    const leaveEmbed = DiscordUtil.createLoggingEmbed(
+      `:arrow_left: <@${memberId}>  - ${username} left **${voiceChannel.name}**`,
+      'RED'
+    );
       logChannel.send(leaveEmbed);
+  }
+  // User switches to/from voice channel
+  else if (newVoiceChannel && oldVoiceChannel && (newVoiceChannel === voiceChannelId || oldVoiceChannel === voiceChannelId)){
+    //User starts/stops streaming
+    if(newVoiceState.streaming && !oldVoiceState.streaming){
+
+      const startStreamingEmbed = DiscordUtil.createLoggingEmbed(
+        `:desktop: <@${memberId}> - ${username} started streaming.`,
+        'PURPLE'
+      );
+
+      logChannel.send(startStreamingEmbed);
+
+    }
+    //stops streaming
+    else if(!newVoiceState.streaming && oldVoiceState.streaming){
+
+      const stopStreamingEmbed = DiscordUtil.createLoggingEmbed(
+        `:desktop: <@${memberId}> - ${username} stopped streaming.`,
+        'PURPLE'
+      );
+
+      logChannel.send(stopStreamingEmbed);
+    }
+    //switched to tour voice channel
+    else {
+      const switchEmbed = DiscordUtil.createLoggingEmbed(
+        `:repeat: <@${memberId}> - ${username} switched from **${oldVoiceState.channel.name}** to **${newVoiceState.channel.name}**`,
+        'YELLOW'
+      );
+
+      logChannel.send(switchEmbed);
+    }
   }
 });
 

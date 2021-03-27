@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const { prefix, accentColor, avatar } = require('../config.json');
 const langs = require('./langs.js');
+const { DateTime } = require("luxon");
 
 module.exports = {
   bookmark(message, user) {
@@ -186,4 +187,17 @@ module.exports = {
     }
     return embed;
   },
+
+  createLoggingEmbed(message, color){
+    const cst = "America/Chicago";
+    const currentTimeUTC = DateTime.utc();
+    const currentTimeCST = currentTimeUTC.setZone(cst);
+
+    const embed = new Discord.MessageEmbed()
+    .setColor(color)
+    .setFooter(`${currentTimeCST.toLocaleString(DateTime.DATETIME_FULL)}`)
+    .setDescription(message);
+
+    return embed;
+  }
 };
