@@ -83,6 +83,32 @@ client.on('messageReactionAdd', async (reaction, user) => {
   }
 });
 
+//log voice channel join/leave activities
+client.on('voiceStateUpdate', (oldMember, newMember) => {
+  
+  const newUserChannel = newMember.channelID;
+  const oldUserChannel = oldMember.channelID;
+
+  //TODO: Update these channel IDs to the correct ones
+  const voiceChannelId = '788198695279132676';
+  const logChannelId = '807333762433548328';
+
+  const logChannel = client.channels.cache.get(logChannelId);
+  const member = newMember.member.user.username;
+  
+  if(!oldUserChannel && newUserChannel === voiceChannelId)
+  { 
+      // User Joins a voice channel
+      logChannel.send(`${member} joined tour voice channel`);
+    
+  }
+  else if(!newUserChannel && oldUserChannel === voiceChannelId) {
+      // User leaves a voice channel
+      logChannel.send(`${member} left tour voice channel`);
+  }
+});
+
+
 client.on('error', console.error);
 
 client.login(token);
