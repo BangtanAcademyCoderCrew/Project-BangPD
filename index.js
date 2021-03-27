@@ -94,6 +94,7 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
   const logChannelId = '807333762433548328';
 
   const logChannel = client.channels.cache.get(logChannelId);
+  const voiceChannel = client.channels.cache.get(voiceChannelId);
   const memberId = newMember.member.user.id;
 
   const cst = "America/Chicago";
@@ -103,14 +104,24 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
       // User Joins a voice channel
       const currentTimeUTC = DateTime.utc();
       const currentTimeCST = currentTimeUTC.setZone(cst);
-      logChannel.send(`<@${memberId}> joined tour voice channel at ${currentTimeCST.toLocaleString(DateTime.DATETIME_FULL)}`);
+
+      const joinEmbed = new Discord.MessageEmbed()
+      .setColor('GREEN')
+      .setDescription(`<@${memberId}> joined ${voiceChannel.name} at ${currentTimeCST.toLocaleString(DateTime.DATETIME_FULL)}`);
+
+      logChannel.send(joinEmbed);
     
   }
   else if(!newUserChannel && oldUserChannel === voiceChannelId) {
       // User leaves a voice channel
       const currentTimeUTC = DateTime.utc();
       const currentTimeCST = currentTimeUTC.setZone(cst);
-      logChannel.send(`<@${memberId}> left tour voice channel at ${currentTimeCST.toLocaleString(DateTime.DATETIME_FULL)}`);
+
+      const leaveEmbed = new Discord.MessageEmbed()
+      .setColor('RED')
+      .setDescription(`<@${memberId}> left ${voiceChannel.name} at ${currentTimeCST.toLocaleString(DateTime.DATETIME_FULL)}`);
+
+      logChannel.send(leaveEmbed);
   }
 });
 
