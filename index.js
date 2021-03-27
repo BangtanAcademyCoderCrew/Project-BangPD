@@ -95,16 +95,24 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
 
   const logChannel = client.channels.cache.get(logChannelId);
   const member = newMember.member.user.username;
+  const memberId = newMember.member.user.id;
+
+  const cst = "America/Chicago";
+
   
   if(!oldUserChannel && newUserChannel === voiceChannelId)
   { 
       // User Joins a voice channel
-      logChannel.send(`${member} joined tour voice channel`);
+      const currentTimeUTC = DateTime.utc();
+      const currentTimeCST = currentTimeUTC.setZone(cst);
+      logChannel.send(`<@${memberId}> joined tour voice channel at ${currentTimeCST.toLocaleString(DateTime.DATETIME_FULL)}`);
     
   }
   else if(!newUserChannel && oldUserChannel === voiceChannelId) {
       // User leaves a voice channel
-      logChannel.send(`${member} left tour voice channel`);
+      const currentTimeUTC = DateTime.utc();
+      const currentTimeCST = currentTimeUTC.setZone(cst);
+      logChannel.send(`<@${memberId}> left tour voice channel at ${currentTimeCST.toLocaleString(DateTime.DATETIME_FULL)}`);
   }
 });
 
