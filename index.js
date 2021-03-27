@@ -94,12 +94,10 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
   const logChannelId = '807333762433548328';
 
   const logChannel = client.channels.cache.get(logChannelId);
-  const member = newMember.member.user.username;
   const memberId = newMember.member.user.id;
 
   const cst = "America/Chicago";
 
-  
   if(!oldUserChannel && newUserChannel === voiceChannelId)
   { 
       // User Joins a voice channel
