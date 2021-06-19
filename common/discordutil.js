@@ -1,7 +1,8 @@
-const Discord = require('discord.js');
+const {Discord , MessageAttachment} = require('discord.js');
 const { prefix, accentColor, avatar } = require('../config.json');
 const langs = require('./langs.js');
 const { DateTime } = require("luxon");
+const got = require('got');
 
 module.exports = {
   bookmark(message, user) {
@@ -199,5 +200,54 @@ module.exports = {
     .setDescription(message);
 
     return embed;
+  },
+
+  getMemberByUsername(message, username){
+    var members = message.guild.members.cache;
+    var user = message.client.users.cache.find(u => u.tag === username);
+    if(!user){
+        return false;
+    }
+    userID = user.id;
+    return members.get(userID);
+  },
+
+  divideMessageWithUsernamesInParts(usernames, messageChannel){
+    for (var i = 0; i <= Math.ceil(usernames.length / 50); i++) {
+      var List = usernames.slice(i * 50, i * 50 + 50).join('\n')
+      if (i < 1) {
+          messageChannel.send(List)
+      }
+      else if (List.length > 0) {
+          messageChannel.send("cont.\n" + List)
+      }
+    }
+    messageChannel.send("Done with changes")
+  },
+
+  openFileAndDo(url, aFunction, message) {
+    (async () => {
+      usersChanged = []
+        try {
+            const response = await got(url);
+            var csv = response.body;
+            var usernames = csv.split("\r\n");
+            
+            usernames.forEach(username => {
+                var member = module.exports.getMemberByUsername(message, username);
+                if (!member){
+                  return message.reply(`User ${username} not found`);
+                }
+                aFunction(member);
+                usersChanged.push(username)                
+            });
+        } catch (error) {
+            console.log("Holi?");
+            console.log(error);
+        }
+      attachment = new MessageAttachment(Buffer.from(`${usersChanged.join('\n')}`, 'utf-8'), 'changedusers.txt');
+      message.channel.send('Changed users', attachment);
+
+    })();
   }
 };

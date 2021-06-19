@@ -18,7 +18,8 @@ client.registry
 	.registerDefaultTypes()
 	.registerGroups([
 		['reminder', 'Command Group for Reminder functionalities'],
-		['dictionary', 'Command Group for Dictionary functionalities']
+		['dictionary', 'Command Group for Dictionary functionalities'],
+    ['roles', 'Command Group for adding roles']
 	])
 	.registerDefaultGroups()
 	.registerDefaultCommands()
