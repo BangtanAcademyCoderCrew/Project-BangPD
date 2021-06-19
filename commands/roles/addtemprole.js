@@ -69,7 +69,7 @@ module.exports = class TempRoleCommand extends Command {
     
     DiscordUtil.openFileAndDo(attachmentURL, function(member){ member.roles.add([roleID]); }, message);
 
-    this.sendReminder(deadlineInUTC, message.channel, roleID, attachmentURL, message);
+    this.removeRoleAtDeadline(deadlineInUTC, message.channel, roleID, attachmentURL, message);
 
     const deadlineMessage =
       "Deadline (CST): " + deadlineDateTime.toLocaleString(DateTime.DATETIME_SHORT);
@@ -86,7 +86,7 @@ module.exports = class TempRoleCommand extends Command {
     return message.reply(fullMessage);
   }
 
-  sendReminder(timeToRemoveRole, channel, roleID, attachmentURL, message) {
+  removeRoleAtDeadline(timeToRemoveRole, channel, roleID, attachmentURL, message) {
     const currentTimeUTC = DateTime.utc();
 
     const timeLeftBeforeRemovingRole = timeToRemoveRole.toMillis() - currentTimeUTC.toMillis();
