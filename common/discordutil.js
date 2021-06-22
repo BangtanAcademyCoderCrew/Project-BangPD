@@ -242,7 +242,6 @@ module.exports = {
                 usersChanged.push(username)                
             });
         } catch (error) {
-            console.log("Holi?");
             console.log(error);
         }
       attachment = new Discord.MessageAttachment(Buffer.from(`${usersChanged.join('\n')}`, 'utf-8'), 'changedusers.txt');
