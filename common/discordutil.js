@@ -1,4 +1,4 @@
-const {Discord , MessageAttachment} = require('discord.js');
+const Discord = require('discord.js');
 const { prefix, accentColor, avatar } = require('../config.json');
 const langs = require('./langs.js');
 const { DateTime } = require("luxon");
@@ -245,7 +245,7 @@ module.exports = {
             console.log("Holi?");
             console.log(error);
         }
-      attachment = new MessageAttachment(Buffer.from(`${usersChanged.join('\n')}`, 'utf-8'), 'changedusers.txt');
+      attachment = new Discord.MessageAttachment(Buffer.from(`${usersChanged.join('\n')}`, 'utf-8'), 'changedusers.txt');
       message.channel.send('Changed users', attachment);
 
     })();
