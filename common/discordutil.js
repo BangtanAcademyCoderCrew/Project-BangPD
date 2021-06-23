@@ -24,10 +24,20 @@ module.exports = {
       }
     }
 
+    if(message.content.length >= 2048){
+      splittedText = this.splitText(message.content);
+      this.createBookMarkMessage(message, splittedText[0], image, user);
+      this.createBookMarkMessage(message, splittedText[1], image, user);
+    }
+    else {
+      this.createBookMarkMessage(message, message.content, image, user);
+    }
+  },
+  createBookMarkMessage(message, text, image, user){
     const embed = new Discord.MessageEmbed()
       .setColor(0xDF2B40)
       .setAuthor(`${message.author.username} said:`, message.author.avatarURL ? message.author.avatarURL : undefined)
-      .setDescription(`${message.content}${image ? `\r\n\r\n${image}` : ''} \r\n\r\n **Message link:** ${message.url}`)
+      .setDescription(`${text}${image ? `\r\n\r\n${image}` : ''} \r\n\r\n **Message link:** ${message.url}`)
       .setImage(image)
       .setTimestamp(message.editedTimestamp || message.createdTimestamp);
 
@@ -248,5 +258,23 @@ module.exports = {
       message.channel.send('Changed users', attachment);
 
     })();
+  },
+
+  splitText(s) {
+    var middle = Math.floor(s.length / 2);
+    var before = s.lastIndexOf(' ', middle);
+    var after = s.indexOf(' ', middle + 1);
+
+    if (before == -1 || (after != -1 && middle - before >= after - middle)) {
+        middle = after;
+    } else {
+        middle = before;
+    }
+
+    var s1 = s.substr(0, middle);
+    var s2 = s.substr(middle + 1);
+
+    return [s1, s2]
   }
+
 };
