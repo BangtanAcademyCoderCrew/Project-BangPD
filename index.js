@@ -12,7 +12,7 @@ const client = new CommandoClient({
 	commandPrefix: prefix,
 	owner: '708723153605754910',
   partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
-  intents: ['GUILD_PRESENCES', 'GUILD_MEMBERS']
+  intents: ['GUILD_PRESENCES', 'GUILD_MEMBERS', 'GUILD_MESSAGES']
 });
 
 client.registry
@@ -20,8 +20,8 @@ client.registry
 	.registerGroups([
 		['reminder', 'Command Group for Reminder functionalities'],
 		['dictionary', 'Command Group for Dictionary functionalities'],
-    ['roles', 'Command Group for adding roles'],
-    ['miscellaneous', 'Other commands']
+    ['roles', 'Command Group for role management'],
+    ['miscellaneous', 'Command Group for misc commands']
 	])
 	.registerDefaultGroups()
 	.registerDefaultCommands()

@@ -16,32 +16,37 @@ module.exports = class RemoveRoleCommand extends Command {
           key: "commandName",
           prompt: "What's the command name?",
           type: "string",
+        },
+        {
+          key: "commandGroup",
+          prompt: "What's the command group?",
+          type: "string",
         }
       ],
     });
   }
 
-  run(message, { commandName }) {    
+  run(message, { commandName, commandGroup }) {    
     const attachment = message.attachments.values().next().value;
     if (!attachment) {
         return message.reply("No valid file attached.")
     }
-    console.log(commandName);
-    removeCommand(commandName)
+    const folderPath = `${"./ : ", path.resolve("./")}/commands/${commandGroup}`;
+    removeCommand(commandName, folderPath)
 
     setTimeout(function(){
-        addCommand(attachment.url, commandName)
+        addCommand(attachment.url, commandName, folderPath)
         return message.channel.send(`Added command ${commandName}`);
     }, 5000)
 
 
-    function removeCommand(commandName) {
-        const commands = fs.readdirSync(path.join(__dirname))
+    function removeCommand(commandName, folderPath) {
+        const commands = fs.readdirSync(folderPath);
         console.log(commands);
         if (!commands.includes(`${commandName}.js`)) return message.channel.send(`There is no command with name or alias \`${commandName}\`, ${message.author}! A new command will be created.`);
 
         try {
-            fs.unlinkSync(path.join(__dirname, `${commandName}.js`))
+            fs.unlinkSync(`${folderPath}/${commandName}.js`)
             console.log("REMOVED FILE");
             message.channel.send("Old command file has been removed.")
             //file removed
@@ -50,11 +55,11 @@ module.exports = class RemoveRoleCommand extends Command {
         }
     }
 
-    async function addCommand(url, fileName) {
+    async function addCommand(url, fileName, folderPath) {
         try {
             const response = await got(url);
             var commandFile = response.body;
-            const filepath = `${__dirname}/${fileName}.js`
+            const filepath = `${folderPath}/${fileName}.js`
             console.log(filepath);
     
             fs.writeFile(filepath, commandFile, function (err) {

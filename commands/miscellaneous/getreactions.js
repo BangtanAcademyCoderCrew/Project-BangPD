@@ -1,12 +1,12 @@
 const { Command } = require("discord.js-commando");
-const DiscordUtil = require('../../common/discordutil.js');
+const Discord = require('discord.js');
 
 module.exports = class RemoveRoleCommand extends Command {
   constructor(client) {
     super(client, {
-      name: "getreactions",
-      aliases: ["getr"],
-      group: "roles",
+      name: "reactions",
+      aliases: ["reactions"],
+      group: "miscellaneous",
       memberName: "get-reactions",
       description: "",
       userPermissions: ['MANAGE_CHANNELS', 'MANAGE_ROLES'],
@@ -33,7 +33,7 @@ module.exports = class RemoveRoleCommand extends Command {
             users[reaction.emoji] = []
             reaction.users.fetch().then( result => {
                 result.forEach( user => {
-                    users[reaction.emoji].push(user.username + "#" + user.discriminator);
+                    users[reaction.emoji].push("<@" + user.id + ">");
                 })
                 var attachment = new Discord.MessageAttachment(Buffer.from(`${users[reaction.emoji].join('\n')}`, 'utf-8'), 'emoji reactions.txt');
                 message.channel.send(`Users that reacted with ${reaction.emoji}`, attachment);
@@ -42,11 +42,6 @@ module.exports = class RemoveRoleCommand extends Command {
     }).catch(function(error) {
         message.reply(`Message with ID ${messageID} wasn't found in channel <#${channel.id}>`)
       });
-
-
-   // attachment = new Discord.MessageAttachment(Buffer.from(`${usersChanged.join('\n')}`, 'utf-8'), 'changedusers.txt');
-    //  message.channel.send('Changed users', attachment);
-
   }
 
 }
