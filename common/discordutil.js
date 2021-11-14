@@ -3,7 +3,6 @@ const { prefix, accentColor, avatar } = require('../config.json');
 const langs = require('./langs.js');
 const { DateTime } = require("luxon");
 const got = require('got');
-const { MessageEmbed } = require('discord.js');
 
 module.exports = {
   bookmark(message, user) {
@@ -46,7 +45,7 @@ module.exports = {
   },
 
   createBasicEmbed(name) {
-    return new MessageEmbed()
+    return new Discord.MessageEmbed()
       .setColor(accentColor)
       .setAuthor(name || 'BangPD', 'https://i.imgur.com/UwOpFvr.png');
   },
