@@ -3,7 +3,7 @@ const { prefix, accentColor, avatar } = require('../config.json');
 const langs = require('./langs.js');
 const { DateTime } = require("luxon");
 const got = require('got');
-const { MessageAttachment, MessageEmbed } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 
 module.exports = {
   bookmark(message, user) {
@@ -132,11 +132,8 @@ module.exports = {
     const pageCount = pages.length;
     if (pageCount > 1) {
       pages.forEach((page, index) => {
-        page.setAuthor(`BangPD (Page ${index + 1} of ${pageCount})`, 'https://i.imgur.com/UwOpFvr.png');
-        this.setEmbedFooter(page, `${username} can browse pages. ${!isDM ? 'Anyone can bookmark this message.' : ''}`);
+        page.setAuthor(`BangPD`, 'https://i.imgur.com/UwOpFvr.png');
       });
-    } else if (pageCount === 1 && !isEmpty) {
-      this.setEmbedFooter(pages[0], 'Anyone can bookmark this message.');
     }
     return pages;
   },

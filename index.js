@@ -1,4 +1,8 @@
-const { CommandoClient } = require('discord.js-commando');
+const { REST } = require('@discordjs/rest');
+const { Routes } = require('discord-api-types/v9');
+const fs = require('fs');
+const { Client, Collection, Intents } = require('discord.js');
+
 const Discord = require('discord.js');
 const DiscordUtil = require('./common/discordutil');
 const path = require('path');
@@ -8,13 +12,73 @@ const {
 	prefix, enabledCommands, status, devIds, llkId, devServerId, enableDictionaryReply, token
   } = require('./config.json');
 
-const client = new CommandoClient({
-	commandPrefix: prefix,
-	owner: '708723153605754910',
-  partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
-  intents: ['GUILD_PRESENCES', 'GUILD_MEMBERS', 'GUILD_MESSAGES']
+const client = new Client({
+	//defaultPrefix: prefix,
+	//owner: '708723153605754910',
+  //partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
+  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES]
+  //intents: ['GUILD_PRESENCES', 'GUILD_MEMBERS', 'GUILD_MESSAGES', Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES]
 });
 
+
+
+client.commands = new Collection();
+const examplecommand = require(`./commands/sejong/examples.js`);
+const hanjacommand = require(`./commands/sejong/hanja.js`);
+client.commands.set(examplecommand.name, examplecommand);
+client.commands.set(hanjacommand.name, hanjacommand);
+
+const commands = client.commands.map(({ execute, ...data }) => data); 
+console.log(commands);
+const rest = new REST({ version: '9' }).setToken(token);
+
+(async () => {
+	try {
+		console.log('Started refreshing application (/) commands');
+
+		await rest.put(
+			Routes.applicationGuildCommands('811088229746343998', '810579429608390716'),
+			{ body: commands },
+		);
+
+		console.log('Sucessfully reloaded application (/) commands.');
+	} catch (error) {
+		console.error(error);
+	}
+})();
+
+//const commandDirs = fs.readdirSync('./commands');
+
+/*
+const commandFiles = fs.readdirSync(`./commands/sejong`).filter(file => file.endsWith('.js'));
+for (const file of commandFiles) {
+  console.log(file);
+  const command = require(`./commands/sejong/${file}`);
+  // set a new item in the Collection
+  // with the key as the command name and the value as the exported module
+
+  client.commands.set(command.name, command);
+}
+
+/*
+for(const commandDir of commandDirs){
+  const commandFiles = fs.readdirSync(`./commands/${commandDir}`).filter(file => file.endsWith('.js'));
+  for (const file of commandFiles) {
+    console.log(file);
+    const command = require(`./commands/${commandDir}/${file}`);
+    // set a new item in the Collection
+    // with the key as the command name and the value as the exported module
+    console.log(command);
+    console.log(command.name);
+    client.commands.set(command.name, command);
+  }
+}
+*/
+
+
+
+
+/*
 client.registry
 	.registerDefaultTypes()
 	.registerGroups([
@@ -27,10 +91,65 @@ client.registry
 	.registerDefaultCommands()
 	.registerCommandsIn(path.join(__dirname, 'commands'));
 
+  */
+
 client.once('ready', () => {
 	console.log(`Bang PD is online!`);
   client.user.setActivity('BE', { type: 'LISTENING' });
 
+});
+
+client.on('interactionCreate', async interaction => {
+  console.log("received interaction");
+	if (!interaction.isCommand()) return;
+
+  console.log("interaction is a command");
+
+	if (!client.commands.has(interaction.commandName)) return;
+
+  console.log("command recognized");
+
+	try {
+		await client.commands.get(interaction.commandName).execute(interaction);
+	} catch (error) {
+		console.error(error);
+		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+	}
+});
+
+
+/*
+client.on('messageCreate', async message => {
+  //console.log(message);
+	if (!client.application?.owner) await client.application?.fetch();
+
+  //console.log(client.application?.owner.id);
+  //650144159432310784
+
+	if (message.content.toLowerCase() === '!deploy' && message.author.id === client.application?.owner.id) {
+		const data = {
+			name: 'ping',
+			description: 'Replies with Pong!',
+		};
+
+		const command = await client.application?.commands.create(data);
+		console.log(command);
+	}
+});
+
+/*
+client.on('messageCreate', async message => {
+	if (!client.application?.owner) await client.application?.fetch();
+
+	if (message.content.toLowerCase() === '!deploy' && message.author.id === client.application?.owner.id) {
+		const data = {
+			name: 'ping',
+			description: 'Replies with Pong!',
+		};
+
+		const command = await client.application?.commands.create(data);
+		console.log(command);
+	}
 });
 
 // CATCH RAW REACTION
@@ -154,6 +273,7 @@ client.on('voiceStateUpdate', (oldVoiceState, newVoiceState) => {
   }
 });
 
+*/
 
 client.on('error', console.error);
 
