@@ -8,30 +8,30 @@
   "private": false,
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",
+    "dev": "nodemon index.js && nodemon deploy-commands.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@discordjs/rest": "^0.1.0-canary.0",
     "cheerio": "^1.0.0-rc.3",
     "detect-libc": "^1.0.3",
-    "discord.js": "^12.5.1",
-    "discord.js-commando": "^0.12.2",
+    "discord-api-types": "^0.24.0",
+    "discord.js": "^13.2.0",
+    "discordjs-button-pagination": "^2.0.1",
     "dotenv": "^8.2.0",
     "elementtree": "^0.1.7",
+    "got": "^11.8.2",
     "krdict-api": "0.0.4",
     "luxon": "^1.25.0",
     "promise": "^8.1.0",
     "request": "^2.88.2",
     "roman-numeral": "^0.2.6",
-    "sequelize": "^5.21.6",
+    "sequelize": "^6.9.0",
     "sqlite3": "^4.2.0"
   },
   "devDependencies": {
-    "eslint": "^5.16.0",
-    "eslint-config-airbnb": "^17.1.1",
-    "eslint-config-airbnb-base": "^13.2.0",
-    "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-react": "^7.19.0"
+    "@discordjs/rest": "0.1.0-canary.0",
+    "eslint": "^8.2.0",
+    "eslint-config-airbnb": "^19.0.0"
   }
 }

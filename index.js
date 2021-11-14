@@ -25,8 +25,10 @@ const client = new Client({
 client.commands = new Collection();
 const examplecommand = require(`./commands/sejong/examples.js`);
 const hanjacommand = require(`./commands/sejong/hanja.js`);
+const papagocommand = require(`./commands/sejong/papago.js`);
 client.commands.set(examplecommand.name, examplecommand);
 client.commands.set(hanjacommand.name, hanjacommand);
+client.commands.set(papagocommand.name, papagocommand);
 
 const commands = client.commands.map(({ execute, ...data }) => data); 
 console.log(commands);
