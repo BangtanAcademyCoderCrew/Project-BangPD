@@ -1,43 +1,41 @@
-const { Command } = require("discord.js-commando");
 const DiscordUtil = require('../../common/discordutil.js');
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const Discord = require('discord.js');
 
-module.exports = class AddRoleCommand extends Command {
-  constructor(client) {
-    super(client, {
-      name: "addrole",
-      aliases: ["addr"],
-      group: "roles",
-      memberName: "add-role",
-      description: "Adds a new role to a list of users. Attach a csv or txt file with a list of all the usernames, one per line, that you would like to add the role to.\n Usage:addrole [roleID]",
-      userPermissions: ['MANAGE_CHANNELS', 'MANAGE_ROLES'],
-      args: [
-        {
-          key: "roleID",
-          prompt: "What role would you like to temporarily add to user?",
-          type: "string",
-        },
-        { key: "fileURL",
-          prompt: "Add a file link if you haven't attached a file in the first message", 
-          type: "string"
+// TODO: needs permissions 'MANAGE_CHANNELS', 'MANAGE_ROLES'
+module.exports = {
+    data: new SlashCommandBuilder()
+        .setName('addrole')
+        .setDescription('Adds a role to user(s)')
+        .addRoleOption(option =>
+            option.setName('role')
+                .setDescription('The role you would like to add to user(s). Attach a csv or txt file with a list of all the usernames, one per line')
+                .setRequired(true))
+        .addStringOption(option =>
+            option.setName('file_url')
+                .setDescription('The url of the csv/txt with list of users, one per line')
+        ),
+    async execute(interaction) {
+        const options = interaction.options;
+        const roleId = options.getRole('role').id;
+        const fileUrl = options.getString('file_url');
+        const attachment = interaction.attachments.values().next().value;
+
+        let attachmentURL;
+        if (!attachment && fileUrl) {
+          attachmentURL = fileUrl;
         }
-      ],
-    });
-  }
+        if (attachment) {
+            attachmentURL = attachment.url;
+        }
+        else {
+          return interaction.reply({ content: 'No valid file' });
+        }
 
-  run(message, { roleID, fileURL }) {
+        const addMemberRole = (member) => {
+            member.roles.add([roleId]);
+        };
 
-    const attachment = message.attachments.values().next().value;
-    var attachmentURL;
-    if (!attachment && fileURL.length > 1) {
-      attachmentURL = fileURL;       
-    }
-    if (attachment){
-      attachmentURL = attachment.url;
-    }
-    else {
-      return message.reply("No valid file")
-    }
-
-    DiscordUtil.openFileAndDo(attachmentURL, function(member){ member.roles.add([roleID]); }, message);
-  }
+        DiscordUtil.openFileAndDo(attachmentURL, addMemberRole, interaction);
+    },
 };

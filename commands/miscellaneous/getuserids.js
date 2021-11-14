@@ -1,46 +1,31 @@
-const { Command } = require("discord.js-commando");
 const Discord = require('discord.js');
+const { SlashCommandBuilder } = require('@discordjs/builders');
 
-module.exports = class GetUserIdsCommand extends Command {
-  constructor(client) {
-    super(client, {
-      name: "getuserids",
-      aliases: ["getids"],
-      group: "miscellaneous",
-      memberName: "getuserids",
-      description: "Gets a list of user ids that were mentioned in a message.\n Usage:getuserids [messageID] [channelID]",
-      userPermissions: [],
-      args: [
-        {
-          key: "messageIDs",
-          prompt: "What messages would you like to get the user ids from?",
-          type: "string",
-        },
-        {
-            key: "channel",
-            prompt: "In what channel is this message?",
-            type: "channel",
-        },
-      ],
-    });
-  }
+module.exports = {
+    data: new SlashCommandBuilder()
+        .setName('getuserids')
+        .setDescription('Gets a list of user ids that were mentioned in a message')
+        .addStringOption(option =>
+            option.setName('message_id')
+                .setDescription('The message id you would like to get the user ids from')
+                .setRequired(true))
+        .addChannelOption(option =>
+            option.setName('channel')
+                .setDescription('The channel this message is in')
+                .setRequired(true)),
+    async execute(interaction) {
+        const options = interaction.options;
+        const messageId = options.getString('message_id');
+        const channel = options.getChannel('channel');
 
-  run(message, { messageIDs, channel }) {
-
-    var allMessageIDs = messageIDs.split(" "); 
-    allMessageIDs.forEach(message =>checkIDs(message))
-
-    function checkIDs(messageID){
-      channel.messages.fetch(messageID).then( msg => {
-          var content = msg.content.replace(/\D/g, " ");
-          content = content.split(" ");
-          var ids = content.filter(e => e.length >= 18);
-          const attachment = new Discord.MessageAttachment(Buffer.from(`<@${ids.join(">\n<@")}>`, 'utf-8'), 'usersID.txt');
-          message.channel.send(`Users in message ${messageID}`, attachment);
-      }).catch(function(error) {
-          console.log(error);
-          message.channel.send(`Message with ID ${messageID} wasn't found in channel <#${channel.id}>`)
+        channel.messages.fetch(messageId).then((msg) => {
+            const content = msg.content.replace(/\D/g, ' ').split(' ');
+            const ids = content.filter(e => e.length >= 18);
+            const attachment = new Discord.MessageAttachment(Buffer.from(`<@${ids.join('>\n<@')}>`, 'utf-8'), 'usersID.txt');
+            interaction.channel.send({ content: `Users in message ${messageId}`, files: [attachment] });
+        }).catch((error) => {
+            console.log(error);
+            interaction.reply({ content: `Message with ID ${messageId} wasn't found in channel <#${channel.id}>` });
         });
-    }
-  }
+    },
 };
