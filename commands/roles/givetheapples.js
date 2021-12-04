@@ -1,91 +1,83 @@
-const { Command } = require("discord.js-commando");
 const Discord = require('discord.js');
+const { SlashCommandBuilder } = require('@discordjs/builders');
 
-module.exports = class AddRolesToUsersInMessageCommand extends Command {
-  constructor(client) {
-    super(client, {
-      name: "givetheapples",
-      aliases: ["giveapples"],
-      group: "roles",
-      memberName: "givetheapples",
-      description: "Assigns a role to users mentioned in a message. If they have the first role, the second role is assigned.\n Usage:givetheapples [messageID] [channelID] [first role ID] [second role ID]",
-      userPermissions: ['MANAGE_ROLES'],
-      args: [
-        {
-          key: "messageIDs",
-          prompt: "What messages would you like to get the user ids from?",
-          type: "string",
-        },
-        {
-            key: "channel",
-            prompt: "In what channel is this message?",
-            type: "channel",
-        },
-        {
-            key: "firstRoleID",
-            prompt: "What role would you like to add to user?",
-            type: "string",
-        },
-        {
-          key: "secondRoleID",
-          prompt: "What role would you like to add to user if they have the first role?",
-          type: "string",
-        }
-      ],
-    });
-  }
+module.exports = {
+  data: new SlashCommandBuilder()
+    .setName('givetheapples')
+    .setDescription('Assigns a role to users mentioned in a message. If they have the first role, the second role is assigned.')
+    .addStringOption(option =>
+      option.setName('messageIds')
+        .setDescription('What messages would you like to get the user ids from?')
+        .setRequired(true))
+    .addChannelOption(option =>
+      option.setName('channel')
+        .setDescription('In what channel is this message?')
+        .setRequired(true))
+    .addRoleOption(option =>
+      option.setName('firstRoleId')
+        .setDescription('What role would you like to add to user?')
+        .setRequired(true))
+    .addRoleOption(option =>
+      option.setName('secondRoleId')
+        .setDescription('What role would you like to add to user if they have the first role?')
+        .setRequired(true)),
+  async execute(interaction) {
+    const options = interaction.options;
+    const messageIds = options.getString('messageIds');
+    const channel = options.getChannel('channel');
+    const firstRoleIdToAssign = options.getRole('firstRoleId');
+    const secondRoleIdToAssign = options.getRole('secondRoleId');
 
-  run(message, { messageIDs, channel, firstRoleID, secondRoleID }) {
+    const allMessageIDs = messageIds.split(' ');
+    allMessageIDs.forEach(messageId => assignRoles(messageId, firstRoleIdToAssign, secondRoleIdToAssign))
 
-    var allMessageIDs = messageIDs.split(" "); 
-    allMessageIDs.forEach(message =>assignRoles(message, firstRoleID, secondRoleID))
-
-    function assignRoles(messageID, firstRoleID, secondRoleID){
-      channel.messages.fetch(messageID).then( msg => {
-          var content = msg.content.replace(/\D/g, " ");
-          content = content.split(" ");
-          var members = message.guild.members.cache;
-          var bothRoles = [firstRoleID, secondRoleID];
-          var ids = content.filter(e => e.length >= 16);
-          console.log(ids);
-          console.log(ids.length);
-          var usersWithFirstRole = []
-          var usersWithSecondRole = []
-          var userFrequency = {}
-          for (var i = 0; i < ids.length; i++){
-            userFrequency[ids[i]] = userFrequency[ids[i]] ? userFrequency[ids[i]] + 1 : 1;
-          }
-
-          for (var i = 0; i < ids.length; i++){
-            var member = members.get(ids[i]);
-            console.log(ids[i]);
-            if (userFrequency[ids[i]] >= 2){
-              if(countInArray(usersWithFirstRole, ids[i]) == 0){
-                member.roles.add(bothRoles); 
-                usersWithFirstRole.push(member);
-                usersWithSecondRole.push(member);
-              }
-            }
-            else if (!member.roles.cache.has(firstRoleID)){
-              member.roles.add([firstRoleID]); 
-              usersWithFirstRole.push(member)
-            }
-            else {
-              member.roles.add([secondRoleID]);
-              usersWithSecondRole.push(member)
-            }
-          }
-          const attachmentFirstRole = new Discord.MessageAttachment(Buffer.from(`${usersWithFirstRole.join("\n")}`, 'utf-8'), 'usersID.txt');
-          message.channel.send(`Users in message ${messageID} added role ${firstRoleID}`, attachmentFirstRole);
-          const attachment = new Discord.MessageAttachment(Buffer.from(`${usersWithSecondRole.join("\n")}`, 'utf-8'), 'usersID.txt');
-          message.channel.send(`Users in message ${messageID} added role ${secondRoleID}`, attachment);
-      }).catch(function(error) {
-          console.log(error);
-          message.channel.send(`Message with ID ${messageID} wasn't found in channel <#${channel.id}>`)
-        });
-      function countInArray(array, element) {
-          return array.filter(item => item == element).length;
-      }
+    const countInArray = (array, element) => {
+      return array.filter(item => item == element).length;
     }
+
+    const assignRoles = (messageId, firstRoleId, secondRoleId) => {
+      channel.messages.fetch(messageId).then(msg => {
+        const content = msg.content.replace(/\D/g, " ").split(" ");
+        const ids = content.filter(e => e.length >= 16);
+        const members = interaction.guild.members.fetch({ user: ids });
+        const bothRoles = [firstRoleId, secondRoleId];
+        console.log(ids);
+        console.log(ids.length);
+        const usersWithFirstRole = []
+        const usersWithSecondRole = []
+
+        // Counts number of times a user appears in ids
+        const userFrequency = {}
+        for (let i = 0; i < ids.length; i++) {
+          userFrequency[ids[i]] = userFrequency[ids[i]] ? userFrequency[ids[i]] + 1 : 1;
+        }
+
+        // Adds roles based on userFrequency counts
+        for (let i = 0; i < ids.length; i++) {
+          const member = members[i];
+          console.log(member.id);
+          if (userFrequency[member.id] >= 2 && countInArray(usersWithFirstRole, member.id) == 0) {
+            member.roles.add(bothRoles);
+            usersWithFirstRole.push(member);
+            usersWithSecondRole.push(member);
+          } else if (!member.roles.cache.has(firstRoleId)) {
+            member.roles.add([firstRoleId]);
+            usersWithFirstRole.push(member)
+          } else {
+            member.roles.add([secondRoleId]);
+            usersWithSecondRole.push(member)
+          }
+        }
+
+        // Creates attachments and sents txt files with userIds
+        const attachmentFirstRole = new Discord.MessageAttachment(Buffer.from(`${usersWithFirstRole.join("\n")}`, 'utf-8'), 'usersID-firstRole.txt');
+        interaction.channel.send(`Users in message ${messageId} added role ${firstRoleId}`, attachmentFirstRole);
+        const attachmentSecondRole = new Discord.MessageAttachment(Buffer.from(`${usersWithSecondRole.join("\n")}`, 'utf-8'), 'usersID-secondRole.txt');
+        interaction.channel.send(`Users in message ${messageId} added role ${secondRoleId}`, attachmentSecondRole);
+      }).catch(function (error) {
+        console.log(error);
+        interaction.channel.send(`Message with ID ${messageId} wasn't found in channel <#${channel.id}>`)
+      });
+    };
   }
-};
+}
