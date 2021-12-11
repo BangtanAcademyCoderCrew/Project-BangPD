@@ -53,7 +53,7 @@ module.exports = {
         }
         const content = msg.content.replace(/\D/g, " ").split(" ");
         const ids = content.filter(e => e.length >= 16);
-        const members = interaction.guild.members.fetch({ user: ids });
+        const members = interaction.guild.members.cache.filter(member => ids.includes(member.id));
         const bothRoles = [firstRoleId, secondRoleId];
         console.log(ids);
         console.log(ids.length);
