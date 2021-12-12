@@ -12,10 +12,10 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@discordjs/builders": "^0.8.2",
     "cheerio": "^1.0.0-rc.3",
     "detect-libc": "^1.0.3",
-    "discord.js": "^12.5.1",
-    "discord.js-commando": "^0.12.2",
+    "discord.js": "^13.0.0",
     "dotenv": "^8.2.0",
     "elementtree": "^0.1.7",
     "krdict-api": "0.0.4",
@@ -27,6 +27,7 @@
     "sqlite3": "^4.2.0"
   },
   "devDependencies": {
+    "@discordjs/rest": "0.1.0-canary.0",
     "eslint": "^5.16.0",
     "eslint-config-airbnb": "^17.1.1",
     "eslint-config-airbnb-base": "^13.2.0",

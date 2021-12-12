@@ -12,13 +12,17 @@ module.exports = {
       .setDescription('What role would you like to add to users (assigned role)?')
       .setRequired(true)),
   async execute(interaction) {
-    baseRoleID = baseRoleID.replace(/\D/g, "");
-    assignedRoleID = assignedRoleID.replace(/\D/g, "");
+    const baseRoleID = baseRoleID.replace(/\D/g, "");
+    const assignedRoleID = assignedRoleID.replace(/\D/g, "");
     const members = interaction.guild.members.cache.filter(member => member.roles.cache.has(baseRoleID));
     // This will run each "add role" in parallel and wait for all of them to complete before creating the attachment
-    await Promise.all(members.map(member => {
-      member.roles.add([assignedRoleID])
-    }));
+    try {
+      await Promise.all(members.map(member => {
+        member.roles.add([assignedRoleID])
+      }));
+    } catch (error) {
+      console.error(error)
+    }
     const attachment = new MessageAttachment(Buffer.from(`${members.join("\n")}`, 'utf-8'), 'usersID.txt');
     message.channel.send(`Users with role ${baseRoleID} added role ${assignedRoleID}`, attachment);
   }
