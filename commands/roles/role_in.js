@@ -12,18 +12,23 @@ module.exports = {
       .setDescription('What role would you like to add to users (assigned role)?')
       .setRequired(true)),
   async execute(interaction) {
-    const baseRoleID = baseRoleID.replace(/\D/g, "");
-    const assignedRoleID = assignedRoleID.replace(/\D/g, "");
+    const options = interaction.options;
+    const baseRoleID = options.getRole('baseRoleId');
+    const assignedRoleID = options.getRole('assignedRoleID');
     const members = interaction.guild.members.cache.filter(member => member.roles.cache.has(baseRoleID));
-    // This will run each "add role" in parallel and wait for all of them to complete before creating the attachment
+
     try {
-      await Promise.all(members.map(member => {
+      members.forEach(member => {
         member.roles.add([assignedRoleID])
-      }));
+      });
     } catch (error) {
       console.error(error)
     }
-    const attachment = new MessageAttachment(Buffer.from(`${members.join("\n")}`, 'utf-8'), 'usersID.txt');
-    message.channel.send(`Users with role ${baseRoleID} added role ${assignedRoleID}`, attachment);
+
+    // members is a collection, needs to be converted to Array
+    // usersWithRoles = [[id, <@id>]], we want to return the id with tags (<@id>)
+    const usersWithRoles = Array.from(members, item => item[1]).join('\n');
+    const attachment = MessageAttachment(Buffer.from(usersWithRoles, 'utf-8'), 'usersID.txt');
+    interaction.channel.send(`Users with role ${baseRoleID} added role ${assignedRoleID}`, attachment);
   }
 }

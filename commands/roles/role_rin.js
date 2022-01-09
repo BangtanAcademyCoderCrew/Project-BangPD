@@ -12,60 +12,23 @@ module.exports = {
       .setDescription('What role would you like to remove from users (assigned role)?')
       .setRequired(true)),
   async execute(interaction) {
-    const baseRoleID = baseRoleID.replace(/\D/g, "");
-    const assignedRoleID = assignedRoleID.replace(/\D/g, "");
+    const options = interaction.options;
+    const baseRoleID = options.getRole('baseRoleId');
+    const assignedRoleID = options.getRole('assignedRoleID');
     const members = interaction.guild.members.cache.filter(member => member.roles.cache.has(baseRoleID));
-    // This will run each "add role" in parallel and wait for all of them to complete before creating the attachment
+
     try {
-      await Promise.all(members.map(member => {
+      members.forEach(member => {
         member.roles.remove([assignedRoleID])
-      }));
+      });
     } catch (error) {
       console.error(error)
     }
-    const attachment = new MessageAttachment(Buffer.from(`${members.join("\n")}`, 'utf-8'), 'usersID.txt');
-    message.channel.send(`Users with role ${baseRoleID} removed role ${assignedRoleID}`, attachment);
+
+    // members is a collection, needs to be converted to Array
+    // usersWithRoles = [[id, <@id>]], we want to return the id with tags (<@id>)
+    const usersWithRolesRemoved = Array.from(members, item => item[1]).join('\n');
+    const attachment = new Discord.MessageAttachment(Buffer.from(usersWithRolesRemoved, 'utf-8'), 'usersID.txt');
+    interaction.channel.send(`Users with role ${baseRoleID} removed role ${assignedRoleID}`, attachment);
   }
 }
-
-
-module.exports = class RemoveRoleCommand extends Command {
-  constructor(client) {
-    super(client, {
-      name: "role_rin",
-      aliases: ["rrin"],
-      group: "roles",
-      memberName: "role_rin",
-      description: "Removes assigned role to all the users with base role role.\n Usage:role_rin base_role assigned_role",
-      userPermissions: ['MANAGE_ROLES'],
-      args: [
-        {
-          key: "baseRoleID",
-          prompt: "What role should the users have (base role)?",
-          type: "string",
-        },
-        {
-          key: "assignedRoleID",
-          prompt: "What role would you like to remove from users (assigned role)?",
-          type: "string",
-        }
-      ],
-    });
-  }
-
-  async run(message, { baseRoleID, assignedRoleID }) {
-    var members = message.guild.members.cache;
-    baseRoleID = baseRoleID.replace(/\D/g, "");
-    assignedRoleID = assignedRoleID.replace(/\D/g, "");
-    console.log(baseRoleID);
-    var usersWithRole = []
-    members.forEach(member => {
-      if (member.roles.cache.has(baseRoleID)) {
-        member.roles.remove([assignedRoleID]);
-        usersWithRole.push(member);
-      }
-    })
-    const attachment = new Discord.MessageAttachment(Buffer.from(`${usersWithRole.join("\n")}`, 'utf-8'), 'usersID.txt');
-    message.channel.send(`Users with role ${baseRoleID} removed role ${assignedRoleID}`, attachment);
-  }
-};
