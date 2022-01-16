@@ -28,12 +28,12 @@ module.exports = {
                         users[reaction.emoji].push('<@' + user.id + '>');
                     });
                     const attachment = new Discord.MessageAttachment(Buffer.from(`${users[reaction.emoji].join('\n')}`, 'utf-8'), 'emoji reactions.txt');
-                    interaction.channel.send({ content: `Users that reacted with ${reaction.emoji}`, files: [attachment] });
+                    interaction.reply({ content: `Users that reacted with ${reaction.emoji}`, files: [attachment] });
                 });
             });
         }).catch((error) => {
             console.log(error);
-            interaction.channel.send({ content: `Message with ID ${messageId} wasn't found in channel <#${channel.id}>` });
+            interaction.reply({ content: `Message with ID ${messageId} wasn't found in channel <#${channel.id}>` });
         });
     },
 };

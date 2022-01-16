@@ -62,11 +62,11 @@ module.exports = {
 
         Object.entries(usersPerGuildGrouped).map(([key, value]) => {
           const attachment = new Discord.MessageAttachment(Buffer.from(`<@${value.join('>\n<@')}>`, 'utf-8'), 'usersID.txt');
-          interaction.channel.send({ content: `Users in  ${key}`, files: [attachment] });
+          interaction.reply({ content: `Users in  ${key}`, files: [attachment] });
         });
       }).catch((error) => {
         console.log(error);
-        interaction.channel.send({ content: `There was an error checking ${messageId} in channel <#${channel.id}>` });
+        interaction.reply({ content: `There was an error checking ${messageId} in channel <#${channel.id}>` });
       });
     };
 

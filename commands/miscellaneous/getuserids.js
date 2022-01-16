@@ -21,10 +21,10 @@ module.exports = {
         channel.messages.fetch(messageId).then((msg) => {
             const ids = msg.mentions.users.map(user => user.id);
             const attachment = new Discord.MessageAttachment(Buffer.from(`<@${ids.join('>\n<@')}>`, 'utf-8'), 'usersID.txt');
-            interaction.channel.send({ content: `Users in message ${messageId}`, files: [attachment] });
+            interaction.reply({ content: `Users in message ${messageId}`, files: [attachment] });
         }).catch((error) => {
             console.log(error);
-            interaction.channel.send({ content: `Message with ID ${messageId} wasn't found in channel <#${channel.id}>` });
+            interaction.reply({ content: `Message with ID ${messageId} wasn't found in channel <#${channel.id}>` });
         });
     },
 };

@@ -33,7 +33,7 @@ module.exports = {
             const commands = fs.readdirSync(filePath);
             console.log(commands);
             if (!commands.includes(`${name}.js`)) {
-                return interaction.channel.send({
+                return interaction.reply({
                     content: `There is no command with name or alias \`${name}\`, ${interaction.author}! A new command will be created.`,
                 });
             }
@@ -41,9 +41,10 @@ module.exports = {
             try {
                 fs.unlinkSync(`${folderPath}/${commandName}.js`);
                 console.log('REMOVED FILE');
-                interaction.channel.send({ content: 'Old command file has been removed.' });
+                interaction.reply({ content: 'Old command file has been removed.' });
             // file removed
-            } catch(error) {
+            }
+ catch(error) {
                 console.error(error);
             }
         };
@@ -61,7 +62,8 @@ module.exports = {
                     }
                     console.log('Results Received');
                 });
-            } catch (error) {
+            }
+ catch (error) {
                 console.log(error);
             }
         };
@@ -70,7 +72,7 @@ module.exports = {
 
         setTimeout(() => {
             addCommand(attachment.url, commandName, folderPath);
-            return interaction.channel.send({ content: `Added command ${commandName}` });
+            return interaction.reply({ content: `Added command ${commandName}` });
         }, 5000);
     },
 };
