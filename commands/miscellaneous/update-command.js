@@ -2,6 +2,8 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const fs = require('fs');
 const path = require('path');
 const got = require('got');
+
+// TODO: this command may no longer be necessary
 // TODO: needs permissions 'MANAGE_CHANNELS', 'MANAGE_ROLES'
 module.exports = {
     data: new SlashCommandBuilder()

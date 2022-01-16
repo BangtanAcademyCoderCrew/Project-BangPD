@@ -19,12 +19,12 @@ module.exports = {
         const messageId = options.getString('message_id');
         const channel = options.getChannel('channel');
 
-        channel.messages.fetch(messageId).then((ReactionsMessage) => {
+        channel.messages.fetch(messageId).then((msg) => {
             const users = {};
-            ReactionsMessage.reactions.cache.forEach((reaction) => {
+            msg.reactions.cache.map((reaction) => {
                 users[reaction.emoji] = [];
                 reaction.users.fetch().then(result => {
-                    result.forEach(user => {
+                    result.map(user => {
                         users[reaction.emoji].push('<@' + user.id + '>');
                     });
                     const attachment = new Discord.MessageAttachment(Buffer.from(`${users[reaction.emoji].join('\n')}`, 'utf-8'), 'emoji reactions.txt');
@@ -33,7 +33,7 @@ module.exports = {
             });
         }).catch((error) => {
             console.log(error);
-            interaction.reply({ content: `Message with ID ${messageId} wasn't found in channel <#${channel.id}>` });
+            interaction.channel.send({ content: `Message with ID ${messageId} wasn't found in channel <#${channel.id}>` });
         });
     },
 };
