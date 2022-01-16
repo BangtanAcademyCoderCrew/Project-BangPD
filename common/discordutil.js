@@ -1,9 +1,9 @@
 const Discord = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const { prefix, accentColor, avatar } = require('../config.json');
 const langs = require('./langs.js');
 const { DateTime } = require('luxon');
 const got = require('got');
-const { MessageEmbed } = require('discord.js');
 
 module.exports = {
   bookmark(message, user) {
@@ -25,8 +25,8 @@ module.exports = {
       }
     }
 
-    if(message.content.length >= 2048) {
-      splittedText = this.splitText(message.content);
+    if (message.content.length >= 2048) {
+      const splittedText = this.splitText(message.content);
       this.createBookMarkMessage(message, splittedText[0], image, user);
       this.createBookMarkMessage(message, splittedText[1], image, user);
     }
@@ -225,12 +225,12 @@ module.exports = {
 
   divideMessageWithUsernamesInParts(usernames, messageChannel) {
     for (let i = 0; i <= Math.ceil(usernames.length / 50); i++) {
-      const List = usernames.slice(i * 50, i * 50 + 50).join('\n');
+      const list = usernames.slice(i * 50, i * 50 + 50).join('\n');
       if (i < 1) {
-          messageChannel.send(List);
+          messageChannel.send(list);
       }
-      else if (List.length > 0) {
-          messageChannel.send('cont.\n' + List);
+      else if (list.length > 0) {
+          messageChannel.send('cont.\n' + list);
       }
     }
     messageChannel.send('Done with changes');
@@ -265,7 +265,7 @@ module.exports = {
     const before = s.lastIndexOf(' ', middle);
     const after = s.indexOf(' ', middle + 1);
 
-    if (before == -1 || (after != -1 && middle - before >= after - middle)) {
+    if (before === -1 || (after !== -1 && middle - before >= after - middle)) {
         middle = after;
     } else {
         middle = before;

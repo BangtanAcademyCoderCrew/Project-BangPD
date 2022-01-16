@@ -19,8 +19,8 @@ module.exports = {
         const channel = options.getChannel('channel');
 
         channel.messages.fetch(messageId).then((msg) => {
-            const content = msg.content.replace(/\D/g, ' ').split(' ');
-            const ids = content.filter(e => e.length >= 18);
+            const mentionedUsers = msg.mentions.users.array();
+            const ids = mentionedUsers.map(u => u.id);
             const attachment = new Discord.MessageAttachment(Buffer.from(`<@${ids.join('>\n<@')}>`, 'utf-8'), 'usersID.txt');
             interaction.channel.send({ content: `Users in message ${messageId}`, files: [attachment] });
         }).catch((error) => {
