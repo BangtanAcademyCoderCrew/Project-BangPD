@@ -1,6 +1,5 @@
 const DiscordUtil = require('../../common/discordutil.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const Discord = require('discord.js');
 
 // TODO: needs permissions 'MANAGE_CHANNELS', 'MANAGE_ROLES'
 module.exports = {

@@ -25,19 +25,23 @@ module.exports = class RemoveRoleCommand extends Command {
     });
   }
 
-  async run(message, { baseRoleID, assignedRoleID}) {    
-    var members = message.guild.members.cache;
+  async run(message, { baseRoleID, assignedRoleID }) {
     baseRoleID = baseRoleID.replace(/\D/g, "");
     assignedRoleID = assignedRoleID.replace(/\D/g, "");
-    console.log(baseRoleID);
-    var usersWithRole = []
-    members.forEach(member => {
-      if(member.roles.cache.has(baseRoleID)){
-        member.roles.remove([assignedRoleID]);
-        usersWithRole.push(member);
-      }
-    })
-    const attachment = new Discord.MessageAttachment(Buffer.from(`${usersWithRole.join("\n")}`, 'utf-8'), 'usersID.txt');
+    const members = message.guild.members.cache.filter(member => member.roles.cache.has(baseRoleID));
+
+    try {
+      members.forEach(member => {
+        member.roles.remove([assignedRoleID])
+      });
+    } catch (error) {
+      console.error(error)
+    }
+
+    // members is a collection, needs to be converted to Array
+    // usersWithRoles = [[id, <@id>]], we want to return the id with tags (<@id>)
+    const usersWithRolesRemoved = Array.from(members, item => item[1]).join('\n');
+    const attachment = new Discord.MessageAttachment(Buffer.from(usersWithRolesRemoved, 'utf-8'), 'usersID.txt');
     message.channel.send(`Users with role ${baseRoleID} removed role ${assignedRoleID}`, attachment);
   }
 };
