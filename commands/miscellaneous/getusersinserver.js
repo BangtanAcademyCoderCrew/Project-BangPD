@@ -34,7 +34,7 @@ module.exports = {
         usersPerGuild[guildId] = ids.filter(id => allUserIdsPerGuild[guildId].includes(id));
       });
 
-      const guildGroupTypes = {
+      const groups = {
         All: '3 Servers',
         BAG: 'only BAG',
         BAL: 'only BAL',
@@ -44,15 +44,15 @@ module.exports = {
         BATandBAG: 'BAT and BAG',
       };
 
-      const usersPerGuildGroup = {};
-      usersPerGuildGroup[guildGroupTypes.BALandBAT] = usersPerGuild[BALId].filter(id => usersPerGuild[BATId].includes(id));
-      usersPerGuildGroup[guildGroupTypes.BALandBAG] = usersPerGuild[BALId].filter(id => usersPerGuild[BAGId].includes(id));
-      usersPerGuildGroup[guildGroupTypes.BATandBAG] = usersPerGuild[BATId].filter(id => usersPerGuild[BAGId].includes(id));
-      usersPerGuildGroup[guildGroupTypes.All] = usersPerGuildGroup[guildGroupTypes.BALandBAT].filter(id => usersPerGuild[BAGId].includes(id));
-      usersPerGuildGroup[guildGroupTypes.BAL] = usersPerGuild[BALId].filter(id => !usersPerGuild[BATId].includes(id)).filter(id => !usersPerGuild[BAGId].includes(id));
-      usersPerGuildGroup[guildGroupTypes.BAT] = usersPerGuild[BATId].filter(id => !usersPerGuild[BALId].includes(id)).filter(id => !usersPerGuild[BAGId].includes(id));
-      usersPerGuildGroup[guildGroupTypes.BAG] = usersPerGuild[BAGId].filter(id => !usersPerGuild[BATId].includes(id)).filter(id => !usersPerGuild[BALId].includes(id));
-      return usersPerGuildGroup;
+      const usersPerGroup = {};
+      usersPerGroup[groups.BALandBAT] = usersPerGuild[BALId].filter(id => usersPerGuild[BATId].includes(id));
+      usersPerGroup[groups.BALandBAG] = usersPerGuild[BALId].filter(id => usersPerGuild[BAGId].includes(id));
+      usersPerGroup[groups.BATandBAG] = usersPerGuild[BATId].filter(id => usersPerGuild[BAGId].includes(id));
+      usersPerGroup[groups.All] = usersPerGroup[groups.BALandBAT].filter(id => usersPerGuild[BAGId].includes(id));
+      usersPerGroup[groups.BAL] = usersPerGuild[BALId].filter(id => !usersPerGuild[BATId].includes(id)).filter(id => !usersPerGuild[BAGId].includes(id));
+      usersPerGroup[groups.BAT] = usersPerGuild[BATId].filter(id => !usersPerGuild[BALId].includes(id)).filter(id => !usersPerGuild[BAGId].includes(id));
+      usersPerGroup[groups.BAG] = usersPerGuild[BAGId].filter(id => !usersPerGuild[BATId].includes(id)).filter(id => !usersPerGuild[BALId].includes(id));
+      return usersPerGroup;
     };
 
     const checkUsersOnServer = (messageId) => {
