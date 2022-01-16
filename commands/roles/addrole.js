@@ -36,5 +36,6 @@ module.exports = {
         };
 
         DiscordUtil.openFileAndDo(attachmentURL, addMemberRole, interaction);
+        interaction.reply({ content: 'Added roles to users in file' });
     },
 };
