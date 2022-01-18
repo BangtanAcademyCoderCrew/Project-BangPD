@@ -44,7 +44,7 @@ module.exports = {
                 interaction.reply({ content: 'Old command file has been removed.' });
             // file removed
             }
- catch(error) {
+            catch(error) {
                 console.error(error);
             }
         };
@@ -63,7 +63,7 @@ module.exports = {
                     console.log('Results Received');
                 });
             }
- catch (error) {
+            catch (error) {
                 console.log(error);
             }
         };

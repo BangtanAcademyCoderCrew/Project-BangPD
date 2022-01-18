@@ -18,7 +18,7 @@ const rest = new REST({ version: '9' }).setToken(botToken);
             { body: commands },
         );
     }
- catch (error) {
+    catch (error) {
         console.error(error);
     }
 })();
