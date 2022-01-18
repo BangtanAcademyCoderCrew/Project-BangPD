@@ -8,14 +8,11 @@ const client = new Client({
     intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_PRESENCES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS ],
 });
 
-// TODO: clean this up after all commands updated
 client.commands = new Collection();
-const commandFilesMisc = fs.readdirSync('./commands/miscellaneous').filter(file => file.endsWith('.js'));
-const commandFilesRoles = fs.readdirSync('./commands/roles').filter(file => file.endsWith('addrole.js'));
-const allCommands = commandFilesMisc.concat(commandFilesRoles);
+const commandFilesMisc = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
-for (const file of allCommands) {
-    const command = require(`./commands/miscellaneous/${file}`);
+for (const file of commandFilesMisc) {
+    const command = require(`./commands/${file}`);
     client.commands.set(command.data.name, command);
 }
 
@@ -32,7 +29,8 @@ client.on('interactionCreate', async (interaction) => {
 
     try {
         await command.execute(interaction);
-    } catch (error) {
+    }
+    catch (error) {
         console.error(error);
         return interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
     }
@@ -43,7 +41,6 @@ const rawEventTypes = {
   MESSAGE_REACTION_ADD: 'messageReactionAdd',
 };
 
-// TODO): is this doing anything?
 client.on('raw', async (event) => {
   if (!rawEventTypes[event.t]) return;
   const { d: data } = event;
@@ -66,7 +63,8 @@ client.on('messageReactionAdd', async (reaction, user) => {
     // If the message this reaction belongs to was removed the fetching might result in an API error, which we need to handle
     try {
       await reaction.fetch();
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Something went wrong when fetching the message: ', error);
       // Return as `reaction.message.author` may be undefined/null
       return;
@@ -86,7 +84,8 @@ client.on('messageReactionAdd', async (reaction, user) => {
         user.send({ embeds: [embed] }).then(msg => msg.react('❌'));
         console.log(`${user.username} - result bookmark `);
       }
-    } else {
+    }
+    else {
       console.log(`${user.username} - message bookmark `);
       DiscordUtil.bookmark(reaction.message, user);
     }
