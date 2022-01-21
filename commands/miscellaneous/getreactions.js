@@ -9,7 +9,7 @@ module.exports = class RemoveRoleCommand extends Command {
       group: "miscellaneous",
       memberName: "getreactions",
       description: "",
-      userPermissions: ['MANAGE_CHANNELS', 'MANAGE_ROLES'],
+      userPermissions: ['MANAGE_MESSAGES'],
       args: [
         {
           key: "messageID",
