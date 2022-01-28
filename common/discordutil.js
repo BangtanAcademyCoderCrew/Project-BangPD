@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const { prefix, accentColor, avatar } = require('../config.json');
 const langs = require('./langs.js');
 const { DateTime } = require("luxon");
-import got from 'got';
+const got = require('got');
 
 module.exports = {
   bookmark(message, user) {
