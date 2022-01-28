@@ -25,6 +25,9 @@ module.exports = class ExampleSentenceAPI {
         'content-type': 'application/xml',
         Accept: 'application/xml',
       },
+      https: {
+        rejectUnauthorized: false
+      },
     };
 
 
