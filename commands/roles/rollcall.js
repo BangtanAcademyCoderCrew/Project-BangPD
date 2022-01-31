@@ -1,18 +1,19 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('rollcall')
     .setDescription('Starts rollcall. You will need the role ids that won\'t be rollcalled and the rollcall role id.')
-    .addStringOption(option => option.setName('roleExceptionIDs')
+    .addStringOption(option => option.setName('role_exception_ids')
       .setDescription('What roles are needed to not be rollcalled (ex. Active Student, level 4, etc)?')
       .setRequired(true))
-    .addRoleOption(option => option.setName('rollcallRoleID')
+    .addRoleOption(option => option.setName('rollcall_role_id')
       .setDescription('Rollcall Role ID')
       .setRequired(true)),
   async execute(interaction) {
     const options = interaction.options;
-    const roleExceptionIDs = options.getString('roleExceptionIDs').split(' ');
+    const roleExceptionIDs = options.getString('role_exception_ids').split(' ');
+    const rollcallRole = options.getRole('rollcall_role_id');
     const members = interaction.guild.members.cache;
 
     let rollcalled = 0;
@@ -32,7 +33,7 @@ module.exports = {
         }
       }
       if (!isActive) {
-        memberInfo.roles.add([rollcallRoleID]);
+        memberInfo.roles.add([rollcallRole]);
         rollcalled++;
       }
     }

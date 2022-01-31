@@ -1,35 +1,35 @@
-import { MessageAttachment } from 'discord.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
+const { MessageAttachment } = require('discord.js');
+const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('givetheapples')
-    .setDescription('Assigns a role to users mentioned in a message. If they have the first role, the second role is assigned.')
-    .addStringOption(option => option.setName('messageIds')
+    .setDescription('Assigns a role to users mentioned in a message. If they have the 1st role, the 2nd role is assigned')
+    .addStringOption(option => option.setName('message_ids')
       .setDescription('What messages would you like to get the user ids from?')
       .setRequired(true))
     .addChannelOption(option => option.setName('channel')
       .setDescription('In what channel is this message?')
       .setRequired(true))
-    .addRoleOption(option => option.setName('firstRoleId')
+    .addRoleOption(option => option.setName('first_role_id')
       .setDescription('What role would you like to add to user?')
       .setRequired(true))
-    .addRoleOption(option => option.setName('secondRoleId')
+    .addRoleOption(option => option.setName('second_role_id')
       .setDescription('What role would you like to add to user if they have the first role?')
       .setRequired(true))
-    .addStringOption(option => option.setName('serverId')
+    .addStringOption(option => option.setName('server_id')
       .setDescription('In what server is this message?')),
   async execute(interaction) {
     const options = interaction.options;
-    const messageIds = options.getString('messageIds');
-    const serverId = options.getString('serverId');
+    const messageIds = options.getString('message_ids');
+    const serverId = options.getString('server_id');
     const channel = options.getChannel('channel');
-    const firstRoleIdToAssign = options.getRole('firstRoleId');
-    const secondRoleIdToAssign = options.getRole('secondRoleId');
+    const firstRoleIdToAssign = options.getRole('first_role_id');
+    const secondRoleIdToAssign = options.getRole('second_role_id');
 
     // This likely doesn't work, can't access other guilds from an interaction rn. It might work if we make this a global command.
     // If we can't get this to work by just using the interaction, we can probably use the REST calls
-    const guild = interaction.message.client.guilds.cache.get(serverId);
+    const guild = interaction.message.client.guilds.cache.get(server_id);
     if (serverId && !guild) {
       return message.reply(`I can't find server with ID ${serverId} :pensive:`);
     }

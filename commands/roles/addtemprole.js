@@ -1,27 +1,27 @@
 const { DateTime } = require("luxon");
 const DiscordUtil = require('../../common/discordutil.js');
-import { SlashCommandBuilder } from '@discordjs/builders';
+const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('temp-role')
-    .setDescription('Adds a new role to a list of users for a limited time. Attach a csv or txt file with a list of all the usernames, one per line that you would like to add the role to. The format for the date to remove the role is YYYY-MM-DD HH:MM')
+    .setDescription('Adds a role to users for a limited time. Attach a csv/txt file with a list of usernames, 1 per line')
     .addStringOption(option => option.setName('deadline')
       .setDescription('When is the time you would like to remove the role in CST? Format YYYY-MM-DD HH:MM')
       .setRequired(true))
-    .addRoleOption(option => option.setName('roleID')
+    .addRoleOption(option => option.setName('role_id')
       .setDescription('What role would you like to temporarily add to user?')
       .setRequired(true))
-    .addStringOption(option => option.setName('fileURL')
-      .setDescription('Add a file link if you haven\'t attached a file in the first message')
+    .addStringOption(option => option.setName('file_url')
+      .setDescription('Add a file link instead of attachment. CSV or TXT file should list all usernames 1 per line')
       .setRequired(true)),
   async execute(interaction) {
     const options = interaction.options;
-    const fileUrl = options.getString('fileUrl');
-    const roleId = options.getRole('roleId');
+    const fileUrl = options.getString('file_url');
+    const roleId = options.getRole('role_id');
 
     // Validate deadline
-    const deadline = options.deadline;
+    const deadline = options.getString('deadline');
     const deadlineDateTime = DateTime.fromSQL(deadline, {
       zone: "America/Chicago",
     });
@@ -37,25 +37,43 @@ module.exports = {
       return await interaction.reply('Deadline is in past. Invalid datetime provided');
     }
 
-    // Attachment
-    const attachment = interaction.attachments.values().next().value;
+    // Handle attachment
+    const attachment = interaction.attachments?.values()?.next()?.value;
     let attachmentURL;
-    if (!attachment && fileURL.length > 1) {
+    if (!attachment && fileUrl?.length > 1) {
       attachmentURL = fileUrl;
     }
-    if (attachment) {
+    else if (attachment) {
       attachmentURL = attachment.url;
     }
     else {
-      await interaction.reply("No valid file")
+      return interaction.reply("No valid file")
+    }
+
+    // Define removeRole
+    const removeRoleAtDeadline = (timeToRemoveRole, channel, roleToRemoveId, attachmentURL, message) => {
+      const currentTimeUTC = DateTime.utc();
+
+      const timeLeftBeforeRemovingRole = timeToRemoveRole.toMillis() - currentTimeUTC.toMillis();
+      // TODO: Maybe can use Duration
+      if (timeLeftBeforeRemovingRole > 0) {
+        setTimeout(
+          () => {
+            DiscordUtil.openFileAndDo(attachmentURL, (member) => { member.roles.remove([roleToRemoveId]); }, message);
+            interaction.channel.send(`The role <@&${roleToRemoveId}> has been removed`);
+          },
+          timeLeftBeforeRemovingRole,
+          channel
+        );
+      }
     }
 
     // Add role and remove at deadline
-    DiscordUtil.openFileAndDo(attachmentURL, (member) => { member.roles.add([roleId]); }, message);
-    this.removeRoleAtDeadline(deadlineInUTC, interaction.channel, roleId, attachmentURL, message);
+    DiscordUtil.openFileAndDo(attachmentURL, (member) => { member.roles.add([roleId]); }, interaction);
+    removeRoleAtDeadline(deadlineInUTC, interaction.channel, roleId, attachmentURL, interaction);
 
     const deadlineMessage =
-      "Deadline (CST): " + deadlineDateTime.toLocaleString(DateTime.DATETIME_SHORT);
+      `Deadline (CST): ${deadlineDateTime.toLocaleString(DateTime.DATETIME_SHORT)}`;
     const reminderPromise =
       "I will send reminder";
     const newLine = "\n";
@@ -66,22 +84,6 @@ module.exports = {
       reminderPromise
     );
 
-    return message.reply(fullMessage);
+    return interaction.reply(fullMessage);
   },
-  removeRoleAtDeadline(timeToRemoveRole, channel, roleID, attachmentURL, message) {
-    const currentTimeUTC = DateTime.utc();
-
-    const timeLeftBeforeRemovingRole = timeToRemoveRole.toMillis() - currentTimeUTC.toMillis();
-    // TODO: Maybe can use Duration
-    if (timeLeftBeforeRemovingRole > 0) {
-      setTimeout(
-        function () {
-          DiscordUtil.openFileAndDo(attachmentURL, function (member) { member.roles.remove([roleID]); }, message);
-          channel.send(`The role <@&${roleId}> has been removed`);
-        },
-        timeLeftBeforeRemovingRole,
-        channel
-      );
-    }
-  }
 }
