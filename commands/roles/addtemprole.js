@@ -60,7 +60,7 @@ module.exports = {
         setTimeout(
           () => {
             DiscordUtil.openFileAndDo(attachmentURL, (member) => { member.roles.remove([roleToRemoveId]); }, message);
-            interaction.channel.send(`The role <@&${roleToRemoveId}> has been removed`);
+            interaction.channel.send(`The role ${roleToRemoveId} has been removed`);
           },
           timeLeftBeforeRemovingRole,
           channel
