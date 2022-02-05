@@ -37,6 +37,6 @@ module.exports = {
         rollcalled++;
       }
     }
-    return message.channel.send(`Rollcall done. ${rollcalled} are in roll call. ${activeMembers} active members.`);
+    return interaction.reply(`Rollcall done. ${rollcalled} are in roll call. ${activeMembers} active members.`);
   }
 }
