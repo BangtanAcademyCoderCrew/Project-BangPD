@@ -11,10 +11,10 @@ module.exports = {
     .addChannelOption(option => option.setName('channel')
       .setDescription('In what channel is this message?')
       .setRequired(true))
-    .addRoleOption(option => option.setName('first_role_id')
+    .addRoleOption(option => option.setName('first_role')
       .setDescription('What role would you like to add to user?')
       .setRequired(true))
-    .addRoleOption(option => option.setName('second_role_id')
+    .addRoleOption(option => option.setName('second_role')
       .setDescription('What role would you like to add to user if they have the first role?')
       .setRequired(true))
     .addStringOption(option => option.setName('server_id')
@@ -22,14 +22,20 @@ module.exports = {
   async execute(interaction) {
     const options = interaction.options;
     const messageIds = options.getString('message_ids');
-    const serverId = options.getString('server_id');
     const channel = options.getChannel('channel');
-    const firstRoleIdToAssign = options.getRole('first_role_id');
-    const secondRoleIdToAssign = options.getRole('second_role_id');
+    const firstRoleToAssign = options.getRole('first_role');
+    const secondRoleToAssign = options.getRole('second_role');
+    let serverId = options.getString('server_id');
 
     // This likely doesn't work, can't access other guilds from an interaction rn. It might work if we make this a global command.
     // If we can't get this to work by just using the interaction, we can probably use the REST calls
-    const guild = interaction.message.client.guilds.cache.get(server_id);
+
+    // If no server id is provided, use guild id of server that the command was sent in
+    if (!serverId) {
+      serverId = interaction.guildId;
+    }
+
+    const guild = interaction.client.guilds.cache.get(serverId);
     if (serverId && !guild) {
       return message.reply(`I can't find server with ID ${serverId} :pensive:`);
     }
@@ -39,14 +45,11 @@ module.exports = {
       return message.reply(`I can't find channel with ID ${channel.id} in server ${guild.name} :pensive:`);
     }
 
-    const allMessageIDs = messageIds.split(' ');
-    allMessageIDs.forEach(messageId => assignRoles(messageId, firstRoleIdToAssign, secondRoleIdToAssign));
-
     const countInArray = (array, element) => {
       return array.filter(item => item == element).length;
     };
 
-    const assignRoles = (messageId, firstRoleId, secondRoleId) => {
+    const assignRoles = (messageId, firstRole, secondRole) => {
       guildChannel.messages.fetch(messageId).then(msg => {
         if (msg.reactions.cache.get('👍') && msg.reactions.cache.get('👍').me) {
           return interaction.reply("You already checked this message before!");
@@ -54,11 +57,11 @@ module.exports = {
         const content = msg.content.replace(/\D/g, " ").split(" ");
         const ids = content.filter(e => e.length >= 16);
         const members = interaction.guild.members.cache.filter(member => ids.includes(member.id));
-        const bothRoles = [firstRoleId, secondRoleId];
+        const bothRoles = [firstRole.id, secondRole.id];
         console.log(ids);
         console.log(ids.length);
-        const usersWithFirstRole = [];
-        const usersWithSecondRole = [];
+        let usersWithFirstRole = '';
+        let usersWithSecondRole = '';
 
         // Counts number of times a user appears in ids
         const userFrequency = {};
@@ -67,31 +70,32 @@ module.exports = {
         }
 
         // Adds roles based on userFrequency counts
-        for (let i = 0; i < ids.length; i++) {
-          const member = members[i];
+        members.forEach((member) => {
           console.log(member.id);
           if (userFrequency[member.id] >= 2 && countInArray(usersWithFirstRole, member.id) == 0) {
             member.roles.add(bothRoles);
-            usersWithFirstRole.push(member);
-            usersWithSecondRole.push(member);
-          } else if (!member.roles.cache.has(firstRoleId)) {
-            member.roles.add([firstRoleId]);
-            usersWithFirstRole.push(member);
+            usersWithFirstRole += `<@${member.id}>\n`;
+            usersWithSecondRole += `<@${member.id}>\n`;
+          } else if (!member.roles.cache.has(firstRole.id)) {
+            member.roles.add([firstRole.id]);
+            usersWithFirstRole += `<@${member.id}>\n`;
           } else {
-            member.roles.add([secondRoleId]);
-            usersWithSecondRole.push(member);
+            member.roles.add([secondRole.id]);
+            usersWithSecondRole += `<@${member.id}>\n`;
           }
-        }
+        });
 
         // Creates attachments and sents txt files with userIds
-        const attachmentFirstRole = new MessageAttachment(Buffer.from(`${usersWithFirstRole.join("\n")}`, 'utf-8'), 'usersID-firstRole.txt');
-        interaction.channel.send(`Users in message ${messageId} added role ${firstRoleId}`, attachmentFirstRole);
-        const attachmentSecondRole = new MessageAttachment(Buffer.from(`${usersWithSecondRole.join("\n")}`, 'utf-8'), 'usersID-secondRole.txt');
-        interaction.channel.send(`Users in message ${messageId} added role ${secondRoleId}`, attachmentSecondRole);
+        const attachmentFirstRole = new MessageAttachment(Buffer.from(usersWithFirstRole, 'utf-8'), 'usersID-firstRole.txt');
+        const attachmentSecondRole = new MessageAttachment(Buffer.from(usersWithSecondRole, 'utf-8'), 'usersID-secondRole.txt');
+        interaction.reply({ content: `Users in message ${messageId} added role ${firstRole} and ${secondRole}`, files: [attachmentFirstRole, attachmentSecondRole] });
       }).catch((error) => {
         console.error(error);
-        interaction.channel.send(`Message with ID ${messageId} wasn't found in channel <#${channel.id}>`);
+        interaction.reply(`Message with ID ${messageId} wasn't found in channel <#${channel.id}>`);
       });
     };
+
+    const allMessageIDs = messageIds.split(' ');
+    allMessageIDs.forEach(messageId => assignRoles(messageId, firstRoleToAssign, secondRoleToAssign));
   }
 }
