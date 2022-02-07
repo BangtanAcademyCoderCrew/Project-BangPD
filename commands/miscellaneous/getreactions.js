@@ -4,12 +4,12 @@ const Discord = require('discord.js');
 module.exports = class RemoveRoleCommand extends Command {
   constructor(client) {
     super(client, {
-      name: "reactions",
+      name: "getreactions",
       aliases: ["reactions"],
       group: "miscellaneous",
-      memberName: "get-reactions",
+      memberName: "getreactions",
       description: "",
-      userPermissions: ['MANAGE_CHANNELS', 'MANAGE_ROLES'],
+      userPermissions: ['MANAGE_MESSAGES'],
       args: [
         {
           key: "messageID",
