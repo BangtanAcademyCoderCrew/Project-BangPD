@@ -3,36 +3,52 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('givetheapples')
+    .setName('ccssgivetheapples')
     .setDescription('Assigns a role to users mentioned in a message. If they have the 1st role, the 2nd role is assigned')
+    .addStringOption(option => option.setName('server_id')
+      .setDescription('In what server is this message?')
+      .setRequired(true))
     .addStringOption(option => option.setName('message_ids')
       .setDescription('What messages would you like to get the user ids from?')
       .setRequired(true))
-    .addChannelOption(option => option.setName('channel')
+    .addStringOption(option => option.setName('channel_id')
       .setDescription('In what channel is this message?')
       .setRequired(true))
-    .addRoleOption(option => option.setName('first_role')
+    .addStringOption(option => option.setName('first_role_id')
       .setDescription('What role would you like to add to user?')
       .setRequired(true))
-    .addRoleOption(option => option.setName('second_role')
+    .addStringOption(option => option.setName('second_role_id')
       .setDescription('What role would you like to add to user if they have the first role?')
       .setRequired(true)),
   async execute(interaction) {
     const options = interaction.options;
     const messageIds = options.getString('message_ids');
-    const channel = options.getChannel('channel');
-    const firstRoleToAssign = options.getRole('first_role');
-    const secondRoleToAssign = options.getRole('second_role');
+    const channelId = options.getString('channel_id');
+    const firstRoleToAssignId = options.getString('first_role_id');
+    const secondRoleToAssignId = options.getString('second_role_id');
+    const serverId = options.getString('server_id');
+
+    console.log('channel id', channelId);
+
+    const guild = interaction.client.guilds.cache.get(serverId);
+    if (serverId && !guild) {
+      return interaction.reply(`I can't find server with ID ${serverId} :pensive:`);
+    }
+
+    const guildChannel = guild.channels.cache.get(channelId);
+    if (!guildChannel) {
+      return interaction.reply(`I can't find channel with ID ${channelId} in server ${guild.name} :pensive:`);
+    }
 
     const assignRoles = (messageId, firstRole, secondRole) => {
-      channel.messages.fetch(messageId).then(msg => {
+      guildChannel.messages.fetch(messageId).then(msg => {
         if (msg.reactions.cache.get('👍') && msg.reactions.cache.get('👍').me) {
           return interaction.reply("You already checked this message before!");
         }
         const content = msg.content.replace(/\D/g, " ").split(" ");
         const ids = content.filter(e => e.length >= 16);
         const members = interaction.guild.members.cache.filter(member => ids.includes(member.id));
-        const bothRoles = [firstRole.id, secondRole.id];
+        const bothRoles = [firstRole, secondRole];
         console.log(ids);
         console.log(ids.length);
         let usersWithFirstRole = '';
@@ -51,11 +67,11 @@ module.exports = {
             member.roles.add(bothRoles);
             usersWithFirstRole += `<@${member.id}>\n`;
             usersWithSecondRole += `<@${member.id}>\n`;
-          } else if (!member.roles.cache.has(firstRole.id)) {
-            member.roles.add([firstRole.id]);
+          } else if (!member.roles.cache.has(firstRole)) {
+            member.roles.add([firstRole]);
             usersWithFirstRole += `<@${member.id}>\n`;
           } else {
-            member.roles.add([secondRole.id]);
+            member.roles.add([secondRole]);
             usersWithSecondRole += `<@${member.id}>\n`;
           }
         });
@@ -66,11 +82,11 @@ module.exports = {
         interaction.reply({ content: `Users in message ${messageId} added role ${firstRole} and ${secondRole}`, files: [attachmentFirstRole, attachmentSecondRole] });
       }).catch((error) => {
         console.error(error);
-        interaction.reply(`Message with ID ${messageId} wasn't found in channel <#${channel.id}>`);
+        interaction.reply(`Message with ID ${messageId} wasn't found in channel <#${channelId}>`);
       });
     };
 
     const allMessageIDs = messageIds.split(' ');
-    allMessageIDs.forEach(messageId => assignRoles(messageId, firstRoleToAssign, secondRoleToAssign));
+    allMessageIDs.forEach(messageId => assignRoles(messageId, firstRoleToAssignId, secondRoleToAssignId));
   }
 }
