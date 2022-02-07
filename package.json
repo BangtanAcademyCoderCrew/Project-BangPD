@@ -18,6 +18,7 @@
     "discord.js": "^13.0.0",
     "dotenv": "^8.2.0",
     "elementtree": "^0.1.7",
+    "got": "11.0.1",
     "krdict-api": "0.0.4",
     "luxon": "^1.25.0",
     "promise": "^8.1.0",
