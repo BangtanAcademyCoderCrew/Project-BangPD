@@ -15,10 +15,7 @@ module.exports = {
     const options = interaction.options;
     const baseRole = options.getRole('base_role');
     const assignedRole = options.getRole('assigned_role');
-
-    const members = interaction.guild.members.cache.filter(member => {
-      return member.roles.cache.has(baseRole.id);
-    });
+    const members = interaction.guild.members.cache.filter(member => member.roles.cache.has(baseRole.id));
 
     try {
       members.forEach(member => {
