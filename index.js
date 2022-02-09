@@ -15,8 +15,8 @@ const {
 const client = new Client({
 	//defaultPrefix: prefix,
 	//owner: '708723153605754910',
-  //partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
-  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES]
+  partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
+  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_PRESENCES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS]
   //intents: ['GUILD_PRESENCES', 'GUILD_MEMBERS', 'GUILD_MESSAGES', Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES]
 });
 
@@ -81,24 +81,6 @@ for(const commandDir of commandDirs){
 }
 */
 
-
-
-
-/*
-client.registry
-	.registerDefaultTypes()
-	.registerGroups([
-		['reminder', 'Command Group for Reminder functionalities'],
-		['dictionary', 'Command Group for Dictionary functionalities'],
-    ['roles', 'Command Group for role management'],
-    ['miscellaneous', 'Command Group for misc commands']
-	])
-	.registerDefaultGroups()
-	.registerDefaultCommands()
-	.registerCommandsIn(path.join(__dirname, 'commands'));
-
-  */
-
 client.once('ready', () => {
 	console.log(`Bang PD is online!`);
   client.user.setActivity('BE', { type: 'LISTENING' });
@@ -123,40 +105,42 @@ client.on('interactionCreate', async interaction => {
 	}
 });
 
-
-/*
-client.on('messageCreate', async message => {
-  //console.log(message);
-	if (!client.application?.owner) await client.application?.fetch();
-
-  //console.log(client.application?.owner.id);
-  //650144159432310784
-
-	if (message.content.toLowerCase() === '!deploy' && message.author.id === client.application?.owner.id) {
-		const data = {
-			name: 'ping',
-			description: 'Replies with Pong!',
-		};
-
-		const command = await client.application?.commands.create(data);
-		console.log(command);
+client.on('messageReactionAdd', async (reaction, user) => {
+	if (reaction.partial) {
+		try {
+			await reaction.fetch();
+		} catch (error) {
+			console.error('Something went wrong when fetching the message: ', error);
+			// Return as `reaction.message.author` may be undefined/null
+			return;
+		}
 	}
+
+	if (user.id === client.user.id){
+		return;
+	}
+	const validChannels = ["GUILD_TEXT", "GUILD_PUBLIC_THREAD", "GUILD_PRIVATE_THREAD"]
+	if (reaction.emoji.name === '🔖' && validChannels.includes(reaction.message.channel.type)) {
+		if (reaction.message.embeds[0] && reaction.message.author.id === client.user.id) {
+      const embed = reaction.message.embeds[0];
+      console.log(embed);
+      console.log(reaction.message);
+      user.send({ embeds: [embed] }).then(msg => msg.react('❌'));
+      console.log(`${user.username} - result bookmark `);
+    } else {
+      console.log(`${user.username} - message bookmark `);
+      DiscordUtil.bookmark(reaction.message, user);
+    }
+	}
+  console.log(!validChannels.includes(reaction.message.channel.type));
+  if (reaction.emoji.name === '❌' && !validChannels.includes(reaction.message.channel.type)){
+    if (user.id !== client.user.id) {
+      reaction.message.delete();
+    }
+  }
 });
 
 /*
-client.on('messageCreate', async message => {
-	if (!client.application?.owner) await client.application?.fetch();
-
-	if (message.content.toLowerCase() === '!deploy' && message.author.id === client.application?.owner.id) {
-		const data = {
-			name: 'ping',
-			description: 'Replies with Pong!',
-		};
-
-		const command = await client.application?.commands.create(data);
-		console.log(command);
-	}
-});
 
 // CATCH RAW REACTION
 const rawEventTypes = {

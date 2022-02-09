@@ -41,7 +41,7 @@ module.exports = {
       .setImage(image)
       .setTimestamp(message.editedTimestamp || message.createdTimestamp);
 
-    user.send(embed).then(msg => msg.react('❌'));
+    user.send({ embeds: [embed] }).then(msg => msg.react('❌'));
   },
 
   createBasicEmbed(name) {

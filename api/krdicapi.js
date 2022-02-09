@@ -70,7 +70,13 @@ module.exports = class KrDicApi {
     this.url = `https://krdict.korean.go.kr/eng/dicSearch/search?nation=eng&nationCode=6&ParaWordNo=&mainSearchWord=${q}&blockCount=${amount}`;
     const promise = new Promise((resolve, reject) =>(async () => {
       try {
-        const response = await got(this.url);
+        const options = {
+          https: {
+            rejectUnauthorized: false
+          }
+        };
+
+        const response = await got(this.url, options);
         resolve(this.parseResult(response.body));
         //=> '<!doctype html> ...'
       } catch (error) {

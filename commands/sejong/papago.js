@@ -58,12 +58,10 @@ module.exports = {
       return;
     }
 
-    const q = args.join(" ");
     const p = new PapagoApi();
 
     await interaction.deferReply();
-
-    const response = await p.translate(q, source, target);
+    const response = await p.translate(text, source, target);
 
     await interaction.editReply(send(response, interaction));
 
