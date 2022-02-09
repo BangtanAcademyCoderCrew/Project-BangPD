@@ -11,27 +11,27 @@ module.exports = {
     .addChannelOption(option => option.setName('channel')
       .setDescription('In what channel is this message?')
       .setRequired(true))
-    .addRoleOption(option => option.setName('role_id')
+    .addRoleOption(option => option.setName('role')
       .setDescription('What role would you like to add to user?')
       .setRequired(true)),
   async execute(interaction) {
     const options = interaction.options;
     const messageIds = options.getString('message_ids');
     const channel = options.getChannel('channel');
-    const roleIdToAssign = options.getRole('role_id');
+    const roleToAssign = options.getRole('role');
 
-    const checkIDs = (messageId, roleId) => {
+    const checkIDs = (messageId, role) => {
       channel.messages.fetch(messageId).then(msg => {
         const content = msg.content.replace(/\D/g, " ").split(" ");
         const ids = content.filter(e => e.length >= 16);
         const members = interaction.guild.members.cache.filter(member => ids.includes(member.id));
         let membersWithRole = '';
         members.forEach(member => {
-          member.roles.add([roleId]);
+          member.roles.add([role]);
           membersWithRole += `<@${member.user.id}>\n`;
         });
         const attachment = new MessageAttachment(Buffer.from(membersWithRole, 'utf-8'), 'usersID.txt');
-        interaction.reply({ content: `Users in message ${messageId} added role ${roleId}`, files: [attachment] });
+        interaction.reply({ content: `Users in message ${messageId} added role ${role}`, files: [attachment] });
       }).catch((error) => {
         console.error(error);
         interaction.reply(`Message with ID ${messageId} wasn't found in channel <#${channel.id}>`);
@@ -39,6 +39,6 @@ module.exports = {
     };
 
     const allMessageIDs = messageIds.split(' ');
-    return allMessageIDs.forEach(message => checkIDs(message, roleIdToAssign));
+    return allMessageIDs.forEach(message => checkIDs(message, roleToAssign));
   }
 }

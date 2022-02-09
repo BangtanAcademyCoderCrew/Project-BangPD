@@ -1,56 +1,44 @@
-const { Command } = require("discord.js-commando");
-const Discord = require('discord.js');
+const { MessageAttachment } = require('discord.js');
+const { SlashCommandBuilder } = require('@discordjs/builders');
 
-module.exports = class RemoveRolesToUsersInMessageCommand extends Command {
-  constructor(client) {
-    super(client, {
-      name: "removerolestouserinmessage",
-      aliases: ["removerolem", "remrolesm"],
-      group: "roles",
-      memberName: "removerolestouserinmessage",
-      description: "Removes a role to users that were mentioned in a message.\n Usage:removerolestouserinmessage [messageID] [channelID]",
-      userPermissions: ['MANAGE_ROLES'],
-      args: [
-        {
-          key: "messageIDs",
-          prompt: "What messages would you like to get the user ids from?",
-          type: "string",
-        },
-        {
-            key: "channel",
-            prompt: "In what channel is this message?",
-            type: "channel",
-        },
-        {
-            key: "roleID",
-            prompt: "What role would you like to remove to user?",
-            type: "string",
-        }
-      ],
-    });
-  }
+module.exports = {
+  data: new SlashCommandBuilder()
+    .setName('removerolestouserinmessage')
+    .setDescription('Removes a role to users that were mentioned in a message.')
+    .addStringOption(option => option.setName('message_ids')
+      .setDescription('What messages would you like to get the user ids from?')
+      .setRequired(true))
+    .addChannelOption(option => option.setName('channel')
+      .setDescription('In what channel is this message?')
+      .setRequired(true))
+    .addRoleOption(option => option.setName('role')
+      .setDescription('What role would you like to remove from user?')
+      .setRequired(true)),
+  async execute(interaction) {
+    const options = interaction.options;
+    const messageIds = options.getString('message_ids');
+    const channel = options.getChannel('channel');
+    const roleToRemove = options.getRole('role');
 
-  run(message, { messageIDs, channel, roleID }) {
-
-    var allMessageIDs = messageIDs.split(" "); 
-    allMessageIDs.forEach(message =>checkIDs(message, roleID))
-
-    function checkIDs(messageID, roleID){
-      channel.messages.fetch(messageID).then( msg => {
-          var content = msg.content.replace(/\D/g, " ");
-          content = content.split(" ");
-          var members = message.guild.members.cache;
-          var ids = content.filter(e => e.length >= 16);
-          for (var i = 0; i < ids.length; i++){
-            var member = members.get(ids[i]);
-            member.roles.remove([roleID]); 
-          }
-          const attachment = new Discord.MessageAttachment(Buffer.from(`<@${ids.join(">\n<@")}>`, 'utf-8'), 'usersID.txt');
-          message.channel.send(`Users in message ${messageID} added role ${roleID}`, attachment);
-      }).catch(function(error) {
-          console.log(error);
-          message.channel.send(`Message with ID ${messageID} wasn't found in channel <#${channel.id}>`)
+    const checkIDs = (messageId, role) => {
+      channel.messages.fetch(messageId).then(msg => {
+        const content = msg.content.replace(/\D/g, " ").split(" ");
+        const ids = content.filter(e => e.length >= 16);
+        const members = interaction.guild.members.cache.filter(member => ids.includes(member.id));
+        let membersWithRoleRemoved = '';
+        members.forEach(member => {
+          member.roles.remove([role]);
+          membersWithRoleRemoved += `<@${member.user.id}>\n`;
         });
-    }
+        const attachment = new MessageAttachment(Buffer.from(membersWithRoleRemoved, 'utf-8'), 'usersID.txt');
+        interaction.reply({ content: `Users in message ${messageId} removed role ${role}`, files: [attachment] });
+      }).catch((error) => {
+        console.error(error);
+        interaction.reply(`Message with ID ${messageId} wasn't found in channel <#${channel.id}>`);
+      });
+    };
+
+    const allMessageIDs = messageIds.split(' ');
+    return allMessageIDs.forEach(message => checkIDs(message, roleToRemove));
   }
-};
+}
