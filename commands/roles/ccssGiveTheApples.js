@@ -28,22 +28,24 @@ module.exports = {
     const secondRoleToAssignId = options.getString('second_role_id');
     const serverId = options.getString('server_id');
 
+    await interaction.deferReply();
+
     console.log('channel id', channelId);
 
     const guild = interaction.client.guilds.cache.get(serverId);
     if (serverId && !guild) {
-      return interaction.reply(`I can't find server with ID ${serverId} :pensive:`);
+      return interaction.followUp(`I can't find server with ID ${serverId} :pensive:`);
     }
 
     const guildChannel = guild.channels.cache.get(channelId);
     if (!guildChannel) {
-      return interaction.reply(`I can't find channel with ID ${channelId} in server ${guild.name} :pensive:`);
+      return interaction.followUp(`I can't find channel with ID ${channelId} in server ${guild.name} :pensive:`);
     }
 
     const assignRoles = (messageId, firstRole, secondRole) => {
       guildChannel.messages.fetch(messageId).then(msg => {
         if (msg.reactions.cache.get('👍') && msg.reactions.cache.get('👍').me) {
-          return interaction.reply("You already checked this message before!");
+          return interaction.followUp("You already checked this message before!");
         }
         const content = msg.content.replace(/\D/g, " ").split(" ");
         const ids = content.filter(e => e.length >= 16);
@@ -79,10 +81,11 @@ module.exports = {
         // Creates attachments and sents txt files with userIds
         const attachmentFirstRole = new MessageAttachment(Buffer.from(usersWithFirstRole, 'utf-8'), 'usersID-firstRole.txt');
         const attachmentSecondRole = new MessageAttachment(Buffer.from(usersWithSecondRole, 'utf-8'), 'usersID-secondRole.txt');
-        interaction.reply({ content: `Users in message ${messageId} added role ${firstRole} and ${secondRole}`, files: [attachmentFirstRole, attachmentSecondRole] });
+        interaction.followUp({ content: `Users in message ${messageId} added role ${firstRole} and ${secondRole}`, files: [attachmentFirstRole, attachmentSecondRole] });
+        msg.react("👍");
       }).catch((error) => {
         console.error(error);
-        interaction.reply(`Message with ID ${messageId} wasn't found in channel <#${channelId}>`);
+        interaction.followUp(`Message with ID ${messageId} wasn't found in channel <#${channelId}>`);
       });
     };
 

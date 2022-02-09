@@ -20,6 +20,8 @@ module.exports = {
     const channel = options.getChannel('channel');
     const roleToRemove = options.getRole('role');
 
+    await interaction.deferReply();
+
     const checkIDs = (messageId, role) => {
       channel.messages.fetch(messageId).then(msg => {
         const content = msg.content.replace(/\D/g, " ").split(" ");
@@ -31,10 +33,10 @@ module.exports = {
           membersWithRoleRemoved += `<@${member.user.id}>\n`;
         });
         const attachment = new MessageAttachment(Buffer.from(membersWithRoleRemoved, 'utf-8'), 'usersID.txt');
-        interaction.reply({ content: `Users in message ${messageId} removed role ${role}`, files: [attachment] });
+        interaction.followUp({ content: `Users in message ${messageId} removed role ${role}`, files: [attachment] });
       }).catch((error) => {
         console.error(error);
-        interaction.reply(`Message with ID ${messageId} wasn't found in channel <#${channel.id}>`);
+        interaction.followUp(`Message with ID ${messageId} wasn't found in channel <#${channel.id}>`);
       });
     };
 
