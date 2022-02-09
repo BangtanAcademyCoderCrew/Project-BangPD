@@ -16,8 +16,7 @@ const client = new Client({
 	//defaultPrefix: prefix,
 	//owner: '708723153605754910',
   partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
-  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_PRESENCES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS]
-  //intents: ['GUILD_PRESENCES', 'GUILD_MEMBERS', 'GUILD_MESSAGES', Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES]
+  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_PRESENCES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGE_REACTIONS]
 });
 
 
@@ -106,7 +105,7 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {
-	if (reaction.partial) {
+	if (reaction.partial && !user.bot) {
 		try {
 			await reaction.fetch();
 		} catch (error) {
@@ -116,15 +115,13 @@ client.on('messageReactionAdd', async (reaction, user) => {
 		}
 	}
 
-	if (user.id === client.user.id){
+	if (user.id === client.user.id || user.bot ){
 		return;
 	}
 	const validChannels = ["GUILD_TEXT", "GUILD_PUBLIC_THREAD", "GUILD_PRIVATE_THREAD"]
 	if (reaction.emoji.name === '🔖' && validChannels.includes(reaction.message.channel.type)) {
 		if (reaction.message.embeds[0] && reaction.message.author.id === client.user.id) {
       const embed = reaction.message.embeds[0];
-      console.log(embed);
-      console.log(reaction.message);
       user.send({ embeds: [embed] }).then(msg => msg.react('❌'));
       console.log(`${user.username} - result bookmark `);
     } else {
@@ -132,9 +129,8 @@ client.on('messageReactionAdd', async (reaction, user) => {
       DiscordUtil.bookmark(reaction.message, user);
     }
 	}
-  console.log(!validChannels.includes(reaction.message.channel.type));
   if (reaction.emoji.name === '❌' && !validChannels.includes(reaction.message.channel.type)){
-    if (user.id !== client.user.id) {
+    if (user.id !== client.user.id && reaction.message.author.id == client.user.id) {
       reaction.message.delete();
     }
   }
