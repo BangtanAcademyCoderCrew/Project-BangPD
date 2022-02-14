@@ -1,14 +1,13 @@
 const Discord = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
-// TODO: needs permissions 'MANAGE_CHANNELS', 'MANAGE_ROLES'
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('getreactions')
-        .setDescription('Get reactions from a message')
+        .setName('getuserids')
+        .setDescription('Gets a list of user ids that were mentioned in a message')
         .addStringOption(option =>
             option.setName('message_id')
-                .setDescription('The message id you would like to get reactions from')
+                .setDescription('The message id you would like to get the user ids from')
                 .setRequired(true))
         .addChannelOption(option =>
             option.setName('channel')
@@ -20,17 +19,9 @@ module.exports = {
         const channel = options.getChannel('channel');
 
         channel.messages.fetch(messageId).then((msg) => {
-            const users = {};
-            msg.reactions.cache.map((reaction) => {
-                users[reaction.emoji] = [];
-                reaction.users.fetch().then(result => {
-                    result.map(user => {
-                        users[reaction.emoji].push('<@' + user.id + '>');
-                    });
-                    const attachment = new Discord.MessageAttachment(Buffer.from(`${users[reaction.emoji].join('\n')}`, 'utf-8'), 'emoji reactions.txt');
-                    interaction.reply({ content: `Users that reacted with ${reaction.emoji}`, files: [attachment] });
-                });
-            });
+            const ids = msg.mentions.users.map(user => user.id);
+            const attachment = new Discord.MessageAttachment(Buffer.from(`<@${ids.join('>\n<@')}>`, 'utf-8'), 'usersID.txt');
+            interaction.reply({ content: `Users in message ${messageId}`, files: [attachment] });
         }).catch((error) => {
             console.log(error);
             interaction.reply({ content: `Message with ID ${messageId} wasn't found in channel <#${channel.id}>` });
