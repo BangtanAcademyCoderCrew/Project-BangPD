@@ -3,8 +3,8 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('removerolestouserinmessage')
-    .setDescription('Removes a role to users that were mentioned in a message.')
+    .setName('addrolestouserinmessage')
+    .setDescription('Gets a list of user ids that were mentioned in a message.')
     .addStringOption(option => option.setName('message_ids')
       .setDescription('What messages would you like to get the user ids from?')
       .setRequired(true))
@@ -12,13 +12,13 @@ module.exports = {
       .setDescription('In what channel is this message?')
       .setRequired(true))
     .addRoleOption(option => option.setName('role')
-      .setDescription('What role would you like to remove from user?')
+      .setDescription('What role would you like to add to user?')
       .setRequired(true)),
   async execute(interaction) {
     const options = interaction.options;
     const messageIds = options.getString('message_ids');
     const channel = options.getChannel('channel');
-    const roleToRemove = options.getRole('role');
+    const roleToAssign = options.getRole('role');
 
     await interaction.deferReply();
 
@@ -27,13 +27,13 @@ module.exports = {
         const content = msg.content.replace(/\D/g, " ").split(" ");
         const ids = content.filter(e => e.length >= 16);
         const members = interaction.guild.members.cache.filter(member => ids.includes(member.id));
-        let membersWithRoleRemoved = '';
+        let membersWithRole = '';
         members.forEach(member => {
-          member.roles.remove([role]);
-          membersWithRoleRemoved += `<@${member.user.id}>\n`;
+          member.roles.add([role]);
+          membersWithRole += `<@${member.user.id}>\n`;
         });
-        const attachment = new MessageAttachment(Buffer.from(membersWithRoleRemoved, 'utf-8'), 'usersID.txt');
-        interaction.followUp({ content: `Users in message ${messageId} removed role ${role}`, files: [attachment] });
+        const attachment = new MessageAttachment(Buffer.from(membersWithRole, 'utf-8'), 'usersID.txt');
+        interaction.followUp({ content: `Users in message ${messageId} added role ${role}`, files: [attachment] });
       }).catch((error) => {
         console.error(error);
         interaction.followUp(`Message with ID ${messageId} wasn't found in channel <#${channel.id}>`);
@@ -41,6 +41,6 @@ module.exports = {
     };
 
     const allMessageIDs = messageIds.split(' ');
-    return allMessageIDs.forEach(message => checkIDs(message, roleToRemove));
+    return allMessageIDs.forEach(message => checkIDs(message, roleToAssign));
   }
 }
