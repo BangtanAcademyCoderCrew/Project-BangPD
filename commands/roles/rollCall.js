@@ -9,7 +9,8 @@ module.exports = {
       .setRequired(true))
     .addRoleOption(option => option.setName('rollcall_role_id')
       .setDescription('Rollcall Role ID')
-      .setRequired(true)),
+      .setRequired(true))
+    .setDefaultPermission(false),
   async execute(interaction) {
     const options = interaction.options;
     const roleExceptionIDs = options.getString('role_exception_ids').split(' ');

@@ -14,7 +14,8 @@ module.exports = {
       .setRequired(true))
     .addStringOption(option => option.setName('file_url')
       .setDescription('Add a file link instead of attachment. CSV or TXT file should list all usernames 1 per line')
-      .setRequired(true)),
+      .setRequired(true))
+    .setDefaultPermission(false),
   async execute(interaction) {
     const options = interaction.options;
     const fileUrl = options.getString('file_url');

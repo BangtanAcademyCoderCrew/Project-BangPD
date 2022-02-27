@@ -13,7 +13,8 @@ module.exports = {
         .addChannelOption(option =>
             option.setName('channel')
                 .setDescription('The channel this message is in')
-                .setRequired(true)),
+                .setRequired(true))
+        .setDefaultPermission(false),
     async execute(interaction) {
         const options = interaction.options;
         const messageId = options.getString('message_id');

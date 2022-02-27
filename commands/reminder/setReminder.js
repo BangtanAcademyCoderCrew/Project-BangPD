@@ -15,22 +15,22 @@ module.exports = {
                 .setDescription('The channel to send the reminder')
                 .setRequired(true))
         .addStringOption(option =>
-            option.setName('timeInAdvance')
+            option.setName('time_in_advance')
                 .setDescription('The time before the deadline you would like the reminder to set off')
                 .addChoice('30 min', '30m')
                 .addChoice('1 hour', '1h')
                 .addChoice('1 day', '1d')
                 .setRequired(true))
         .addStringOption(option =>
-            option.setName('reminderMessage')
+            option.setName('reminder_message')
                 .setDescription('The reminder message to send to channel')
                 .setRequired(true)),
     async execute(interaction) {
         const options = interaction.options;
         const deadline = options.getString('deadline');
         const channel = options.getChannel('channel');
-        const timeInAdvance = options.getString('timeInAdvance');
-        const message = options.getString('reminderMessage');
+        const timeInAdvance = options.getString('time_in_advance');
+        const message = options.getString('reminder_message');
         const cst = 'America/Chicago';
 
         const deadlineDateTime = DateTime.fromSQL(deadline, {
@@ -50,15 +50,15 @@ module.exports = {
 
         let reminderTime;
         switch (timeInAdvance) {
-          case '30m':
-            reminderTime = deadlineInUTC.minus({ minutes: 30 });
-            break;
-          case '1h':
-            reminderTime = deadlineInUTC.minus({ hours: 1 });
-            break;
-          case '1d':
-            reminderTime = deadlineInUTC.minus({ days: 1 });
-            break;
+            case '30m':
+                reminderTime = deadlineInUTC.minus({ minutes: 30 });
+                break;
+            case '1h':
+                reminderTime = deadlineInUTC.minus({ hours: 1 });
+                break;
+            case '1d':
+                reminderTime = deadlineInUTC.minus({ days: 1 });
+                break;
         }
 
         this.sendReminder(reminderTime, channel, message);
@@ -92,7 +92,7 @@ module.exports = {
         if (delay > 0) {
             setTimeout(
                 () => {
-                  channel.send(message);
+                    channel.send(message);
                 },
                 delay,
                 channel,

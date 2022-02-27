@@ -1,6 +1,5 @@
 {
-    "token": "",
-    "prefix": "+",
+    "prefix": "&",
     "accentColor": "#FFFFF",
     "enabledCommands": ["word", "hanja", "examples", "papago", "help", "msg"],
     "devIds": ["104905437614223360"],
@@ -8,5 +7,6 @@
     "enableSejongReply": true,
     "BALId": "819398172270264351",
     "BATId": "888439837256994823",
-    "BAGId": "848725336366645259"
+    "BAGId": "848725336366645259",
+    "commandDirectories": ["./commands/miscellaneous", "./commands/reminder", "./commands/roles"]
 }
