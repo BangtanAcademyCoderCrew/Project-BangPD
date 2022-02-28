@@ -57,7 +57,6 @@ module.exports = {
     const rest = new REST({ version: '9' }).setToken(botToken);
     const filteredCommands = commands.filter(command => command.default_permission === false);
 
-    // guildRoles
     const roles = await rest.get(
       Routes.guildRoles(guildId)
     );
@@ -81,7 +80,6 @@ module.exports = {
       });
     });
 
-    // guildApplicationCommandsPermissions
     try {
       await rest.put(
         Routes.guildApplicationCommandsPermissions(clientId, guildId),
