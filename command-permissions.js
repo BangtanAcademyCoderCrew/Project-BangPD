@@ -1,8 +1,10 @@
 /**
  * This file contains the code for setting permissions on non-public commands.
  * The SlashCommandBuilder doesn't have any methods that allow you to set specific permissions for commands.
- * For restricted commands, we set the default permissions to false and then on deploy of the commands, we run setCommandPermissions to
- * assign the appropriate permissons.
+ * For restricted commands, we set the default permissions to false and then on deploy of the commands,
+ * we run setCommandPermissions to assign the appropriate permissons. In some cases, permissions are checked
+ * at the time the command is run. This is due to the Discord API limiting the number of permission overwrites 
+ * through the API to 10. In our case, this means that only up to 10 roles can be alotted permissions per command.
  * 
  * Miscellaneous
  * - areActiveStudents: MANAGE_MESSAGES (checked in command)
