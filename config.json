@@ -1,5 +1,6 @@
 {
-    "prefix": "&",
+    "token": "",
+    "prefix": "+",
     "accentColor": "#FFFFF",
     "enabledCommands": ["word", "hanja", "examples", "papago", "help", "msg"],
     "devIds": ["104905437614223360"],
