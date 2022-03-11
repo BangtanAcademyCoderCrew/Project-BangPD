@@ -41,7 +41,7 @@ module.exports = {
       .setImage(image)
       .setTimestamp(message.editedTimestamp || message.createdTimestamp);
 
-    user.send(embed).then(msg => msg.react('❌'));
+    user.send({ embeds: [embed] }).then(msg => msg.react('❌'));
   },
 
   createBasicEmbed(name) {
@@ -131,11 +131,8 @@ module.exports = {
     const pageCount = pages.length;
     if (pageCount > 1) {
       pages.forEach((page, index) => {
-        page.setAuthor(`BangPD (Page ${index + 1} of ${pageCount})`, 'https://i.imgur.com/UwOpFvr.png');
-        this.setEmbedFooter(page, `${username} can browse pages. ${!isDM ? 'Anyone can bookmark this message.' : ''}`);
+        page.setAuthor(`BangPD`, 'https://i.imgur.com/UwOpFvr.png');
       });
-    } else if (pageCount === 1 && !isEmpty) {
-      this.setEmbedFooter(pages[0], 'Anyone can bookmark this message.');
     }
     return pages;
   },

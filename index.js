@@ -37,6 +37,58 @@ client.on('interactionCreate', async (interaction) => {
   }
 });
 
+client.on('interactionCreate', async interaction => {
+  console.log("received interaction");
+	if (!interaction.isCommand()) return;
+
+  console.log("interaction is a command");
+
+	if (!client.commands.has(interaction.commandName)) return;
+
+  console.log("command recognized");
+
+	try {
+		await client.commands.get(interaction.commandName).execute(interaction);
+	} catch (error) {
+		console.error(error);
+		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+	}
+});
+
+client.on('messageReactionAdd', async (reaction, user) => {
+	if (reaction.partial && !user.bot) {
+		try {
+			await reaction.fetch();
+		} catch (error) {
+			console.error('Something went wrong when fetching the message: ', error);
+			// Return as `reaction.message.author` may be undefined/null
+			return;
+		}
+	}
+
+	if (user.id === client.user.id || user.bot ){
+		return;
+	}
+	const validChannels = ["GUILD_TEXT", "GUILD_PUBLIC_THREAD", "GUILD_PRIVATE_THREAD"]
+	if (reaction.emoji.name === '🔖' && validChannels.includes(reaction.message.channel.type)) {
+		if (reaction.message.embeds[0] && reaction.message.author.id === client.user.id) {
+      const embed = reaction.message.embeds[0];
+      user.send({ embeds: [embed] }).then(msg => msg.react('❌'));
+      console.log(`${user.username} - result bookmark `);
+    } else {
+      console.log(`${user.username} - message bookmark `);
+      DiscordUtil.bookmark(reaction.message, user);
+    }
+	}
+  if (reaction.emoji.name === '❌' && !validChannels.includes(reaction.message.channel.type)){
+    if (user.id !== client.user.id && reaction.message.author.id == client.user.id) {
+      reaction.message.delete();
+    }
+  }
+});
+
+/*
+
 // CATCH RAW REACTION
 const rawEventTypes = {
   MESSAGE_REACTION_ADD: 'messageReactionAdd',
@@ -153,6 +205,7 @@ client.on('voiceStateUpdate', (oldVoiceState, newVoiceState) => {
   }
 });
 
+*/
 
 client.on('error', console.error);
 
