@@ -1,89 +1,40 @@
-const { REST } = require('@discordjs/rest');
-const { Routes } = require('discord-api-types/v9');
 const fs = require('fs');
-const { Client, Collection, Intents } = require('discord.js');
-
-const Discord = require('discord.js');
+const { Client, Collection, Emoji, Intents, MessageReaction } = require('discord.js');
 const DiscordUtil = require('./common/discordutil');
-const path = require('path');
-const got = require('got');
-const { DateTime } = require("luxon");
-const {
-	prefix, enabledCommands, status, devIds, llkId, devServerId, enableDictionaryReply, token
-  } = require('./config.json');
+const { botToken, commandDirectories } = require('./config.json');
 
 const client = new Client({
-	//defaultPrefix: prefix,
-	//owner: '708723153605754910',
   partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
-  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_PRESENCES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGE_REACTIONS]
+  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_PRESENCES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS],
 });
 
-
-
 client.commands = new Collection();
-const examplecommand = require(`./commands/sejong/examples.js`);
-const hanjacommand = require(`./commands/sejong/hanja.js`);
-const papagocommand = require(`./commands/sejong/papago.js`);
-const wordcommand = require(`./commands/sejong/word.js`);
-const helpcommand = require(`./commands/sejong/help.js`);
-client.commands.set(examplecommand.name, examplecommand);
-client.commands.set(hanjacommand.name, hanjacommand);
-client.commands.set(papagocommand.name, papagocommand);
-client.commands.set(wordcommand.name, wordcommand);
-client.commands.set(helpcommand.name, helpcommand);
-
-const commands = client.commands.map(({ execute, ...data }) => data); 
-console.log(commands);
-const rest = new REST({ version: '9' }).setToken(token);
-
-(async () => {
-	try {
-		console.log('Started refreshing application (/) commands');
-
-		await rest.put(
-			Routes.applicationGuildCommands('811088229746343998', '810579429608390716'),
-			{ body: commands },
-		);
-
-		console.log('Sucessfully reloaded application (/) commands.');
-	} catch (error) {
-		console.error(error);
-	}
-})();
-
-//const commandDirs = fs.readdirSync('./commands');
-
-/*
-const commandFiles = fs.readdirSync(`./commands/sejong`).filter(file => file.endsWith('.js'));
-for (const file of commandFiles) {
-  console.log(file);
-  const command = require(`./commands/sejong/${file}`);
-  // set a new item in the Collection
-  // with the key as the command name and the value as the exported module
-
-  client.commands.set(command.name, command);
-}
-
-/*
-for(const commandDir of commandDirs){
-  const commandFiles = fs.readdirSync(`./commands/${commandDir}`).filter(file => file.endsWith('.js'));
-  for (const file of commandFiles) {
-    console.log(file);
-    const command = require(`./commands/${commandDir}/${file}`);
-    // set a new item in the Collection
-    // with the key as the command name and the value as the exported module
-    console.log(command);
-    console.log(command.name);
-    client.commands.set(command.name, command);
-  }
-}
-*/
+commandDirectories.forEach(dir => {
+  const commandFiles = fs.readdirSync(dir).filter(file => file.endsWith('.js'));
+  commandFiles.forEach((file) => {
+    const command = require(`${dir}/${file}`);
+    client.commands.set(command.data.name, command);
+  });
+});
 
 client.once('ready', () => {
-	console.log(`Bang PD is online!`);
+  console.log('Bang PD is online!');
   client.user.setActivity('BE', { type: 'LISTENING' });
+});
 
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isCommand()) return;
+  const command = client.commands.get(interaction.commandName);
+
+  if (!command) return;
+
+  try {
+    await command.execute(interaction);
+  }
+  catch (error) {
+    console.error(error);
+    return interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+  }
 });
 
 client.on('interactionCreate', async interaction => {
@@ -154,49 +105,52 @@ client.on('raw', async (event) => {
 
   let reaction = message.reactions.cache;
   if (!reaction) {
-    const emoji = new Discord.Emoji(client.guilds.get(data.guild_id), data.emoji);
-    reaction = new Discord.MessageReaction(message, emoji, 1, data.user_id === client.user.id);
+    const emoji = new Emoji(client.guilds.get(data.guild_id), data.emoji);
+    reaction = new MessageReaction(message, emoji, 1, data.user_id === client.user.id);
   }
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {
   // When we receive a reaction we check if the reaction is partial or not
-	if (reaction.partial) {
-		// If the message this reaction belongs to was removed the fetching might result in an API error, which we need to handle
-		try {
-			await reaction.fetch();
-		} catch (error) {
-			console.error('Something went wrong when fetching the message: ', error);
-			// Return as `reaction.message.author` may be undefined/null
-			return;
-		}
-	}
+  if (reaction.partial) {
+    // If the message this reaction belongs to was removed the fetching might result in an API error, which we need to handle
+    try {
+      await reaction.fetch();
+    }
+    catch (error) {
+      console.error('Something went wrong when fetching the message: ', error);
+      // Return as `reaction.message.author` may be undefined/null
+      return;
+    }
+  }
 
   if (reaction.message.author.id === client.user.id && reaction.emoji.name === '❌' && reaction.message.channel.type !== 'text') {
     if (user.id !== client.user.id) {
-      reaction.message.delete();
+      await reaction.message.delete();
     }
   }
+
   if (reaction.emoji.name === '🔖' && reaction.message.channel.type === 'text') {
     if (user.id !== client.user.id) {
       if (reaction.message.embeds[0] && reaction.message.author.id === client.user.id) {
         const embed = reaction.message.embeds[0];
-        user.send({ embed }).then(msg => msg.react('❌'));
+        user.send({ embeds: [embed] }).then(msg => msg.react('❌'));
         console.log(`${user.username} - result bookmark `);
-      } else {
-        console.log(`${user.username} - message bookmark `);
-        DiscordUtil.bookmark(reaction.message, user);
       }
+    }
+    else {
+      console.log(`${user.username} - message bookmark `);
+      DiscordUtil.bookmark(reaction.message, user);
     }
   }
 });
 
-//log voice channel join/leave activities
+// log voice channel join/leave activities
 client.on('voiceStateUpdate', (oldVoiceState, newVoiceState) => {
-  const newVoiceChannel = newVoiceState.channelID;
-  const oldVoiceChannel = oldVoiceState.channelID;
+  const newVoiceChannel = newVoiceState.channelId;
+  const oldVoiceChannel = oldVoiceState.channelId;
 
-  //TODO: Update these channel IDs to the correct ones
+  // TODO: Update these channel IDs to the correct ones
   const voiceChannelId = '825428308749058119';
   const logChannelId = '807333762433548328';
 
@@ -206,55 +160,47 @@ client.on('voiceStateUpdate', (oldVoiceState, newVoiceState) => {
   const username = newVoiceState.member.user.tag;
 
   // User joins a voice channel
-  if(!oldVoiceChannel && newVoiceChannel === voiceChannelId)
-  { 
+  if (!oldVoiceChannel && newVoiceChannel === voiceChannelId) {
     const joinEmbed = DiscordUtil.createLoggingEmbed(
       `:arrow_right: <@${memberId}> - ${username} joined **${voiceChannel.name}**`,
       'GREEN'
     );
-      logChannel.send(joinEmbed);
-    
+    logChannel.send({ embeds: [joinEmbed] });
+
   }
   // User leaves a voice channel
-  else if(!newVoiceChannel && oldVoiceChannel === voiceChannelId) {
-
+  else if (!newVoiceChannel && oldVoiceChannel === voiceChannelId) {
     const leaveEmbed = DiscordUtil.createLoggingEmbed(
       `:arrow_left: <@${memberId}>  - ${username} left **${voiceChannel.name}**`,
       'RED'
     );
-      logChannel.send(leaveEmbed);
+    logChannel.send({ embeds: [leaveEmbed] });
   }
   // User switches to/from voice channel
-  else if (newVoiceChannel && oldVoiceChannel && (newVoiceChannel === voiceChannelId || oldVoiceChannel === voiceChannelId)){
-    //User starts/stops streaming
-    if(newVoiceState.streaming && !oldVoiceState.streaming){
-
+  else if (newVoiceChannel && oldVoiceChannel && (newVoiceChannel === voiceChannelId || oldVoiceChannel === voiceChannelId)) {
+    // User starts/stops streaming
+    if (newVoiceState.streaming && !oldVoiceState.streaming) {
       const startStreamingEmbed = DiscordUtil.createLoggingEmbed(
         `:desktop: <@${memberId}> - ${username} started streaming.`,
         'PURPLE'
       );
-
-      logChannel.send(startStreamingEmbed);
-
+      logChannel.send({ embeds: [startStreamingEmbed] });
     }
-    //stops streaming
-    else if(!newVoiceState.streaming && oldVoiceState.streaming){
-
+    // stops streaming
+    else if (!newVoiceState.streaming && oldVoiceState.streaming) {
       const stopStreamingEmbed = DiscordUtil.createLoggingEmbed(
         `:desktop: <@${memberId}> - ${username} stopped streaming.`,
         'PURPLE'
       );
-
-      logChannel.send(stopStreamingEmbed);
+      logChannel.send({ embeds: [stopStreamingEmbed] });
     }
-    //switched to tour voice channel
+    // switched to tour voice channel
     else {
       const switchEmbed = DiscordUtil.createLoggingEmbed(
         `:repeat: <@${memberId}> - ${username} switched from **${oldVoiceState.channel.name}** to **${newVoiceState.channel.name}**`,
         'YELLOW'
       );
-
-      logChannel.send(switchEmbed);
+      logChannel.send({ embeds: [switchEmbed] });
     }
   }
 });
@@ -263,4 +209,4 @@ client.on('voiceStateUpdate', (oldVoiceState, newVoiceState) => {
 
 client.on('error', console.error);
 
-client.login(token);
+client.login(botToken);

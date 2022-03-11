@@ -21,6 +21,7 @@
     "dotenv": "^8.2.0",
     "elementtree": "^0.1.7",
     "got": "^11.8.2",
+    "@discordjs/builders": "^0.8.2",
     "krdict-api": "0.0.4",
     "luxon": "^1.25.0",
     "promise": "^8.1.0",
@@ -33,5 +34,9 @@
     "@discordjs/rest": "0.1.0-canary.0",
     "eslint": "^8.2.0",
     "eslint-config-airbnb": "^19.0.0"
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-react": "^7.19.0"
   }
 }
