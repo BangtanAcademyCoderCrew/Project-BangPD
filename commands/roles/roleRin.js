@@ -10,7 +10,8 @@ module.exports = {
       .setRequired(true))
     .addRoleOption(option => option.setName('assigned_role')
       .setDescription('What role would you like to remove from users (assigned role)?')
-      .setRequired(true)),
+      .setRequired(true))
+    .setDefaultPermission(false),
   async execute(interaction) {
     const options = interaction.options;
     const baseRole = options.getRole('base_role');

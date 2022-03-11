@@ -16,7 +16,8 @@ module.exports = {
         .addStringOption(option =>
             option.setName('command_group')
                 .setDescription('The group this command is in')
-                .setRequired(true)),
+                .setRequired(true))
+        .setDefaultPermission(false),
     async execute(interaction) {
         const options = interaction.options;
         const commandName = options.getString('command_name');
@@ -42,9 +43,9 @@ module.exports = {
                 fs.unlinkSync(`${folderPath}/${commandName}.js`);
                 console.log('REMOVED FILE');
                 interaction.reply({ content: 'Old command file has been removed.' });
-            // file removed
+                // file removed
             }
-            catch(error) {
+            catch (error) {
                 console.error(error);
             }
         };

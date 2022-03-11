@@ -13,7 +13,8 @@ module.exports = {
       .setRequired(true))
     .addRoleOption(option => option.setName('role')
       .setDescription('What role would you like to add to user?')
-      .setRequired(true)),
+      .setRequired(true))
+    .setDefaultPermission(false),
   async execute(interaction) {
     const options = interaction.options;
     const messageIds = options.getString('message_ids');

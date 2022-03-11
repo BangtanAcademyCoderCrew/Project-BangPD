@@ -1,39 +1,40 @@
 const fs = require('fs');
 const { Client, Collection, Emoji, Intents, MessageReaction } = require('discord.js');
 const DiscordUtil = require('./common/discordutil');
-const { token } = require('./config.json');
+const { botToken, commandDirectories } = require('./config.json');
 
 const client = new Client({
-    partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
-    intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_PRESENCES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS ],
+  partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
+  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_PRESENCES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS],
 });
 
 client.commands = new Collection();
-const commandFilesMisc = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-
-for (const file of commandFilesMisc) {
-    const command = require(`./commands/${file}`);
+commandDirectories.forEach(dir => {
+  const commandFiles = fs.readdirSync(dir).filter(file => file.endsWith('.js'));
+  commandFiles.forEach((file) => {
+    const command = require(`${dir}/${file}`);
     client.commands.set(command.data.name, command);
-}
+  });
+});
 
 client.once('ready', () => {
-	console.log('Bang PD is online!');
-    client.user.setActivity('BE', { type: 'LISTENING' });
+  console.log('Bang PD is online!');
+  client.user.setActivity('BE', { type: 'LISTENING' });
 });
 
 client.on('interactionCreate', async (interaction) => {
-    if (!interaction.isCommand()) return;
-    const command = client.commands.get(interaction.commandName);
+  if (!interaction.isCommand()) return;
+  const command = client.commands.get(interaction.commandName);
 
-    if (!command) return;
+  if (!command) return;
 
-    try {
-        await command.execute(interaction);
-    }
-    catch (error) {
-        console.error(error);
-        return interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-    }
+  try {
+    await command.execute(interaction);
+  }
+  catch (error) {
+    console.error(error);
+    return interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+  }
 });
 
 // CATCH RAW REACTION
@@ -134,7 +135,7 @@ client.on('voiceStateUpdate', (oldVoiceState, newVoiceState) => {
       logChannel.send({ embeds: [startStreamingEmbed] });
     }
     // stops streaming
-    else if(!newVoiceState.streaming && oldVoiceState.streaming) {
+    else if (!newVoiceState.streaming && oldVoiceState.streaming) {
       const stopStreamingEmbed = DiscordUtil.createLoggingEmbed(
         `:desktop: <@${memberId}> - ${username} stopped streaming.`,
         'PURPLE'
@@ -155,4 +156,4 @@ client.on('voiceStateUpdate', (oldVoiceState, newVoiceState) => {
 
 client.on('error', console.error);
 
-client.login(token);
+client.login(botToken);

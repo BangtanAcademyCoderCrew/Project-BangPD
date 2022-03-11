@@ -1,14 +1,13 @@
 const DiscordUtil = require('../../common/discordutil.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
-// TODO: needs permissions 'MANAGE_CHANNELS', 'MANAGE_ROLES'
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('addrole')
-    .setDescription('Adds a role to user(s). Attach a csv or txt file with a list of all the usernames, one per line')
+    .setName('removerole')
+    .setDescription('Removes a role from user(s). Attach a csv or txt file with a list usernames, one per line')
     .addRoleOption(option =>
       option.setName('role')
-        .setDescription('The role you would like to add to user(s).')
+        .setDescription('The rol you would like to remove from user(s)')
         .setRequired(true))
     .addStringOption(option =>
       option.setName('file_url')
@@ -25,7 +24,7 @@ module.exports = {
     if (!attachment && fileUrl) {
       attachmentURL = fileUrl;
     }
-    if (attachment) {
+    else if (attachment) {
       attachmentURL = attachment.url;
     }
     else {
@@ -33,10 +32,10 @@ module.exports = {
     }
 
     const addMemberRole = (member) => {
-      member.roles.add([roleId]);
+      member.roles.remove([roleId]);
     };
 
     DiscordUtil.openFileAndDo(attachmentURL, addMemberRole, interaction);
-    interaction.reply({ content: 'Added roles to users in file' });
+    interaction.reply({ content: 'Removed roles to users in file' });
   },
 };
