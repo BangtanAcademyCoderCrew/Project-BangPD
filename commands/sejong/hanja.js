@@ -5,16 +5,19 @@ const { DMChannel, MessageButton } = require("discord.js");
 const paginationEmbed = require("discordjs-button-pagination");
 
 module.exports = {
-  name: "hanja",
-  description: "Search for Hanja in English, Korean, or Hanja itself.",
-  options: [
-    {
-      name: "word",
-      description: "What is the word?",
-      type: ApplicationCommandOptionType.String,
-      required: true,
-    },
-  ],
+  data: {
+    name: "hanja",
+    group: "dictionary",
+    description: "Search for Hanja in English, Korean, or Hanja itself.",
+    options: [
+      {
+        name: "word",
+        description: "What is the word?",
+        type: ApplicationCommandOptionType.String,
+        required: true,
+      },
+    ]
+  },
 
   async execute(interaction) {
     const args = interaction.options.getString("word");

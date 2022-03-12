@@ -9,7 +9,12 @@ commandDirectories.forEach(dir => {
   const commandFiles = fs.readdirSync(dir).filter(file => file.endsWith('.js'));
   commandFiles.forEach((file) => {
     const command = require(`${dir}/${file}`);
-    commands.push(command.data.toJSON());
+
+    if(command.data.group){
+      commands.push(command.data);
+    } else {
+      commands.push(command.data.toJSON());
+    }
   });
 });
 

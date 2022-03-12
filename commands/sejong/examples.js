@@ -4,16 +4,19 @@ const { ApplicationCommandOptionType } = require("discord-api-types/v9");
 const { DMChannel } = require("discord.js");
 
 module.exports = {
-  name: "examples",
-  description: "Search the dictionary for example sentences.",
-  options: [
-    {
-      name: "word",
-      type: ApplicationCommandOptionType.String,
-      description: "The word to look up examples for",
-      required: true,
-    },
-  ],
+  data: {
+    name: "examples",
+    group: "dictionary",
+    description: "Search the dictionary for example sentences.",
+    options: [
+      {
+        name: "word",
+        type: ApplicationCommandOptionType.String,
+        description: "The word to look up examples for",
+        required: true,
+      },
+    ],
+  },
 
   async execute(interaction) {
     const query = interaction.options.getString("word");

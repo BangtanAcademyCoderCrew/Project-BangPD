@@ -6,21 +6,23 @@ const { ApplicationCommandOptionType } = require("discord-api-types/v9");
 const { DMChannel, MessageButton } = require("discord.js");
 
 module.exports = {
-  name: "word",
-  //memberName: 'word',
-  description: "Search the dictionary for a Korean word.",
-  //details: 'Searches the dictionary for the Korean word provided and lists found results along with respective meanings. Results come from the National Institute of Korean Language\'s Korean-English Learners\' Dictionary.\r\n\r\nEnglish definitions are displayed by default.\r\n\r\nUse the Korean / English flag reactions to swap the language of the meanings, or use the book reaction to bookmark the message to DMs.',
-  //aliases: ['w'],
-  //group: 'dictionary',
-  //examples: [`${prefix}word 나무`],
-  options: [
-    {
-      name: "word",
-      description: "What is the word?",
-      type: ApplicationCommandOptionType.String,
-      required: true,
-    },
-  ],
+  data: {
+    name: "word",
+    group: "dictionary",
+    description: "Search the dictionary for a Korean word.",
+    //details: 'Searches the dictionary for the Korean word provided and lists found results along with respective meanings. Results come from the National Institute of Korean Language\'s Korean-English Learners\' Dictionary.\r\n\r\nEnglish definitions are displayed by default.\r\n\r\nUse the Korean / English flag reactions to swap the language of the meanings, or use the book reaction to bookmark the message to DMs.',
+    //aliases: ['w'],
+    //group: 'dictionary',
+    //examples: [`${prefix}word 나무`],
+    options: [
+      {
+        name: "word",
+        description: "What is the word?",
+        type: ApplicationCommandOptionType.String,
+        required: true,
+      },
+    ]
+  },
 
   //TODO: Figure out how to throttle
 

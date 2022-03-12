@@ -37,24 +37,6 @@ client.on('interactionCreate', async (interaction) => {
   }
 });
 
-client.on('interactionCreate', async interaction => {
-  console.log("received interaction");
-	if (!interaction.isCommand()) return;
-
-  console.log("interaction is a command");
-
-	if (!client.commands.has(interaction.commandName)) return;
-
-  console.log("command recognized");
-
-	try {
-		await client.commands.get(interaction.commandName).execute(interaction);
-	} catch (error) {
-		console.error(error);
-		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-	}
-});
-
 client.on('messageReactionAdd', async (reaction, user) => {
 	if (reaction.partial && !user.bot) {
 		try {

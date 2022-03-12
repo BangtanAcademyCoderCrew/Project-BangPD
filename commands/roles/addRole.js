@@ -25,7 +25,7 @@ module.exports = {
     if (!attachment && fileUrl) {
       attachmentURL = fileUrl;
     }
-    if (attachment) {
+    else if (attachment) {
       attachmentURL = attachment.url;
     }
     else {

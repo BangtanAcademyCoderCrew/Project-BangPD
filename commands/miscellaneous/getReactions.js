@@ -20,6 +20,8 @@ module.exports = {
     const messageId = options.getString('message_id');
     const channel = options.getChannel('channel');
 
+    await interaction.deferReply();
+
     channel.messages.fetch(messageId).then((msg) => {
       const users = {};
       msg.reactions.cache.map((reaction) => {
@@ -29,7 +31,7 @@ module.exports = {
             users[reaction.emoji].push('<@' + user.id + '>');
           });
           const attachment = new Discord.MessageAttachment(Buffer.from(`${users[reaction.emoji].join('\n')}`, 'utf-8'), 'emoji reactions.txt');
-          interaction.reply({ content: `Users that reacted with ${reaction.emoji}`, files: [attachment] });
+          interaction.followUp({ content: `Users that reacted with ${reaction.emoji}`, files: [attachment] });
         });
       });
     }).catch((error) => {
