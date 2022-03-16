@@ -3,8 +3,6 @@ const fs = require('fs');
 const path = require('path');
 const got = require('got');
 
-// TODO: this command may no longer be necessary
-// TODO: needs permissions 'MANAGE_CHANNELS', 'MANAGE_ROLES'
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('updatecommand')
@@ -24,6 +22,8 @@ module.exports = {
         const commandGroup = options.getString('command_group');
         const attachment = interaction.attachments.values().next().value;
 
+        await interaction.deferReply();
+
         if (!attachment) {
             return interaction.reply({ content: 'No valid file attached.' });
         }
@@ -35,7 +35,7 @@ module.exports = {
             console.log(commands);
             if (!commands.includes(`${name}.js`)) {
                 return interaction.reply({
-                    content: `There is no command with name or alias \`${name}\`, ${interaction.author}! A new command will be created.`,
+                    content: `There is no command with name or alias \`${name}\`, ${interaction.author}! A new command will be created.`
                 });
             }
 
@@ -43,7 +43,6 @@ module.exports = {
                 fs.unlinkSync(`${folderPath}/${commandName}.js`);
                 console.log('REMOVED FILE');
                 interaction.reply({ content: 'Old command file has been removed.' });
-                // file removed
             }
             catch (error) {
                 console.error(error);
@@ -73,7 +72,7 @@ module.exports = {
 
         setTimeout(() => {
             addCommand(attachment.url, commandName, folderPath);
-            return interaction.reply({ content: `Added command ${commandName}` });
+            return interaction.followUp({ content: `Added command ${commandName}` });
         }, 5000);
     },
 };

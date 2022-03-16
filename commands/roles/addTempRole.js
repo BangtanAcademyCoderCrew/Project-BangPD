@@ -21,6 +21,8 @@ module.exports = {
     const fileUrl = options.getString('file_url');
     const roleId = options.getRole('role_id');
 
+    await interaction.deferReply();
+
     // Validate deadline
     const deadline = options.getString('deadline');
     const deadlineDateTime = DateTime.fromSQL(deadline, {
@@ -28,14 +30,14 @@ module.exports = {
     });
 
     if (!deadlineDateTime.isValid) {
-      return await interaction.reply('Invalid deadline provided. Please enter deadline in correct format. YYYY-MM-DD HH:MM');
+      return await interaction.reply({ content:'Invalid deadline provided. Please enter deadline in correct format. YYYY-MM-DD HH:MM'});
     }
 
     const deadlineInUTC = deadlineDateTime.toUTC();
     const currentTimeUTC = DateTime.utc();
 
     if (currentTimeUTC > deadlineInUTC) {
-      return await interaction.reply('Deadline is in past. Invalid datetime provided');
+      return await interaction.reply({ content:'Invalid datetime provided. Deadline is in past.'});
     }
 
     // Handle attachment
@@ -48,7 +50,7 @@ module.exports = {
       attachmentURL = attachment.url;
     }
     else {
-      return interaction.reply("No valid file")
+      return interaction.reply({ content: "No valid file"})
     }
 
     // Define removeRole
@@ -61,7 +63,7 @@ module.exports = {
         setTimeout(
           () => {
             DiscordUtil.openFileAndDo(attachmentURL, (member) => { member.roles.remove([roleToRemoveId]); }, message);
-            interaction.channel.send(`The role ${roleToRemoveId} has been removed`);
+            interaction.reply({ content:`The role ${roleToRemoveId} has been removed`});
           },
           timeLeftBeforeRemovingRole,
           channel
@@ -85,6 +87,6 @@ module.exports = {
       reminderPromise
     );
 
-    return interaction.reply(fullMessage);
-  },
+    return interaction.reply({ content: fullMessage});
+  }
 }

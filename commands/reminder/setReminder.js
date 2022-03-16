@@ -1,7 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { DateTime } = require('luxon');
 
-// TODO: needs permission 'MANAGE_CHANNELS'
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('setreminder')
@@ -33,8 +32,10 @@ module.exports = {
     const message = options.getString('reminder_message');
     const cst = 'America/Chicago';
 
+    await interaction.deferReply();
+
     const deadlineDateTime = DateTime.fromSQL(deadline, {
-      zone: cst,
+      zone: cst
     });
     if (!deadlineDateTime.isValid) {
       interaction.reply({ content: 'Invalid deadline provided. Please enter deadline in correct format. YYYY-MM-DD HH:MM' });
@@ -44,7 +45,7 @@ module.exports = {
     const deadlineInUTC = deadlineDateTime.toUTC();
     const currentTimeUTC = DateTime.utc();
     if (currentTimeUTC > deadlineInUTC) {
-      interaction.reply({ content: 'Deadline is in past. Invalid datetime provided.' });
+      interaction.reply({ content: 'Invalid datetime provided. Deadline is in past. ' });
       return;
     }
 
@@ -88,7 +89,6 @@ module.exports = {
   sendReminder(timeBeforeDeadline, channel, message) {
     const currentTimeUTC = DateTime.utc();
     const delay = timeBeforeDeadline.toMillis() - currentTimeUTC.toMillis();
-    // TODO: Maybe can use Duration
     if (delay > 0) {
       setTimeout(
         () => {
@@ -99,5 +99,5 @@ module.exports = {
         message
       );
     }
-  },
+  }
 };

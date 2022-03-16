@@ -1,15 +1,14 @@
 {
     "extends": "eslint:recommended",
     "env": {
-        "node": true,
-        "es7": true
+        "node": true
     },
     "parserOptions": {
         "ecmaVersion": 2019
     },
     "rules": {
-        "brace-style": ["error", "stroustrup", { "allowSingleLine": true }],
-        "comma-dangle": ["error", "always-multiline"],
+        "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
+        "comma-dangle": ["error", "never"],
         "comma-spacing": "error",
         "comma-style": "error",
         "curly": ["error", "multi-line", "consistent"],

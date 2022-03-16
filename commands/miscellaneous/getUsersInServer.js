@@ -4,7 +4,6 @@ const { BATId, BALId, BAGId } = require('../../config.json');
 
 const ALL_GUILD_IDS = [BATId, BALId, BAGId];
 
-// TODO: needs permission 'MANAGE_ROLES'
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('getusersinserver')
@@ -21,6 +20,8 @@ module.exports = {
     const options = interaction.options;
     const messageIds = options.getString('message_ids');
     const channel = options.getChannel('channel');
+
+    await interaction.deferReply();
 
     const allUserIdsPerGuild = {};
     ALL_GUILD_IDS.map((guildId) => {
@@ -41,7 +42,7 @@ module.exports = {
         BAT: 'only BAT',
         BALandBAG: 'BAL and BAG',
         BALandBAT: 'BAL and BAT',
-        BATandBAG: 'BAT and BAG',
+        BATandBAG: 'BAT and BAG'
       };
 
       const usersPerGroup = {};
@@ -62,15 +63,15 @@ module.exports = {
 
         Object.entries(usersPerGuildGrouped).map(([key, value]) => {
           const attachment = new Discord.MessageAttachment(Buffer.from(`<@${value.join('>\n<@')}>`, 'utf-8'), 'usersID.txt');
-          interaction.reply({ content: `Users in  ${key}`, files: [attachment] });
+          interaction.followUp({ content: `Users in  ${key}`, files: [attachment] });
         });
       }).catch((error) => {
         console.log(error);
-        interaction.reply({ content: `There was an error checking ${messageId} in channel <#${channel.id}>` });
+        interaction.followUp({ content: `There was an error checking ${messageId} in channel <#${channel.id}> <:shookysad:949689086665437184>` });
       });
     };
 
     const allMessageIds = messageIds.split(' ');
     allMessageIds.map(messageId => checkUsersOnServer(messageId));
-  },
+  }
 };

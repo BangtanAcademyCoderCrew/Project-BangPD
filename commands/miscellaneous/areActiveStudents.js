@@ -1,4 +1,4 @@
-const { MessageAttachment, Permissions } = require('discord.js');
+const { MessageAttachment } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
@@ -19,21 +19,18 @@ module.exports = {
         .setRequired(true))
     .setDefaultPermission(false),
   async execute(interaction) {
-    // Check user permissions
-    if (!interaction.member.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)) {
-      return interaction.reply('Insufficient permissions to use this command.')
-    }
-
     const options = interaction.options;
     const messageIds = options.getString('message_ids');
     const roleId = options.getRole('role').id;
     const channel = options.getChannel('channel');
 
+    await interaction.deferReply();
+
     const hasActiveStudentRole = (ids, roleID) => {
       const activeStudents = Array.from(interaction.guild.roles.cache.get(roleID).members.keys());
       const areActiveStudents = ids.filter(id => activeStudents.includes(id));
       return areActiveStudents;
-    }
+    };
 
     const checkIDs = (messageID) => {
       channel.messages.fetch(messageID).then(msg => {
@@ -41,17 +38,17 @@ module.exports = {
         const ids = content.filter(e => e.length >= 16);
         const activeStudents = hasActiveStudentRole(ids, roleId);
         const notActiveStudents = ids.filter(id => !activeStudents.includes(id));
-        const attachmentActive = new MessageAttachment(Buffer.from(`<@${activeStudents.join(">\n<@")}>`, 'utf-8'), 'activeStudents.txt');
-        const attachmentNotActive = new MessageAttachment(Buffer.from(`<@${notActiveStudents.join(">\n<@")}>`, 'utf-8'), 'activeStudents.txt');
-        interaction.channel.send({ content: `Users in message ${messageID} who are active`, files: [attachmentActive] });
-        interaction.channel.send({ content: `Users in message ${messageID} who are not active`, files: [attachmentNotActive] });
+        const attachmentActive = new MessageAttachment(Buffer.from(`<@${activeStudents.join('>\n<@')}>`, 'utf-8'), 'activeStudents.txt');
+        const attachmentNotActive = new MessageAttachment(Buffer.from(`<@${notActiveStudents.join('>\n<@')}>`, 'utf-8'), 'notActiveStudents.txt');
+        interaction.reply({ content: `Users in message ${messageID} who are active`, files: [attachmentActive] });
+        interaction.followUp({ content: `Users in message ${messageID} who are not active`, files: [attachmentNotActive] });
       }).catch((error) => {
         console.error(error);
-        interaction.channel.send(`Message with ID ${messageID} wasn't found in channel <#${channel.id}>`)
+        interaction.reply({ content: `Message with ID ${messageID} wasn't found in channel <#${channel.id}> <:shookysad:949689086665437184>` });
       });
-    }
+    };
 
-    const allMessageIDs = messageIds.split(" ");
-    allMessageIDs.forEach(message => checkIDs(message))
+    const allMessageIDs = messageIds.split(' ');
+    allMessageIDs.forEach(message => checkIDs(message));
   }
-}
+};

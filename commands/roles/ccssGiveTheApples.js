@@ -31,24 +31,22 @@ module.exports = {
 
     await interaction.deferReply();
 
-    console.log('channel id', channelId);
-
     const guild = interaction.client.guilds.cache.get(serverId);
     if (serverId && !guild) {
-      return interaction.followUp(`I can't find server with ID ${serverId} :pensive:`);
+      return interaction.reply({ content:`I can't find server with ID ${serverId} :pensive:` });
     }
 
     const guildChannel = guild.channels.cache.get(channelId);
     if (!guildChannel) {
-      return interaction.followUp(`I can't find channel with ID ${channelId} in server ${guild.name} :pensive:`);
+      return interaction.reply({ content:`I can't find channel with ID ${channelId} in server ${guild.name} :pensive:` });
     }
 
     const assignRoles = (messageId, firstRole, secondRole) => {
       guildChannel.messages.fetch(messageId).then(msg => {
         if (msg.reactions.cache.get('👍') && msg.reactions.cache.get('👍').me) {
-          return interaction.followUp("You already checked this message before!");
+          return interaction.followUp('You already checked this message before!');
         }
-        const content = msg.content.replace(/\D/g, " ").split(" ");
+        const content = msg.content.replace(/\D/g, ' ').split(' ');
         const ids = content.filter(e => e.length >= 16);
         const members = interaction.guild.members.cache.filter(member => ids.includes(member.id));
         const bothRoles = [firstRole, secondRole];
@@ -79,18 +77,18 @@ module.exports = {
           }
         });
 
-        // Creates attachments and sents txt files with userIds
+        // Creates attachments and sends txt files with userIds
         const attachmentFirstRole = new MessageAttachment(Buffer.from(usersWithFirstRole, 'utf-8'), 'usersID-firstRole.txt');
         const attachmentSecondRole = new MessageAttachment(Buffer.from(usersWithSecondRole, 'utf-8'), 'usersID-secondRole.txt');
         interaction.followUp({ content: `Users in message ${messageId} added role ${firstRole} and ${secondRole}`, files: [attachmentFirstRole, attachmentSecondRole] });
-        msg.react("👍");
+        msg.react('👍');
       }).catch((error) => {
         console.error(error);
-        interaction.followUp(`Message with ID ${messageId} wasn't found in channel <#${channelId}>`);
+        interaction.followUp(`Message with ID ${messageId} wasn't found in channel <#${channelId}> <:shookysad:949689086665437184>`);
       });
     };
 
     const allMessageIDs = messageIds.split(' ');
     allMessageIDs.forEach(messageId => assignRoles(messageId, firstRoleToAssignId, secondRoleToAssignId));
   }
-}
+};

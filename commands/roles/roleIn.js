@@ -18,12 +18,14 @@ module.exports = {
     const assignedRole = options.getRole('assigned_role');
     const members = interaction.guild.members.cache.filter(member => member.roles.cache.has(baseRole.id));
 
+    await interaction.deferReply();
+
     try {
       members.forEach(member => {
-        member.roles.add([assignedRole.id])
+        member.roles.add([assignedRole.id]);
       });
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
 
     // members is a collection, needs to be converted to Array
@@ -32,4 +34,4 @@ module.exports = {
     const attachment = new MessageAttachment(Buffer.from(usersWithRoles, 'utf-8'), 'usersID.txt');
     return interaction.reply({ content: `Users with role ${baseRole} added role ${assignedRole}`, files: [attachment] });
   }
-}
+};

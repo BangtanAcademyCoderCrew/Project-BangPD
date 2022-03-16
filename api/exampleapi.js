@@ -1,6 +1,7 @@
 const querystring = require('querystring');
 const got = require('got');
 const et = require('elementtree');
+const Promise = require('promise');
 const { krDictUrl, krDictToken } = require('../apiconfig.json');
 
 module.exports = class ExampleSentenceAPI {
@@ -11,7 +12,7 @@ module.exports = class ExampleSentenceAPI {
       part: 'exam',
       method: 'exact',
       multimedia: 0,
-      sort: 'dict',
+      sort: 'dict'
     };
   }
 
@@ -23,11 +24,11 @@ module.exports = class ExampleSentenceAPI {
       url,
       headers: {
         'content-type': 'application/xml',
-        Accept: 'application/xml',
+        Accept: 'application/xml'
       },
       https: {
         rejectUnauthorized: false
-      },
+      }
     };
 
 
@@ -35,10 +36,10 @@ module.exports = class ExampleSentenceAPI {
       try {
         const response = await got(options);
         resolve(response.body);
-        //=> '<!doctype html> ...'
+        // => '<!doctype html> ...'
       } catch (error) {
         console.log(error);
-        //=> 'Internal server error ...'
+        // => 'Internal server error ...'
       }
     })());
     return promise;

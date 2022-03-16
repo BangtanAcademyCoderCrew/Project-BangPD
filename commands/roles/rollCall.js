@@ -17,6 +17,8 @@ module.exports = {
     const rollcallRole = options.getRole('rollcall_role_id');
     const members = interaction.guild.members.cache;
 
+    await interaction.deferReply();
+
     let rollcalled = 0;
     let activeMembers = 0;
 
@@ -38,6 +40,6 @@ module.exports = {
         rollcalled++;
       }
     }
-    return interaction.reply(`Rollcall done. ${rollcalled} are in roll call. ${activeMembers} active members.`);
+    return interaction.reply({ content: `Rollcall done. ${rollcalled} are in roll call. ${activeMembers} active members.` });
   }
-}
+};

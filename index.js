@@ -1,11 +1,16 @@
 const fs = require('fs');
-const { Client, Collection, Emoji, Intents, MessageReaction } = require('discord.js');
+const { Client, Collection, Intents } = require('discord.js');
 const DiscordUtil = require('./common/discordutil');
 const { botToken, commandDirectories } = require('./config.json');
 
 const client = new Client({
   partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
-  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_PRESENCES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS],
+  intents: [
+      Intents.FLAGS.GUILDS,
+      Intents.FLAGS.GUILD_PRESENCES,
+      Intents.FLAGS.GUILD_MEMBERS,
+      Intents.FLAGS.GUILD_MESSAGES,
+      Intents.FLAGS.GUILD_MESSAGE_REACTIONS]
 });
 
 client.commands = new Collection();
@@ -30,43 +35,42 @@ client.on('interactionCreate', async (interaction) => {
 
   try {
     await command.execute(interaction);
-  }
-  catch (error) {
+  } catch (error) {
     console.error(error);
     return interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
   }
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {
-	if (reaction.partial && !user.bot) {
-		try {
-			await reaction.fetch();
-		} catch (error) {
-			console.error('Something went wrong when fetching the message: ', error);
-			// Return as `reaction.message.author` may be undefined/null
-			return;
-		}
-	}
-
-	if (user.id === client.user.id || user.bot ){
-		return;
-	}
-	const validChannels = ["GUILD_TEXT", "GUILD_PUBLIC_THREAD", "GUILD_PRIVATE_THREAD"]
-	if (reaction.emoji.name === '🔖' && validChannels.includes(reaction.message.channel.type)) {
-		if (reaction.message.embeds[0] && reaction.message.author.id === client.user.id) {
-      const embed = reaction.message.embeds[0];
-      user.send({ embeds: [embed] }).then(msg => msg.react('❌'));
-      console.log(`${user.username} - result bookmark `);
-    } else {
-      console.log(`${user.username} - message bookmark `);
-      DiscordUtil.bookmark(reaction.message, user);
-    }
-	}
-  if (reaction.emoji.name === '❌' && !validChannels.includes(reaction.message.channel.type)){
-    if (user.id !== client.user.id && reaction.message.author.id == client.user.id) {
-      reaction.message.delete();
+  if (reaction.partial && !user.bot) {
+    try {
+      await reaction.fetch();
+    } catch (error) {
+      console.error('Something went wrong when fetching the message: ', error);
+      // Return as `reaction.message.author` may be undefined/null
+       return;
     }
   }
+
+  if (user.id === client.user.id || user.bot) {
+    return;
+  }
+    const validChannels = ['GUILD_TEXT', 'GUILD_PUBLIC_THREAD', 'GUILD_PRIVATE_THREAD'];
+    if (reaction.emoji.name === '🔖' && validChannels.includes(reaction.message.channel.type)) {
+      if (reaction.message.embeds[0] && reaction.message.author.id === client.user.id) {
+        const embed = reaction.message.embeds[0];
+        user.send({ embeds: [embed] }).then(msg => msg.react('❌'));
+        console.log(`${user.username} - result bookmark `);
+      } else {
+        console.log(`${user.username} - message bookmark `);
+          DiscordUtil.bookmark(reaction.message, user);
+      }
+    }
+    if (reaction.emoji.name === '❌' && !validChannels.includes(reaction.message.channel.type)) {
+      if (user.id !== client.user.id && reaction.message.author.id == client.user.id) {
+        reaction.message.delete();
+      }
+    }
 });
 
 /*

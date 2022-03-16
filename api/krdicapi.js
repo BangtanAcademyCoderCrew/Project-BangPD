@@ -1,5 +1,6 @@
 const got = require('got');
 const cheerio = require('cheerio');
+const Promise = require('promise');
 
 module.exports = class KrDicApi {
   parseResult(html, maxSenses) {
@@ -21,7 +22,7 @@ module.exports = class KrDicApi {
       const h = title.text().match(/\(.*\)/);
       const p = title.text().match(/\[(.*?)\]/);
 
-      let s = $(entry).find('.star').children().length; 
+      const s = $(entry).find('.star').children().length;
 
       dicEntry.stars = s;
 
@@ -33,14 +34,14 @@ module.exports = class KrDicApi {
 
       let pronunciation;
       if (p && p[1]) {
-        pronunciation = p[1].replace("듣기", "").trim();
+        pronunciation = p[1].replace('듣기', '').trim();
       }
 
       dicEntry.pronunciation = pronunciation;
 
-      let wordTypes = $(title).find('.word_att_type1').text()
-        .replace('「',"")
-        .replace('」',"")
+      const wordTypes = $(title).find('.word_att_type1').text()
+        .replace('「', '')
+        .replace('」', '')
         .replace(/\s+/g, ' ')
         .trim()
         .split(' ');
@@ -48,14 +49,14 @@ module.exports = class KrDicApi {
       dicEntry.wordType = wordTypes[0];
       dicEntry.wordTypeTranslated = wordTypes[1];
 
-      const senses = $(this.entries).eq(i).find('dd')
+      const senses = $(this.entries).eq(i).find('dd');
       const entrySenses = [];
       let j;
       for(j = 0; j < senses.length; j += 3) {
         const sense = {};
         sense.meaning = senses.eq(j).text().trim().replace(/\d+/g, '').replace(/\s+/g, ' ').replace('. ', '').trim();
         sense.definition = senses.eq(j + 1).text().replace(/\s+/g, ' ').trim();
-        sense.translation = senses.eq(j + 2).text().replace(/\s+/g, ' ').trim();  
+        sense.translation = senses.eq(j + 2).text().replace(/\s+/g, ' ').trim();
         entrySenses.push(sense);
       }
       dicEntry.senses = entrySenses;
@@ -78,10 +79,10 @@ module.exports = class KrDicApi {
 
         const response = await got(this.url, options);
         resolve(this.parseResult(response.body));
-        //=> '<!doctype html> ...'
+        // => '<!doctype html> ...'
       } catch (error) {
         console.log(error);
-        //=> 'Internal server error ...'
+        // => 'Internal server error ...'
       }
     })());
     return promise;

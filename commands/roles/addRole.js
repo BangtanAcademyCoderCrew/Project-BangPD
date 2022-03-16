@@ -1,7 +1,6 @@
 const DiscordUtil = require('../../common/discordutil.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
-// TODO: needs permissions 'MANAGE_CHANNELS', 'MANAGE_ROLES'
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('addrole')
@@ -20,6 +19,8 @@ module.exports = {
     const roleId = options.getRole('role').id;
     const fileUrl = options.getString('file_url');
     const attachment = interaction.attachments?.values()?.next()?.value;
+
+    await interaction.deferReply();
 
     let attachmentURL;
     if (!attachment && fileUrl) {

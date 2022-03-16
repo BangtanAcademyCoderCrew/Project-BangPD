@@ -1,7 +1,6 @@
 const Discord = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
-// TODO: needs permissions 'MANAGE_CHANNELS', 'MANAGE_ROLES'
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('getreactions')
@@ -36,7 +35,7 @@ module.exports = {
       });
     }).catch((error) => {
       console.log(error);
-      interaction.reply({ content: `Message with ID ${messageId} wasn't found in channel <#${channel.id}>` });
+      interaction.reply({ content: `Message with ID ${messageId} wasn't found in channel <#${channel.id}> <:shookysad:949689086665437184>` });
     });
-  },
+  }
 };

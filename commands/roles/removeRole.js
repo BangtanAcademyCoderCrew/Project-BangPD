@@ -20,6 +20,8 @@ module.exports = {
     const fileUrl = options.getString('file_url');
     const attachment = interaction.attachments?.values()?.next()?.value;
 
+    await interaction.deferReply();
+
     let attachmentURL;
     if (!attachment && fileUrl) {
       attachmentURL = fileUrl;

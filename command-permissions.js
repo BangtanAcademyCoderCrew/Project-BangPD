@@ -2,15 +2,15 @@
  * This file contains the code for setting permissions on non-public commands.
  * The SlashCommandBuilder doesn't have any methods that allow you to set specific permissions for commands.
  * For restricted commands, we set the default permissions to false and then on deploy of the commands,
- * we run setCommandPermissions to assign the appropriate permissons. In some cases, permissions are checked
- * at the time the command is run. This is due to the Discord API limiting the number of permission overwrites 
- * through the API to 10. In our case, this means that only up to 10 roles can be alotted permissions per command.
- * 
+ * we run setCommandPermissions to assign the appropriate permissions. In some cases, permissions are checked
+ * at the time the command is run. This is due to the Discord API limiting the number of permission overwrites
+ * through the API to 10. In our case, this means that only up to 10 roles can be allotted permissions per command.
+ *
  * Miscellaneous
  * - areActiveStudents: MANAGE_MESSAGES (checked in command)
  * - getReactions: MANAGE_CHANNELS, MANAGE_ROLES
  * - updateCommand: MANAGE_CHANNELS, MANAGE_ROLES
- * 
+ *
  * Role
  * - addRole: MANAGE_CHANNELS, MANAGE_ROLES
  * - addTempRole: MANAGE_CHANNELS, MANAGE_ROLES
@@ -20,36 +20,55 @@
  * - roleIn: MANAGE_ROLES
  * - roleRin: MANAGE_ROLES
  * - rolesToUserMentioned: MANAGE_ROLES
- * - rollcall: MANAGE_CHANNELS, MANAGE_ROLES
+ * - rollCall: MANAGE_CHANNELS, MANAGE_ROLES
  */
 
 const { Permissions } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const { clientId, guildId, botToken } = require('./config.json');
+const { ApplicationCommandPermissionTypes } = require('discord.js/typings/enums');
 
 const commandsWithPermissions = [
   // can MANAGE_ROLES and MANAGE_CHANNELS
   {
     permissions: [Permissions.FLAGS.MANAGE_CHANNELS, Permissions.FLAGS.MANAGE_ROLES],
     roleNames: [
-      'getreactions',
-      'updatecommand',
       'addrole',
+      'getreactions',
       'temp-role',
       'removerole',
-      'rollcall'
+      'rollcall',
+      'updatecommand'
     ]
   },
   // can MANAGE_ROLES
   {
     permissions: [Permissions.FLAGS.MANAGE_ROLES],
     roleNames: [
-      'givetheapples',
+      'addpermissions',
+      'addrolestouserinmessage',
       'ccssgivetheapples',
+      'getusersinserver',
+      'givetheapples',
+      'removepermissions',
+      'removerolestouserinmessage',
       'role_in',
-      'role_rin',
-      'addrolestouserinmessage'
+      'role_rin'
+    ]
+  },
+  // can MANAGE_CHANNELS
+  {
+    permissions: [Permissions.FLAGS.MANAGE_CHANNELS],
+    roleNames: [
+      'setreminder'
+    ]
+  },
+  // can MANAGE_MESSAGES
+  {
+    permissions: [Permissions.FLAGS.MANAGE_MESSAGES],
+    roleNames: [
+      'areactivestudents'
     ]
   }
 ];
@@ -63,19 +82,19 @@ module.exports = {
       Routes.guildRoles(guildId)
     );
 
-    // Build permissions body 
+    // Build permissions body
     const permissionsBody = [];
     commandsWithPermissions.forEach(obj => {
       const rolesWithPermissions = roles.filter(role => {
-        const permission = new Permissions(role.permissions)
+        const permission = new Permissions(role.permissions);
         return permission.has(obj.permissions);
       }).map(role => {
         return {
           id: role.id,
-          type: 1, // ROLE
+          type: ApplicationCommandPermissionTypes.ROLE,
           permission: true
-        }
-      })
+        };
+      });
       obj.roleNames.map(name => {
         const comm = filteredCommands.find(command => command.name === name);
         permissionsBody.push({ id: comm.id, permissions: rolesWithPermissions });
@@ -85,10 +104,10 @@ module.exports = {
     try {
       await rest.put(
         Routes.guildApplicationCommandsPermissions(clientId, guildId),
-        { body: permissionsBody },
+        { body: permissionsBody }
       );
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
   }
-}
+};

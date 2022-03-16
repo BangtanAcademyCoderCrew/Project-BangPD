@@ -25,7 +25,7 @@ module.exports = {
 
     const checkIDs = (messageId, role) => {
       channel.messages.fetch(messageId).then(msg => {
-        const content = msg.content.replace(/\D/g, " ").split(" ");
+        const content = msg.content.replace(/\D/g, ' ').split(' ');
         const ids = content.filter(e => e.length >= 16);
         const members = interaction.guild.members.cache.filter(member => ids.includes(member.id));
         let membersWithRole = '';
@@ -37,11 +37,11 @@ module.exports = {
         interaction.followUp({ content: `Users in message ${messageId} added role ${role}`, files: [attachment] });
       }).catch((error) => {
         console.error(error);
-        interaction.followUp(`Message with ID ${messageId} wasn't found in channel <#${channel.id}>`);
+        interaction.followUp({ content: `Message with ID ${messageId} wasn't found in channel <#${channel.id}> <:shookysad:949689086665437184>` });
       });
     };
 
     const allMessageIDs = messageIds.split(' ');
     return allMessageIDs.forEach(message => checkIDs(message, roleToAssign));
   }
-}
+};

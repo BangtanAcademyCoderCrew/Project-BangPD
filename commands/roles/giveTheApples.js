@@ -30,14 +30,12 @@ module.exports = {
     const assignRoles = (messageId, firstRole, secondRole) => {
       channel.messages.fetch(messageId).then(msg => {
         if (msg.reactions.cache.get('👍') && msg.reactions.cache.get('👍').me) {
-          return interaction.channel.send("You already checked this message before!");
+          return interaction.reply({ content: 'You already checked this message before!' });
         }
-        const content = msg.content.replace(/\D/g, " ").split(" ");
+        const content = msg.content.replace(/\D/g, ' ').split(' ');
         const ids = content.filter(e => e.length >= 16);
         const members = interaction.guild.members.cache.filter(member => ids.includes(member.id));
         const bothRoles = [firstRole.id, secondRole.id];
-        console.log(ids);
-        console.log(ids.length);
         let usersWithFirstRole = '';
         let usersWithSecondRole = '';
 
@@ -49,7 +47,6 @@ module.exports = {
 
         // Adds roles based on userFrequency counts
         members.forEach((member) => {
-          console.log(member.id);
           if (userFrequency[member.id] >= 2 && usersWithFirstRole.indexOf(member.id) == -1) {
             member.roles.add(bothRoles);
             usersWithFirstRole += `<@${member.id}>\n`;
@@ -63,18 +60,18 @@ module.exports = {
           }
         });
 
-        // Creates attachments and sents txt files with userIds
+        // Creates attachments and sends txt files with userIds
         const attachmentFirstRole = new MessageAttachment(Buffer.from(usersWithFirstRole, 'utf-8'), 'usersID-firstRole.txt');
         const attachmentSecondRole = new MessageAttachment(Buffer.from(usersWithSecondRole, 'utf-8'), 'usersID-secondRole.txt');
         interaction.followUp({ content: `Users in message ${messageId} added role ${firstRole} and ${secondRole}`, files: [attachmentFirstRole, attachmentSecondRole] });
-        msg.react("👍");
+        msg.react('👍');
       }).catch((error) => {
         console.error(error);
-        interaction.followUp(`Message with ID ${messageId} wasn't found in channel <#${channel.id}>`);
+        interaction.followUp({ content: `Message with ID ${messageId} wasn't found in channel <#${channel.id}> <:shookysad:949689086665437184>` });
       });
     };
 
     const allMessageIDs = messageIds.split(' ');
     allMessageIDs.forEach(messageId => assignRoles(messageId, firstRoleToAssign, secondRoleToAssign));
   }
-}
+};
