@@ -64,7 +64,7 @@ module.exports = {
         // Adds roles based on userFrequency counts
         members.forEach((member) => {
           console.log(member.id);
-          if (userFrequency[member.id] >= 2 && usersWithFirstRole.indexOf(member.id) == -1) {
+          if (userFrequency[member.id] >= 2 && usersWithFirstRole.indexOf(member.id) === -1) {
             member.roles.add(bothRoles);
             usersWithFirstRole += `<@${member.id}>\n`;
             usersWithSecondRole += `<@${member.id}>\n`;

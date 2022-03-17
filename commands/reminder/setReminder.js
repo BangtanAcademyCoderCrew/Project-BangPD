@@ -45,7 +45,7 @@ module.exports = {
     const deadlineInUTC = deadlineDateTime.toUTC();
     const currentTimeUTC = DateTime.utc();
     if (currentTimeUTC > deadlineInUTC) {
-      interaction.reply({ content: 'Invalid datetime provided. Deadline is in past. ' });
+      interaction.reply({ content: 'Invalid deadline provided. Deadline is in past.' });
       return;
     }
 

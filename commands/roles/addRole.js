@@ -16,7 +16,7 @@ module.exports = {
     .setDefaultPermission(false),
   async execute(interaction) {
     const options = interaction.options;
-    const roleId = options.getRole('role').id;
+    const role = options.getRole('role');
     const fileUrl = options.getString('file_url');
     const attachment = interaction.attachments?.values()?.next()?.value;
 
@@ -34,10 +34,10 @@ module.exports = {
     }
 
     const addMemberRole = (member) => {
-      member.roles.add([roleId]);
+      member.roles.add([role.id]);
     };
 
     DiscordUtil.openFileAndDo(attachmentURL, addMemberRole, interaction);
-    interaction.reply({ content: 'Added roles to users in file' });
+    interaction.reply({ content: `The role ${role} has been added` });
   },
 };

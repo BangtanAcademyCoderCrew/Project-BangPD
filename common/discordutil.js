@@ -28,8 +28,7 @@ module.exports = {
       const splittedText = this.splitText(message.content);
       this.createBookMarkMessage(message, splittedText[0], image, user);
       this.createBookMarkMessage(message, splittedText[1], image, user);
-    }
-    else {
+    } else {
       this.createBookMarkMessage(message, message.content, image, user);
     }
   },
@@ -130,8 +129,8 @@ module.exports = {
     }
     const pageCount = pages.length;
     if (pageCount > 1) {
-      pages.forEach((page, index) => {
-        page.setAuthor(`BangPD`, 'https://i.imgur.com/UwOpFvr.png');
+      pages.forEach((page) => {
+        page.setAuthor('BangPD', 'https://i.imgur.com/UwOpFvr.png');
       });
     }
     return pages;
@@ -178,7 +177,7 @@ module.exports = {
         name,
         aliases,
         description,
-        examples,
+        examples
       } = c;
 
       const descriptionAndExamples = description + (examples ? `\r\n __(Ex. ${examples})__` : '');
@@ -202,9 +201,9 @@ module.exports = {
     const currentTimeCST = currentTimeUTC.setZone(cst);
 
     const embed = new Discord.MessageEmbed()
-    .setColor(color)
-    .setFooter(`${currentTimeCST.toLocaleString(DateTime.DATETIME_FULL)}`)
-    .setDescription(message);
+      .setColor(color)
+      .setFooter(`${currentTimeCST.toLocaleString(DateTime.DATETIME_FULL)}`)
+      .setDescription(message);
 
     return embed;
   },
@@ -213,7 +212,7 @@ module.exports = {
     const members = interaction.guild.members.cache;
     const user = interaction.client.users.cache.find(u => u.tag === username);
     if (!user) {
-        return false;
+      return false;
     }
     const userId = user.id;
     return members.get(userId);
@@ -223,10 +222,9 @@ module.exports = {
     for (let i = 0; i <= Math.ceil(usernames.length / 50); i++) {
       const list = usernames.slice(i * 50, i * 50 + 50).join('\n');
       if (i < 1) {
-          messageChannel.send(list);
-      }
-      else if (list.length > 0) {
-          messageChannel.send('cont.\n' + list);
+        messageChannel.send(list);
+      } else if (list.length > 0) {
+        messageChannel.send('cont.\n' + list);
       }
     }
     messageChannel.send('Done with changes');
@@ -235,24 +233,24 @@ module.exports = {
   openFileAndDo(url, callback, interaction) {
     (async () => {
       const usersChanged = [];
-        try {
-            const response = await got(url);
-            const csv = response.body;
-            const usernames = csv.split('\r\n');
+      try {
+        const response = await got(url);
+        const csv = response.body;
+        const usernames = csv.split('\r\n');
 
-            usernames.forEach(username => {
-                const member = module.exports.getMemberByUsername(interaction, username);
-                if (!member) {
-                  return interaction.reply({ content: `User ${username} not found` });
-                }
-              callback(member);
-                usersChanged.push(username);
-            });
-        } catch (error) {
-            console.log(error);
-        }
+        usernames.forEach(username => {
+          const member = module.exports.getMemberByUsername(interaction, username);
+          if (!member) {
+            return interaction.reply({ content: `User ${username} not found` });
+          }
+          callback(member);
+          usersChanged.push(username);
+        });
+      } catch (error) {
+        console.log(error);
+      }
       const attachment = new Discord.MessageAttachment(Buffer.from(`${usersChanged.join('\n')}`, 'utf-8'), 'changedusers.txt');
-      interaction.channel.send({ content: 'Changed users', files: [attachment] });
+      interaction.reply({ content: 'Changed users', files: [attachment] });
     })();
   },
 
@@ -262,15 +260,15 @@ module.exports = {
     const after = s.indexOf(' ', middle + 1);
 
     if (before === -1 || (after !== -1 && middle - before >= after - middle)) {
-        middle = after;
+      middle = after;
     } else {
-        middle = before;
+      middle = before;
     }
 
     const s1 = s.substr(0, middle);
     const s2 = s.substr(middle + 1);
 
     return [s1, s2];
-  },
+  }
 
 };

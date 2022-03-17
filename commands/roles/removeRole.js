@@ -7,7 +7,7 @@ module.exports = {
     .setDescription('Removes a role from user(s). Attach a csv or txt file with a list usernames, one per line')
     .addRoleOption(option =>
       option.setName('role')
-        .setDescription('The rol you would like to remove from user(s)')
+        .setDescription('The role you would like to remove from user(s)')
         .setRequired(true))
     .addStringOption(option =>
       option.setName('file_url')
@@ -16,7 +16,7 @@ module.exports = {
     .setDefaultPermission(false),
   async execute(interaction) {
     const options = interaction.options;
-    const roleId = options.getRole('role').id;
+    const role = options.getRole('role');
     const fileUrl = options.getString('file_url');
     const attachment = interaction.attachments?.values()?.next()?.value;
 
@@ -33,11 +33,11 @@ module.exports = {
       return interaction.reply({ content: 'No valid file' });
     }
 
-    const addMemberRole = (member) => {
-      member.roles.remove([roleId]);
+    const removeMemberRole = (member) => {
+      member.roles.remove([role.id]);
     };
 
-    DiscordUtil.openFileAndDo(attachmentURL, addMemberRole, interaction);
-    interaction.reply({ content: 'Removed roles to users in file' });
+    DiscordUtil.openFileAndDo(attachmentURL, removeMemberRole, interaction);
+    interaction.reply({ content: `The role ${role} has been removed` });
   },
 };

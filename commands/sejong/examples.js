@@ -1,25 +1,25 @@
-const DiscordUtil = require("../../common/discordutil.js");
-const ExampleSentenceAPI = require("../../api/exampleapi.js");
-const { ApplicationCommandOptionType } = require("discord-api-types/v9");
-const { DMChannel } = require("discord.js");
+const DiscordUtil = require('../../common/discordutil.js');
+const ExampleSentenceAPI = require('../../api/exampleapi.js');
+const { ApplicationCommandOptionType } = require('discord-api-types/v9');
+const { DMChannel } = require('discord.js');
 
 module.exports = {
   data: {
-    name: "examples",
-    group: "dictionary",
-    description: "Search the dictionary for example sentences.",
+    name: 'examples',
+    group: 'dictionary',
+    description: 'Search the dictionary for example sentences.',
     options: [
       {
-        name: "word",
+        name: 'word',
         type: ApplicationCommandOptionType.String,
-        description: "The word to look up examples for",
-        required: true,
-      },
-    ],
+        description: 'The word to look up examples for',
+        required: true
+      }
+    ]
   },
 
   async execute(interaction) {
-    const query = interaction.options.getString("word");
+    const query = interaction.options.getString('word');
     const api = new ExampleSentenceAPI();
     const isDM = interaction.channel instanceof DMChannel;
 
@@ -32,7 +32,7 @@ module.exports = {
 
     function send(dicEntries, interaction) {
       const exEmbed = DiscordUtil.createExampleResultEmbed(
-        "en",
+        'en',
         query,
         interaction.user.username,
         isDM,
@@ -44,8 +44,8 @@ module.exports = {
         return;
       }
       interaction.editReply({ embeds: [exEmbed] }).then((msg) => {
-        if (!isDM) msg.react("🔖");
+        if (!isDM) msg.react('🔖');
       });
     }
-  },
+  }
 };

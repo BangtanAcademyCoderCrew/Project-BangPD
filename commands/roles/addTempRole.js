@@ -37,7 +37,7 @@ module.exports = {
     const currentTimeUTC = DateTime.utc();
 
     if (currentTimeUTC > deadlineInUTC) {
-      return await interaction.reply({ content:'Invalid datetime provided. Deadline is in past.'});
+      return await interaction.reply({ content:'Invalid deadline provided. Deadline is in past.'});
     }
 
     // Handle attachment
@@ -75,16 +75,16 @@ module.exports = {
     DiscordUtil.openFileAndDo(attachmentURL, (member) => { member.roles.add([roleId]); }, interaction);
     removeRoleAtDeadline(deadlineInUTC, interaction.channel, roleId, attachmentURL, interaction);
 
+    const removalPromise =
+      `I will remove the role ${roleToRemoveId} on:`;
     const deadlineMessage =
       `Deadline (CST): ${deadlineDateTime.toLocaleString(DateTime.DATETIME_SHORT)}`;
-    const reminderPromise =
-      "I will send reminder";
     const newLine = "\n";
 
-    const fullMessage = deadlineMessage.concat(
+    const fullMessage = removalPromise.concat(
       newLine,
       newLine,
-      reminderPromise
+      deadlineMessage
     );
 
     return interaction.reply({ content: fullMessage});
