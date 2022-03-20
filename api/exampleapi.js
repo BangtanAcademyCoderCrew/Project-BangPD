@@ -3,6 +3,9 @@ const got = require('got');
 const et = require('elementtree');
 const Promise = require('promise');
 const { krDictUrl, krDictToken } = require('../apiconfig.json');
+const https = require('https');
+const rootCas = require('ssl-root-cas').create();
+const path = require('path');
 
 module.exports = class ExampleSentenceAPI {
   constructor() {
@@ -17,6 +20,10 @@ module.exports = class ExampleSentenceAPI {
   }
 
   searchExamples(q) {
+    let reqPath = path.join(__dirname, '../');
+    rootCas.addFile(path.resolve(reqPath, 'intermediate.pem'));
+    https.globalAgent.options.ca = rootCas;
+
     this.options.q = q;
     const url = `${krDictUrl}search?${querystring.stringify(this.options)}`;
 
@@ -25,9 +32,6 @@ module.exports = class ExampleSentenceAPI {
       headers: {
         'content-type': 'application/xml',
         Accept: 'application/xml'
-      },
-      https: {
-        rejectUnauthorized: false
       }
     };
 

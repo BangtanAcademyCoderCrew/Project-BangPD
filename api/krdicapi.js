@@ -1,6 +1,9 @@
 const got = require('got');
 const cheerio = require('cheerio');
 const Promise = require('promise');
+const https = require('https');
+const rootCas = require('ssl-root-cas').create();
+const path = require('path');
 
 module.exports = class KrDicApi {
   parseResult(html, maxSenses) {
@@ -68,16 +71,14 @@ module.exports = class KrDicApi {
   }
 
   searchWords(q, amount) {
+    let reqPath = path.join(__dirname, '../');
+    rootCas.addFile(path.resolve(reqPath, 'intermediate.pem'));
+    https.globalAgent.options.ca = rootCas;
+
     this.url = `https://krdict.korean.go.kr/eng/dicSearch/search?nation=eng&nationCode=6&ParaWordNo=&mainSearchWord=${q}&blockCount=${amount}`;
     const promise = new Promise((resolve, reject) =>(async () => {
       try {
-        const options = {
-          https: {
-            rejectUnauthorized: false
-          }
-        };
-
-        const response = await got(this.url, options);
+        const response = await got(this.url);
         resolve(this.parseResult(response.body));
         // => '<!doctype html> ...'
       } catch (error) {
