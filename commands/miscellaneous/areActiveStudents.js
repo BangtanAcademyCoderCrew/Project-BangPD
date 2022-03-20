@@ -44,7 +44,7 @@ module.exports = {
         interaction.followUp({ content: `Users in message ${messageID} who are not active`, files: [attachmentNotActive] });
       }).catch((error) => {
         console.error(error);
-        interaction.reply({ content: `Message with ID ${messageID} wasn't found in channel <#${channel.id}> <:shookysad:949689086665437184>` });
+        interaction.reply({ content: `Message with ID ${messageID} wasn't found in channel <#${channel.id}> <a:shookysad:949689086665437184>` });
       });
     };
 

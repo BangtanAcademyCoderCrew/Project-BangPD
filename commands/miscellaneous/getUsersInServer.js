@@ -67,7 +67,7 @@ module.exports = {
         });
       }).catch((error) => {
         console.log(error);
-        interaction.followUp({ content: `There was an error checking ${messageId} in channel <#${channel.id}> <:shookysad:949689086665437184>` });
+        interaction.followUp({ content: `There was an error checking ${messageId} in channel <#${channel.id}> <a:shookysad:949689086665437184>` });
       });
     };
 

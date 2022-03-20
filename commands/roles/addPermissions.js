@@ -22,7 +22,7 @@ module.exports = {
       return commands.find(command => command.name === commandName);
     });
     if (!cmd) {
-      return interaction.reply({ content: `Command ${commandName} not found. <:shookysad:949689086665437184>` });
+      return interaction.reply({ content: `Command ${commandName} not found. <a:shookysad:949689086665437184>` });
     }
     const permissions = [
       {

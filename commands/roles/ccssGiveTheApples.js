@@ -84,7 +84,7 @@ module.exports = {
         msg.react('👍');
       }).catch((error) => {
         console.error(error);
-        interaction.followUp(`Message with ID ${messageId} wasn't found in channel <#${channelId}> <:shookysad:949689086665437184>`);
+        interaction.followUp(`Message with ID ${messageId} wasn't found in channel <#${channelId}> <a:shookysad:949689086665437184>`);
       });
     };
 
