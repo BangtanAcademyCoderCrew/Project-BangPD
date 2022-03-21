@@ -7,8 +7,8 @@
   "license": "AGPL-3.0-only",
   "private": false,
   "scripts": {
-    "start": "cross-env NODE_EXTRA_CA_CERTS=\"intermediate.pem\" node index.js",
-    "dev": "cross-env NODE_EXTRA_CA_CERTS=\"intermediate.pem\" nodemon index.js && nodemon deploy-commands.js",
+    "start": "cross-env NODE_EXTRA_CA_CERTS=\"krdic_api_cert.pem\" node index.js",
+    "dev": "cross-env NODE_EXTRA_CA_CERTS=\"krdic_api_cert.pem\" nodemon index.js && nodemon deploy-commands.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
@@ -25,6 +25,7 @@
     "krdict-api": "0.0.4",
     "luxon": "^1.25.0",
     "promise": "^8.1.0",
+    "query-string": "^7.1.1",
     "request": "^2.88.2",
     "roman-numeral": "^0.2.6",
     "sequelize": "^6.9.0",

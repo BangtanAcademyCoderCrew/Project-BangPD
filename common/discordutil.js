@@ -33,9 +33,13 @@ module.exports = {
     }
   },
   createBookMarkMessage(message, text, image, user) {
+    let author = {
+      name: message.author.username,
+      iconURL: message.author.avatarURL
+    }
     const embed = new Discord.MessageEmbed()
       .setColor(0xDF2B40)
-      .setAuthor(`${message.author.username} said:`, message.author.avatarURL ? message.author.avatarURL : undefined)
+      .setAuthor(author)
       .setDescription(`${text}${image ? `\r\n\r\n${image}` : ''} \r\n\r\n **Message link:** ${message.url}`)
       .setImage(image)
       .setTimestamp(message.editedTimestamp || message.createdTimestamp);
@@ -44,13 +48,22 @@ module.exports = {
   },
 
   createBasicEmbed(name) {
+    let author = {
+      name: name || 'BangPD',
+      iconURL: 'https://i.imgur.com/UwOpFvr.png'
+    }
+    
     return new Discord.MessageEmbed()
       .setColor(accentColor)
-      .setAuthor(name || 'BangPD', 'https://i.imgur.com/UwOpFvr.png');
+      .setAuthor(author);
   },
 
   setEmbedFooter(embed, footer) {
-    embed.setFooter(footer, avatar);
+    let footerData = {
+      text: footer,
+      iconURL: avatar
+    }
+    embed.setFooter(footerData);
   },
 
   createPendingEmbed(username) {
@@ -130,7 +143,11 @@ module.exports = {
     const pageCount = pages.length;
     if (pageCount > 1) {
       pages.forEach((page) => {
-        page.setAuthor('BangPD', 'https://i.imgur.com/UwOpFvr.png');
+        let author = {
+          name: "BangPD",
+          iconURL: 'https://i.imgur.com/UwOpFvr.png'
+        }
+        page.setAuthor(author);
       });
     }
     return pages;
@@ -199,10 +216,13 @@ module.exports = {
     const cst = 'America/Chicago';
     const currentTimeUTC = DateTime.utc();
     const currentTimeCST = currentTimeUTC.setZone(cst);
+    let footer = {
+      text: `${currentTimeCST.toLocaleString(DateTime.DATETIME_FULL)}`
+    }
 
     const embed = new Discord.MessageEmbed()
       .setColor(color)
-      .setFooter(`${currentTimeCST.toLocaleString(DateTime.DATETIME_FULL)}`)
+      .setFooter(footer)
       .setDescription(message);
 
     return embed;

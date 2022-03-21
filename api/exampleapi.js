@@ -20,8 +20,9 @@ module.exports = class ExampleSentenceAPI {
   }
 
   searchExamples(q) {
+    //Needed to fix UNABLE_TO_VERIFY_LEAF_SIGNATURE issue - https://stackoverflow.com/a/60020493
     let reqPath = path.join(__dirname, '../');
-    rootCas.addFile(path.resolve(reqPath, 'intermediate.pem'));
+    rootCas.addFile(path.resolve(reqPath, 'krdic_api_cert.pem'));
     https.globalAgent.options.ca = rootCas;
 
     this.options.q = q;
