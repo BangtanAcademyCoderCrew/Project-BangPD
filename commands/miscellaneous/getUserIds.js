@@ -6,8 +6,8 @@ module.exports = {
     .setName('getuserids')
     .setDescription('Gets a list of user ids that were mentioned in a message')
     .addStringOption(option =>
-      option.setName('message_id')
-        .setDescription('The message id you would like to get the user ids from')
+      option.setName('message_ids')
+        .setDescription('The message ids you would like to get the user ids from')
         .setRequired(true))
     .addChannelOption(option =>
       option.setName('channel')
@@ -15,18 +15,23 @@ module.exports = {
         .setRequired(true)),
   async execute(interaction) {
     const options = interaction.options;
-    const messageId = options.getString('message_id');
+    const messageIds = options.getString('message_id');
     const channel = options.getChannel('channel');
 
     await interaction.deferReply();
 
-    channel.messages.fetch(messageId).then((msg) => {
-      const ids = msg.mentions.users.map(user => user.id);
-      const attachment = new Discord.MessageAttachment(Buffer.from(`<@${ids.join('>\n<@')}>`, 'utf-8'), 'usersID.txt');
-      interaction.reply({ content: `Users in message ${messageId}`, files: [attachment] });
-    }).catch((error) => {
-      console.log(error);
-      interaction.reply({ content: `Message with ID ${messageId} wasn't found in channel <#${channel.id}> <a:shookysad:949689086665437184>` });
-    });
+    const checkIDs = (messageId) => {
+      channel.messages.fetch(messageId).then((msg) => {
+        const ids = msg.mentions.users.map(user => user.id);
+        const attachment = new Discord.MessageAttachment(Buffer.from(`<@${ids.join('>\n<@')}>`, 'utf-8'), 'usersID.txt');
+        interaction.followUp({ content: `Users in message ${messageId}`, files: [attachment] });
+      }).catch((error) => {
+        console.log(error);
+        interaction.followUp({ content: `Message with ID ${messageId} wasn't found in channel <#${channel.id}> <a:shookysad:949689086665437184>` });
+      });
+    }
+    const allMessageIDs = messageIds.split(' ');
+    console.log(allMessageIDs);
+    allMessageIDs.forEach(message => checkIDs(message));
   }
 };

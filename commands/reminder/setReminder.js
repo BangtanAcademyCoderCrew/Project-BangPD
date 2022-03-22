@@ -23,7 +23,8 @@ module.exports = {
     .addStringOption(option =>
       option.setName('reminder_message')
         .setDescription('The reminder message to send to channel')
-        .setRequired(true)),
+        .setRequired(true))
+    .setDefaultPermission(false),
   async execute(interaction) {
     const options = interaction.options;
     const deadline = options.getString('deadline');

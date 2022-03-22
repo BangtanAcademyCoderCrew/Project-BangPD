@@ -40,11 +40,11 @@ module.exports = {
         const notActiveStudents = ids.filter(id => !activeStudents.includes(id));
         const attachmentActive = new MessageAttachment(Buffer.from(`<@${activeStudents.join('>\n<@')}>`, 'utf-8'), 'activeStudents.txt');
         const attachmentNotActive = new MessageAttachment(Buffer.from(`<@${notActiveStudents.join('>\n<@')}>`, 'utf-8'), 'notActiveStudents.txt');
-        interaction.reply({ content: `Users in message ${messageID} who are active`, files: [attachmentActive] });
+        interaction.followUp({ content: `Users in message ${messageID} who are active`, files: [attachmentActive] });
         interaction.followUp({ content: `Users in message ${messageID} who are not active`, files: [attachmentNotActive] });
       }).catch((error) => {
         console.error(error);
-        interaction.reply({ content: `Message with ID ${messageID} wasn't found in channel <#${channel.id}> <a:shookysad:949689086665437184>` });
+        interaction.followUp({ content: `Message with ID ${messageID} wasn't found in channel <#${channel.id}> <a:shookysad:949689086665437184>` });
       });
     };
 

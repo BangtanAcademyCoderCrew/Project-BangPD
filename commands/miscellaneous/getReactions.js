@@ -35,7 +35,7 @@ module.exports = {
       });
     }).catch((error) => {
       console.log(error);
-      interaction.reply({ content: `Message with ID ${messageId} wasn't found in channel <#${channel.id}> <a:shookysad:949689086665437184>` });
+      interaction.followUp({ content: `Message with ID ${messageId} wasn't found in channel <#${channel.id}> <a:shookysad:949689086665437184>` });
     });
   }
 };
