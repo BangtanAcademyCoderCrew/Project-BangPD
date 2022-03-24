@@ -12,6 +12,7 @@ module.exports = {
     .addChannelOption(option =>
       option.setName('channel')
         .setDescription('The channel this message is in')
+        .addChannelType(0)
         .setRequired(true))
     .setDefaultPermission(false),
   async execute(interaction) {

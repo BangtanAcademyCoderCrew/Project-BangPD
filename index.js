@@ -10,7 +10,10 @@ const client = new Client({
       Intents.FLAGS.GUILD_PRESENCES,
       Intents.FLAGS.GUILD_MEMBERS,
       Intents.FLAGS.GUILD_MESSAGES,
-      Intents.FLAGS.GUILD_MESSAGE_REACTIONS]
+      Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+      Intents.FLAGS.DIRECT_MESSAGES,
+      Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+    ]
 });
 
 client.commands = new Collection();
@@ -74,62 +77,6 @@ client.on('messageReactionAdd', async (reaction, user) => {
 });
 
 /*
-
-// CATCH RAW REACTION
-const rawEventTypes = {
-  MESSAGE_REACTION_ADD: 'messageReactionAdd',
-};
-
-client.on('raw', async (event) => {
-  if (!rawEventTypes[event.t]) return;
-  const { d: data } = event;
-  const user = client.users.cache.get(data.user_id);
-  const channel = client.channels.cache.get(data.channel_id) || await user.createDM();
-
-  const message = await channel.messages.fetch(data.message_id);
-  const emojiKey = (data.emoji.id) ? `${data.emoji.name}:${data.emoji.id}` : data.emoji.name;
-
-  let reaction = message.reactions.cache;
-  if (!reaction) {
-    const emoji = new Emoji(client.guilds.get(data.guild_id), data.emoji);
-    reaction = new MessageReaction(message, emoji, 1, data.user_id === client.user.id);
-  }
-});
-
-client.on('messageReactionAdd', async (reaction, user) => {
-  // When we receive a reaction we check if the reaction is partial or not
-  if (reaction.partial) {
-    // If the message this reaction belongs to was removed the fetching might result in an API error, which we need to handle
-    try {
-      await reaction.fetch();
-    }
-    catch (error) {
-      console.error('Something went wrong when fetching the message: ', error);
-      // Return as `reaction.message.author` may be undefined/null
-      return;
-    }
-  }
-
-  if (reaction.message.author.id === client.user.id && reaction.emoji.name === '❌' && reaction.message.channel.type !== 'text') {
-    if (user.id !== client.user.id) {
-      await reaction.message.delete();
-    }
-  }
-
-  if (reaction.emoji.name === '🔖' && reaction.message.channel.type === 'text') {
-    if (user.id !== client.user.id) {
-      if (reaction.message.embeds[0] && reaction.message.author.id === client.user.id) {
-        const embed = reaction.message.embeds[0];
-        user.send({ embeds: [embed] }).then(msg => msg.react('❌'));
-        console.log(`${user.username} - result bookmark `);
-      }
-    }
-    else {
-      console.log(`${user.username} - message bookmark `);
-      DiscordUtil.bookmark(reaction.message, user);
-    }
-  }
-});
 
 // log voice channel join/leave activities
 client.on('voiceStateUpdate', (oldVoiceState, newVoiceState) => {

@@ -10,6 +10,7 @@ module.exports = {
       .setRequired(true))
     .addChannelOption(option => option.setName('channel')
       .setDescription('In what channel is this message?')
+      .addChannelType(0)
       .setRequired(true))
     .addRoleOption(option => option.setName('role')
       .setDescription('What role would you like to add to user?')

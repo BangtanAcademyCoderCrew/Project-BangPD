@@ -12,6 +12,7 @@ module.exports = {
     .addChannelOption(option =>
       option.setName('channel')
         .setDescription('The channel to send the reminder')
+        .addChannelType(0)
         .setRequired(true))
     .addStringOption(option =>
       option.setName('time_in_advance')
@@ -39,14 +40,14 @@ module.exports = {
       zone: cst
     });
     if (!deadlineDateTime.isValid) {
-      interaction.reply({ content: 'Invalid deadline provided. Please enter deadline in correct format. YYYY-MM-DD HH:MM' });
+      interaction.followUp({ content: 'Invalid deadline provided. Please enter deadline in correct format. YYYY-MM-DD HH:MM' });
       return;
     }
 
     const deadlineInUTC = deadlineDateTime.toUTC();
     const currentTimeUTC = DateTime.utc();
     if (currentTimeUTC > deadlineInUTC) {
-      interaction.reply({ content: 'Invalid deadline provided. Deadline is in past.' });
+      interaction.followUp({ content: 'Invalid deadline provided. Deadline is in past.' });
       return;
     }
 
@@ -85,7 +86,7 @@ module.exports = {
       newLine,
       reminderPromise
     );
-    interaction.reply({ content: fullMessage });
+    interaction.followUp({ content: fullMessage });
   },
   sendReminder(timeBeforeDeadline, channel, message) {
     const currentTimeUTC = DateTime.utc();
