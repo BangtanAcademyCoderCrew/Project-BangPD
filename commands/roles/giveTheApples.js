@@ -1,5 +1,6 @@
 const { MessageAttachment } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { ChannelType } = require('discord-api-types/v9');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -10,6 +11,7 @@ module.exports = {
       .setRequired(true))
     .addChannelOption(option => option.setName('channel')
       .setDescription('In what channel is this message?')
+      .addChannelTypes([ChannelType.GuildText, ChannelType.GuildPublicThread, ChannelType.GuildPrivateThread])
       .setRequired(true))
     .addRoleOption(option => option.setName('first_role')
       .setDescription('What role would you like to add to user?')
@@ -32,8 +34,7 @@ module.exports = {
         if (msg.reactions.cache.get('👍') && msg.reactions.cache.get('👍').me) {
           return interaction.reply({ content: 'You already checked this message before!' });
         }
-        const content = msg.content.replace(/\D/g, ' ').split(' ');
-        const ids = content.filter(e => e.length >= 16);
+        const ids = msg.mentions.users.map(user => user.id);
         const members = interaction.guild.members.cache.filter(member => ids.includes(member.id));
         const bothRoles = [firstRole.id, secondRole.id];
         let usersWithFirstRole = '';

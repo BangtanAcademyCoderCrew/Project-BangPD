@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { ChannelType } = require('discord-api-types/v9');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -11,7 +12,7 @@ module.exports = {
     .addChannelOption(option =>
       option.setName('channel')
         .setDescription('The channel this message is in')
-        .addChannelType(0)
+        .addChannelTypes([ChannelType.GuildText, ChannelType.GuildPublicThread, ChannelType.GuildPrivateThread])
         .setRequired(true)),
   async execute(interaction) {
     const options = interaction.options;

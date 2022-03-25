@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { BATId, BALId, BAGId } = require('../../config.json');
+const { ChannelType } = require('discord-api-types/v9');
 
 const ALL_GUILD_IDS = [BATId, BALId, BAGId];
 
@@ -15,7 +16,7 @@ module.exports = {
     .addChannelOption(option =>
       option.setName('channel')
         .setDescription('The channel the message(s) are in')
-        .addChannelType(0)
+        .addChannelTypes([ChannelType.GuildText, ChannelType.GuildPublicThread, ChannelType.GuildPrivateThread])
         .setRequired(true))
     .setDefaultPermission(false),
   async execute(interaction) {

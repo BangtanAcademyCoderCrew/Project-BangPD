@@ -25,9 +25,8 @@
 
 const { Permissions } = require('discord.js');
 const { REST } = require('@discordjs/rest');
-const { Routes } = require('discord-api-types/v9');
+const { Routes, ApplicationCommandPermissionType } = require('discord-api-types/v9');
 const { clientId, guildId, botToken } = require('./config.json');
-const { ApplicationCommandPermissionTypes } = require('discord.js/typings/enums');
 
 const commandsWithPermissions = [
   // can MANAGE_ROLES and MANAGE_CHANNELS
@@ -91,7 +90,7 @@ module.exports = {
       }).map(role => {
         return {
           id: role.id,
-          type: ApplicationCommandPermissionTypes.ROLE,
+          type: ApplicationCommandPermissionType.Role,
           permission: true
         };
       });

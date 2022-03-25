@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { DateTime } = require('luxon');
+const { ChannelType } = require('discord-api-types/v9');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -12,7 +13,7 @@ module.exports = {
     .addChannelOption(option =>
       option.setName('channel')
         .setDescription('The channel to send the reminder')
-        .addChannelType(0)
+        .addChannelTypes([ChannelType.GuildText, ChannelType.GuildPublicThread, ChannelType.GuildPrivateThread])
         .setRequired(true))
     .addStringOption(option =>
       option.setName('time_in_advance')

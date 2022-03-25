@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, roleMention } = require('@discordjs/builders');
-const { ApplicationCommandPermissionTypes } = require('discord.js/typings/enums');
+const { ApplicationCommandPermissionType } = require('discord-api-types/v9');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -27,7 +27,7 @@ module.exports = {
     const permissions = [
       {
         id: roleID,
-        type: ApplicationCommandPermissionTypes.ROLE,
+        type: ApplicationCommandPermissionType.Role,
         permission: false
       }
     ];

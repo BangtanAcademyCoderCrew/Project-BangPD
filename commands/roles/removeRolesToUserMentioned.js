@@ -1,5 +1,6 @@
 const { MessageAttachment } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { ChannelType } = require('discord-api-types/v9');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -10,7 +11,7 @@ module.exports = {
       .setRequired(true))
     .addChannelOption(option => option.setName('channel')
       .setDescription('In what channel is this message?')
-      .addChannelType(0)
+      .addChannelTypes([ChannelType.GuildText, ChannelType.GuildPublicThread, ChannelType.GuildPrivateThread])
       .setRequired(true))
     .addRoleOption(option => option.setName('role')
       .setDescription('What role would you like to remove from user?')
