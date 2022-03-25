@@ -27,6 +27,8 @@ const { Permissions } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { Routes, ApplicationCommandPermissionType } = require('discord-api-types/v9');
 const { clientId, guildId, botToken } = require('./config.json');
+const customPermissions = require('./customPermissions.json');
+
 
 const commandsWithPermissions = [
   // can MANAGE_ROLES and MANAGE_CHANNELS
@@ -96,7 +98,12 @@ module.exports = {
       });
       obj.roleNames.map(name => {
         const comm = filteredCommands.find(command => command.name === name);
-        permissionsBody.push({ id: comm.id, permissions: rolesWithPermissions });
+        if(comm.id in customPermissions){
+          permissionsBody.push({ id: comm.id, permissions: rolesWithPermissions.concat(customPermissions[comm.id].permissions) });
+        }
+        else {
+          permissionsBody.push({ id: comm.id, permissions: rolesWithPermissions });
+        }
       });
     });
 
