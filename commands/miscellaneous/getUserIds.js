@@ -17,7 +17,7 @@ module.exports = {
         .setRequired(true)),
   async execute(interaction) {
     const options = interaction.options;
-    const messageIds = options.getString('message_id');
+    const messageIds = options.getString('message_ids');
     const channel = options.getChannel('channel');
 
     await interaction.deferReply();
@@ -31,9 +31,8 @@ module.exports = {
         console.log(error);
         interaction.followUp({ content: `Message with ID ${messageId} wasn't found in channel <#${channel.id}> <a:shookysad:949689086665437184>` });
       });
-    }
+    };
     const allMessageIDs = messageIds.split(' ');
-    console.log(allMessageIDs);
     allMessageIDs.forEach(message => checkIDs(message));
   }
 };
