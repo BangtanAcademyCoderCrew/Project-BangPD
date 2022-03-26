@@ -51,6 +51,7 @@ const commandsWithPermissions = [
       'addrolestouserinmessage',
       'ccssgivetheapples',
       'getusersinserver',
+      'getusernames',
       'givetheapples',
       'removepermissions',
       'removerolestouserinmessage',
