@@ -30,14 +30,14 @@ module.exports = {
     });
 
     if (!deadlineDateTime.isValid) {
-      return await interaction.reply({ content:'Invalid deadline provided. Please enter deadline in correct format. YYYY-MM-DD HH:MM'});
+      return await interaction.followUp({ content:'Invalid deadline provided. Please enter deadline in correct format. YYYY-MM-DD HH:MM'});
     }
 
     const deadlineInUTC = deadlineDateTime.toUTC();
     const currentTimeUTC = DateTime.utc();
 
     if (currentTimeUTC > deadlineInUTC) {
-      return await interaction.reply({ content:'Invalid deadline provided. Deadline is in past.'});
+      return await interaction.followUp({ content:'Invalid deadline provided. Deadline is in past.'});
     }
 
     // Handle attachment
@@ -63,7 +63,7 @@ module.exports = {
         setTimeout(
           () => {
             DiscordUtil.openFileAndDo(attachmentURL, (member) => { member.roles.remove([roleToRemoveId]); }, message);
-            interaction.reply({ content:`The role ${roleToRemoveId} has been removed`});
+            interaction.followUp({ content:`The role ${roleToRemoveId} has been removed`});
           },
           timeLeftBeforeRemovingRole,
           channel
@@ -76,7 +76,7 @@ module.exports = {
     removeRoleAtDeadline(deadlineInUTC, interaction.channel, roleId, attachmentURL, interaction);
 
     const removalPromise =
-      `I will remove the role ${roleToRemoveId} on:`;
+      `I will remove the role ${roleId} on:`;
     const deadlineMessage =
       `Deadline (CST): ${deadlineDateTime.toLocaleString(DateTime.DATETIME_SHORT)}`;
     const newLine = "\n";
@@ -87,6 +87,6 @@ module.exports = {
       deadlineMessage
     );
 
-    return interaction.reply({ content: fullMessage});
+    return interaction.followUp({ content: fullMessage});
   }
 }

@@ -30,7 +30,7 @@ module.exports = {
       attachmentURL = attachment.url;
     }
     else {
-      return interaction.reply({ content: 'No valid file' });
+      return interaction.followUp({ content: 'No valid file' });
     }
 
     const removeMemberRole = (member) => {

@@ -33,10 +33,10 @@ module.exports = {
     }
   },
   createBookMarkMessage(message, text, image, user) {
-    let author = {
+    const author = {
       name: message.author.username,
       iconURL: message.author.avatarURL
-    }
+    };
     const embed = new Discord.MessageEmbed()
       .setColor(0xDF2B40)
       .setAuthor(author)
@@ -48,21 +48,21 @@ module.exports = {
   },
 
   createBasicEmbed(name) {
-    let author = {
+    const author = {
       name: name || 'BangPD',
       iconURL: 'https://i.imgur.com/UwOpFvr.png'
-    }
-    
+    };
+
     return new Discord.MessageEmbed()
       .setColor(accentColor)
       .setAuthor(author);
   },
 
   setEmbedFooter(embed, footer) {
-    let footerData = {
+    const footerData = {
       text: footer,
       iconURL: avatar
-    }
+    };
     embed.setFooter(footerData);
   },
 
@@ -143,10 +143,10 @@ module.exports = {
     const pageCount = pages.length;
     if (pageCount > 1) {
       pages.forEach((page) => {
-        let author = {
-          name: "BangPD",
+        const author = {
+          name: 'BangPD',
           iconURL: 'https://i.imgur.com/UwOpFvr.png'
-        }
+        };
         page.setAuthor(author);
       });
     }
@@ -216,7 +216,7 @@ module.exports = {
     const cst = 'America/Chicago';
     const currentTimeUTC = DateTime.utc();
     const currentTimeCST = currentTimeUTC.setZone(cst);
-    let footer = {
+    const footer = {
       text: `${currentTimeCST.toLocaleString(DateTime.DATETIME_FULL)}`
     };
 

@@ -32,6 +32,6 @@ module.exports = {
     // usersWithRoles = [[id, <@id>]], we want to return the id with tags (<@id>)
     const usersWithRoles = Array.from(members, item => item[1]).join('\n');
     const attachment = new MessageAttachment(Buffer.from(usersWithRoles, 'utf-8'), 'usersID.txt');
-    return interaction.reply({ content: `Users with role ${baseRole} added role ${assignedRole}`, files: [attachment] });
+    return interaction.followUp({ content: `Users with role ${baseRole} added role ${assignedRole}`, files: [attachment] });
   }
 };
