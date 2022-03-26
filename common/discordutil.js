@@ -218,7 +218,7 @@ module.exports = {
     const currentTimeCST = currentTimeUTC.setZone(cst);
     let footer = {
       text: `${currentTimeCST.toLocaleString(DateTime.DATETIME_FULL)}`
-    }
+    };
 
     const embed = new Discord.MessageEmbed()
       .setColor(color)
@@ -261,7 +261,7 @@ module.exports = {
         usernames.forEach(username => {
           const member = module.exports.getMemberByUsername(interaction, username);
           if (!member) {
-            return interaction.reply({ content: `User ${username} not found` });
+            return interaction.followUp({ content: `User ${username} not found` });
           }
           callback(member);
           usersChanged.push(username);
@@ -270,7 +270,7 @@ module.exports = {
         console.log(error);
       }
       const attachment = new Discord.MessageAttachment(Buffer.from(`${usersChanged.join('\n')}`, 'utf-8'), 'changedusers.txt');
-      interaction.reply({ content: 'Changed users', files: [attachment] });
+      interaction.followUp({ content: 'Changed users', files: [attachment] });
     })();
   },
 
