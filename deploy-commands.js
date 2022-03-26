@@ -10,7 +10,7 @@ commandDirectories.forEach(dir => {
   commandFiles.forEach((file) => {
     const command = require(`${dir}/${file}`);
 
-    if(command.data.group){
+    if (command.data.group) {
       commands.push(command.data);
     } else {
       commands.push(command.data.toJSON());
@@ -24,12 +24,11 @@ const rest = new REST({ version: '9' }).setToken(botToken);
   try {
     const createdCommands = await rest.put(
       Routes.applicationGuildCommands(clientId, guildId),
-      { body: commands },
+      { body: commands }
     );
 
     await setCommandPermissions(createdCommands);
-  }
-  catch (error) {
+  } catch (error) {
     console.error(error);
   }
 })();

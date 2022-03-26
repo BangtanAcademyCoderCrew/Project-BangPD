@@ -29,6 +29,9 @@ module.exports = {
     const allUserIdsPerGuild = {};
     ALL_GUILD_IDS.map((guildId) => {
       const guild = interaction.client.guilds.cache.get(guildId);
+      if (guildId && !guild) {
+        return interaction.followUp({ content:`I can't find server with ID ${guildId} :pensive:` });
+      }
       allUserIdsPerGuild[guildId] = guild.members.cache.map(m => m.id);
     });
 
