@@ -25,7 +25,7 @@ module.exports = {
     await interaction.deferReply();
 
     if (!attachment) {
-      return interaction.reply({ content: 'No valid file attached.' });
+      return interaction.followUp({ content: 'No valid file attached.' });
     }
     const folderPath = `${'./ : ', path.resolve('./')}/commands/${commandGroup}`;
 
@@ -34,7 +34,7 @@ module.exports = {
       const commands = fs.readdirSync(filePath);
       console.log(commands);
       if (!commands.includes(`${name}.js`)) {
-        return interaction.reply({
+        return interaction.followUp({
           content: `There is no command with name or alias \`${name}\`, ${interaction.author}! A new command will be created.`
         });
       }
@@ -42,7 +42,7 @@ module.exports = {
       try {
         fs.unlinkSync(`${folderPath}/${commandName}.js`);
         console.log('REMOVED FILE');
-        interaction.reply({ content: 'Old command file has been removed.' });
+        interaction.followUp({ content: 'Old command file has been removed.' });
       } catch (error) {
         console.error(error);
       }

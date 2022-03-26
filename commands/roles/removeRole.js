@@ -38,6 +38,6 @@ module.exports = {
     };
 
     DiscordUtil.openFileAndDo(attachmentURL, removeMemberRole, interaction);
-    interaction.reply({ content: `The role ${role} has been removed` });
+    interaction.followUp({ content: `The role ${role} has been removed` });
   },
 };

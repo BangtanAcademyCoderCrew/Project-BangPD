@@ -1,10 +1,10 @@
 const { SlashCommandBuilder, roleMention } = require('@discordjs/builders');
 const { ApplicationCommandPermissionType } = require('discord-api-types/v9');
 const fs = require('fs');
-var path = require("path");
+const path = require('path');
 const fileName = '../../customPermissions.json';
-var pathToJson = path.resolve(__dirname, fileName);
-var file = require(pathToJson);
+const pathToJson = path.resolve(__dirname, fileName);
+const file = require(pathToJson);
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -25,20 +25,20 @@ module.exports = {
     const commandName = options.getString('command');
 
     const writeToFile = (commandId, permissions) => {
-      if (commandId in file){
-        file[commandId].permissions = file[commandId].permissions.concat(permissions)
+      if (commandId in file) {
+        file[commandId].permissions = file[commandId].permissions.concat(permissions);
       } else {
-        file[commandId] = { 
-          id:cmd.id, 
-          permissions:permissions 
-        }
+        file[commandId] = {
+          id:cmd.id,
+          permissions:permissions
+        };
       }
 
       fs.writeFile(pathToJson, JSON.stringify(file), function writeJSON(err) {
-          if (err){
+          if (err) {
               console.log(err);
               return false;
-          } 
+          }
           console.log(JSON.stringify(file));
           console.log('writing to ' + pathToJson);
       });
@@ -59,8 +59,8 @@ module.exports = {
     ];
 
     await cmd.permissions.add({ permissions });
-    
-    writeToFile(cmd.id, permissions );
+
+    writeToFile(cmd.id, permissions);
 
     interaction.reply({ content: `You added the role ${roleMention(roleID)} to use the command ${commandName}.` });
   }

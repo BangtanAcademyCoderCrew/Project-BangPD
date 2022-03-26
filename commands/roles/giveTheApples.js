@@ -32,7 +32,7 @@ module.exports = {
     const assignRoles = (messageId, firstRole, secondRole) => {
       channel.messages.fetch(messageId).then(msg => {
         if (msg.reactions.cache.get('👍') && msg.reactions.cache.get('👍').me) {
-          return interaction.reply({ content: 'You already checked this message before!' });
+          return interaction.followUp({ content: 'You already checked this message before!' });
         }
         const ids = msg.mentions.users.map(user => user.id);
         const members = interaction.guild.members.cache.filter(member => ids.includes(member.id));
