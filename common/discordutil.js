@@ -289,6 +289,28 @@ module.exports = {
     const s2 = s.substr(middle + 1);
 
     return [s1, s2];
+  },
+
+  async fetchAllMessagesByChannel(channel) {
+    const messages = [];
+
+    // Create message pointer because we can only get 100 at a time
+    let message = await channel.messages
+      .fetch({ limit: 1 })
+      .then(messagePage => (messagePage.size === 1 ? messagePage.at(0) : null));
+
+    while (message) {
+      await channel.messages
+        .fetch({ limit: 100, before: message.id })
+        .then(messagePage => {
+          messagePage.forEach(msg => messages.push(msg));
+
+          // Update message pointer to be last message in page of messages
+          message = messagePage.size > 0 ? messagePage.at(messagePage.size - 1) : null;
+        });
+    }
+
+    return messages;
   }
 
 };

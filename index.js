@@ -25,6 +25,13 @@ commandDirectories.forEach(dir => {
   });
 });
 
+const scheduledJobsDirectory = './scheduledJobs';
+const scheduledJobFiles = fs.readdirSync(scheduledJobsDirectory).filter(file => file.endsWith('.js'));
+scheduledJobFiles.forEach((file) => {
+  const job = require(`${scheduledJobsDirectory}/${file}`);
+  job.start(client);
+});
+
 client.once('ready', () => {
   console.log('Bang PD is online!');
   client.user.setActivity('BE', { type: 'LISTENING' });
