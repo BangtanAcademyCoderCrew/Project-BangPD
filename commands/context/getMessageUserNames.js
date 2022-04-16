@@ -4,7 +4,7 @@ const got = require('got');
 
 module.exports = {
   data: new ContextMenuCommandBuilder()
-    .setName('getMessageUserIds')
+    .setName('getMessageUserNames')
     .setType(3),
   async execute(interaction) {
     const guildId = interaction.guildId;
