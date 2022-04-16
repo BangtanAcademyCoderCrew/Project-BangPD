@@ -8,7 +8,7 @@
   "private": false,
   "scripts": {
     "start": "cross-env NODE_EXTRA_CA_CERTS=\"krdic_api_cert.pem\" node index.js",
-    "dev": "cross-env NODE_EXTRA_CA_CERTS=\"krdic_api_cert.pem\" nodemon index.js && nodemon deploy-commands.js",
+    "dev": "cross-env NODE_EXTRA_CA_CERTS=\"krdic_api_cert.pem\" nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

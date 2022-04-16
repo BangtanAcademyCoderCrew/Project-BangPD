@@ -5,5 +5,5 @@
     "BALId": "819398172270264351",
     "BATId": "888439837256994823",
     "BAGId": "848725336366645259",
-    "commandDirectories": ["./commands/miscellaneous", "./commands/reminder", "./commands/roles"]
+    "commandDirectories": ["./commands/context", "./commands/miscellaneous", "./commands/reminder", "./commands/roles"]
 }
