@@ -21,7 +21,7 @@ module.exports = {
         const attachment = new Discord.MessageAttachment(Buffer.from(`<@${ids.join('>\n<@')}>`, 'utf-8'), 'usersID.txt');
         return interaction.followUp({ content: `Users in message ${messageId}`, files: [attachment] });
       } else {
-        return interaction.followUp({ content: 'This message has no users mentioned}' });
+        return interaction.followUp({ content: `There are no user mentions in message ${messageId}` });
       }
     }).catch((error) => {
       console.log(error);

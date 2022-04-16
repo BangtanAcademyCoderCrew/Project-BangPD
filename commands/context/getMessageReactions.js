@@ -31,7 +31,7 @@ module.exports = {
           });
         });
       } else {
-        return interaction.followUp({ content: 'This message has no reactions' });
+        return interaction.followUp({ content: `There are no reactions to message ${messageId}` });
       }
     }).catch((error) => {
       console.log(error);

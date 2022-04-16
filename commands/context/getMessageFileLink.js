@@ -19,7 +19,7 @@ module.exports = {
       if (attachment) {
         return interaction.followUp({ content: `Message with ID ${messageId} has file ${attachment.url}` });
       } else {
-        return interaction.followUp({ content: 'This message doesn\'t have a file' });
+        return interaction.followUp({ content: `There is no file in message ${messageId}` });
       }
     }).catch((error) => {
       console.log(error);
