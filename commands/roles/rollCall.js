@@ -29,7 +29,8 @@ module.exports = {
       let isActive = false;
 
       for (let i = 0; i < roleExceptionIDs.length; i++) {
-        if (memberInfo.roles.cache.get(roleExceptionIDs[i])) {
+        const roleId = roleExceptionIDs[i].replace(/\D/g, '');
+        if (memberInfo.roles.cache.get(roleId)) {
           isActive = true;
           activeMembers++;
           break;
@@ -40,6 +41,6 @@ module.exports = {
         rollcalled++;
       }
     }
-    return interaction.reply({ content: `Rollcall done. ${rollcalled} are in roll call. ${activeMembers} active members.` });
+    return interaction.followUp({ content: `Rollcall done. ${rollcalled} are in roll call. ${activeMembers} active members.` });
   }
 };

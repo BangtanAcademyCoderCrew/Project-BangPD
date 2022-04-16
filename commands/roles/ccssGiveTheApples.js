@@ -33,12 +33,12 @@ module.exports = {
 
     const guild = interaction.client.guilds.cache.get(serverId);
     if (serverId && !guild) {
-      return interaction.reply({ content:`I can't find server with ID ${serverId} :pensive:` });
+      return interaction.followUp({ content: `I can't find server with ID ${serverId} :pensive:` });
     }
 
     const guildChannel = guild.channels.cache.get(channelId);
     if (!guildChannel) {
-      return interaction.reply({ content:`I can't find channel with ID ${channelId} in server ${guild.name} :pensive:` });
+      return interaction.followUp({ content: `I can't find channel with ID ${channelId} in server ${guild.name} :pensive:` });
     }
 
     const assignRoles = (messageId, firstRole, secondRole) => {
@@ -48,7 +48,7 @@ module.exports = {
         }
         const content = msg.content.replace(/\D/g, ' ').split(' ');
         const ids = content.filter(e => e.length >= 16);
-        const members = interaction.guild.members.cache.filter(member => ids.includes(member.id));
+        const members = guild.members.cache.filter(member => ids.includes(member.id));
         const bothRoles = [firstRole, secondRole];
         console.log(ids);
         console.log(ids.length);

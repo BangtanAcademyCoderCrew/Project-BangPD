@@ -9,7 +9,6 @@
  * Miscellaneous
  * - areActiveStudents: MANAGE_MESSAGES (checked in command)
  * - getReactions: MANAGE_CHANNELS, MANAGE_ROLES
- * - updateCommand: MANAGE_CHANNELS, MANAGE_ROLES
  *
  * Role
  * - addRole: MANAGE_CHANNELS, MANAGE_ROLES
@@ -40,7 +39,6 @@ const commandsWithPermissions = [
       'temp-role',
       'removerole',
       'rollcall',
-      'updatecommand',
       'getMessageReactions'
     ]
   },
@@ -102,7 +100,7 @@ module.exports = {
       });
       obj.roleNames.map(name => {
         const comm = filteredCommands.find(command => command.name === name);
-        if(comm.id in customPermissions) {
+        if (comm.id in customPermissions) {
           permissionsBody.push({ id: comm.id, permissions: rolesWithPermissions.concat(customPermissions[comm.id].permissions) });
         } else {
           permissionsBody.push({ id: comm.id, permissions: rolesWithPermissions });
