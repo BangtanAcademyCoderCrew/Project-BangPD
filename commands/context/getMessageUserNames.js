@@ -7,7 +7,6 @@ module.exports = {
     .setName('getMessageUserIds')
     .setType(3),
   async execute(interaction) {
-    console.log('Debug -- interaction', interaction);
     const guildId = interaction.guildId;
     const attachment = interaction.attachments.first();
 

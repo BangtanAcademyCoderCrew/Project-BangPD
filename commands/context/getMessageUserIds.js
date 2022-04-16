@@ -6,7 +6,6 @@ module.exports = {
     .setName('getMessageUserIds')
     .setType(3),
   async execute(interaction) {
-    console.log('Debug -- interaction', interaction);
     const messageId = interaction.targetId;
     const channelId = interaction.channelId;
     const guildId = interaction.guildId;
