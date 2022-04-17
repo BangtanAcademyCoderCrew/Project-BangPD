@@ -25,12 +25,12 @@ module.exports = {
       userIds.forEach(userId => {
         const foundUser = users.find(u => u.id === userId);
         if (!foundUser) {
-          return interaction.followUp({ content: `User ${userId} not found <a:shookysad:949689086665437184>` });
+          return interaction.followUp({ content: `User ${userId} not found <a:shookysad:949689086665437184>`, ephemeral: true });
 
         }
         const foundMember = members.find(m => m.id === userId);
         if (!foundMember) {
-          return interaction.followUp({ content: `Member ${userId} not found in server <a:shookysad:949689086665437184>` });
+          return interaction.followUp({ content: `Member ${userId} not found in server <a:shookysad:949689086665437184>`, ephemeral: true });
 
         }
         const nicknameOrUserName = foundMember.displayName || foundUser.username;
@@ -40,6 +40,6 @@ module.exports = {
       console.log(error);
     }
     const response = new Discord.MessageAttachment(Buffer.from(`${userNicknamesAndTags.join('\n')}`, 'utf-8'), 'userNames.txt');
-    return interaction.followUp({ content: 'User(s) nicknames and tags', files: [response] });
+    return interaction.followUp({ content: 'User(s) nicknames and tags', files: [response], ephemeral: true });
   }
 };

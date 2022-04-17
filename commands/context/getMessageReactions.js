@@ -27,11 +27,11 @@ module.exports = {
               users[reaction.emoji].push('<@' + user.id + '>');
             });
             const attachment = new Discord.MessageAttachment(Buffer.from(`${users[reaction.emoji].join('\n')}`, 'utf-8'), 'emoji reactions.txt');
-            return interaction.followUp({ content: `Users that reacted with ${reaction.emoji}`, files: [attachment] });
+            return interaction.followUp({ content: `Users that reacted with ${reaction.emoji}`, files: [attachment], ephemeral: true });
           });
         });
       } else {
-        return interaction.followUp({ content: `There are no reactions to message ${messageId}` });
+        return interaction.followUp({ content: `There are no reactions to message ${messageId}`, ephemeral: true });
       }
     }).catch((error) => {
       console.log(error);

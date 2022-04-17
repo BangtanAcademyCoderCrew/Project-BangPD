@@ -23,7 +23,7 @@ module.exports = {
     ALL_GUILD_IDS.map((id) => {
       const currentGuild = interaction.client.guilds.cache.get(id);
       if (id && !currentGuild) {
-        return interaction.followUp({ content:`I can't find server with ID ${id} :pensive:` });
+        return interaction.followUp({ content:`I can't find server with ID ${id} :pensive:`, ephemeral: true });
       }
       allUserIdsPerGuild[id] = currentGuild.members.cache.map(m => m.id);
     });
@@ -61,11 +61,11 @@ module.exports = {
 
       Object.entries(usersPerGuildGrouped).map(([key, value]) => {
         const attachment = new Discord.MessageAttachment(Buffer.from(`<@${value.join('>\n<@')}>`, 'utf-8'), 'usersID.txt');
-        return interaction.followUp({ content: `Users in  ${key}`, files: [attachment] });
+        return interaction.followUp({ content: `Users in  ${key}`, files: [attachment], ephemeral: true });
       });
     }).catch((error) => {
       console.log(error);
-      return interaction.followUp({ content: `There was an error checking ${messageId} in channel <#${channelId}> <a:shookysad:949689086665437184>` });
+      return interaction.followUp({ content: `There was an error checking ${messageId} in channel <#${channelId}> <a:shookysad:949689086665437184>`, ephemeral: true });
     });
   }
 };
