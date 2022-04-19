@@ -106,7 +106,7 @@ module.exports = {
 
         if (comm.id in customPermissions) {
           permissionsBody.push({ id: comm.id, permissions: rolesWithPermissions.concat(customPermissions[comm.id].permissions) });
-        } else if (comm.id) {
+        } else {
           permissionsBody.push({ id: comm.id, permissions: rolesWithPermissions });
         }
       });
