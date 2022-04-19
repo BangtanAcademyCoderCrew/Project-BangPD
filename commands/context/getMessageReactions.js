@@ -3,7 +3,7 @@ const { ContextMenuCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
   data: new ContextMenuCommandBuilder()
-    .setName('getMessageReactions')
+    .setName('reactions')
     .setType(3)
     .setDefaultPermission(false),
   async execute(interaction) {
@@ -11,7 +11,7 @@ module.exports = {
     const channelId = interaction.channelId;
     const guildId = interaction.guildId;
 
-    await interaction.deferReply();
+    await interaction.deferReply({ ephemeral: true });
 
     const guild = interaction.client.guilds.cache.get(guildId);
     const channel = guild.channels.cache.get(channelId);

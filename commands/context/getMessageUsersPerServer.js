@@ -6,7 +6,7 @@ const ALL_GUILD_IDS = [BATId, BALId, BAGId];
 
 module.exports = {
   data: new ContextMenuCommandBuilder()
-    .setName('getMessageUsersPerServer')
+    .setName('usersPerServer')
     .setType(3)
     .setDefaultPermission(false),
   async execute(interaction) {
@@ -14,7 +14,7 @@ module.exports = {
     const channelId = interaction.channelId;
     const guildId = interaction.guildId;
 
-    await interaction.deferReply();
+    await interaction.deferReply({ ephemeral: true });
 
     const guild = interaction.client.guilds.cache.get(guildId);
     const channel = guild.channels.cache.get(channelId);

@@ -2,6 +2,7 @@ const fs = require('fs');
 const { Client, Collection, Intents } = require('discord.js');
 const DiscordUtil = require('./common/discordutil');
 const { botToken, commandDirectories } = require('./config.json');
+const { deployCommands } = require('./deploy-commands');
 
 const client = new Client({
   partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
@@ -27,6 +28,7 @@ commandDirectories.forEach(dir => {
 
 client.once('ready', () => {
   console.log('Bang PD is online!');
+  deployCommands();
   client.user.setActivity('BE', { type: 'LISTENING' });
 });
 
