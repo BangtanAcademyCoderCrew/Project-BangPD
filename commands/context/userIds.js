@@ -3,7 +3,7 @@ const { ContextMenuCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
   data: new ContextMenuCommandBuilder()
-    .setName('userIds')
+    .setName('user ids')
     .setType(3),
   async execute(interaction) {
     const messageId = interaction.targetId;

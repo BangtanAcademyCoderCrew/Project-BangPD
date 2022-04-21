@@ -4,7 +4,7 @@ const got = require('got');
 
 module.exports = {
   data: new ContextMenuCommandBuilder()
-    .setName('userNames')
+    .setName('user names')
     .setType(3)
     .setDefaultPermission(false),
   async execute(interaction) {
@@ -26,7 +26,7 @@ module.exports = {
         try {
           const response = await got(attachment.url);
           const csv = response.body;
-          const userIds = csv.split(/\r?\n/).map(id => id.replace(/[^\d]/g, ''));
+          const userIds = csv.trim().split(/\r?\n/).map(id => id.replace(/[^\d]/g, ''));
           const users = interaction.client.users.cache.filter(u => userIds.includes(u.id));
           const members = guild.members.cache.filter(m => userIds.includes(m.id));
 

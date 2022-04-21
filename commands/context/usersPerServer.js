@@ -6,7 +6,7 @@ const ALL_GUILD_IDS = [BATId, BALId, BAGId];
 
 module.exports = {
   data: new ContextMenuCommandBuilder()
-    .setName('usersPerServer')
+    .setName('users per server')
     .setType(3)
     .setDefaultPermission(false),
   async execute(interaction) {

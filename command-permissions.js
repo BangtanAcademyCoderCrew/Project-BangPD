@@ -56,8 +56,8 @@ const commandsWithPermissions = [
       'removerolestouserinmessage',
       'role_in',
       'role_rin',
-      'userNames',
-      'usersPerServer'
+      'user names',
+      'users per server'
     ]
   },
   // can MANAGE_CHANNELS
