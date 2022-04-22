@@ -3,7 +3,7 @@ const { ContextMenuCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
   data: new ContextMenuCommandBuilder()
-    .setName('user ids')
+    .setName('get user ids')
     .setType(3),
   async execute(interaction) {
     const messageId = interaction.targetId;
@@ -16,9 +16,9 @@ module.exports = {
     const channel = guild.channels.cache.get(channelId);
 
     channel.messages.fetch(messageId).then((msg) => {
-      const ids = msg.mentions.users.map(user => user.id);
+      const ids = msg.mentions.users.filter(user => !user.bot).map(user => user.id);
       if (ids.length > 0) {
-        const attachment = new Discord.MessageAttachment(Buffer.from(`<@${ids.join('>\n<@')}>`, 'utf-8'), 'usersID.txt');
+        const attachment = new Discord.MessageAttachment(Buffer.from(`<@${ids.join('>\n<@')}>`, 'utf-8'), 'userIDs.txt');
         return interaction.followUp({ content: `Users in message ${messageId}`, files: [attachment], ephemeral: true });
       } else {
         return interaction.followUp({ content: `There are no user mentions in message ${messageId}`, ephemeral: true });

@@ -30,6 +30,9 @@ module.exports = {
           return interaction.followUp({ content: `User ${userId} not found <a:shookysad:949689086665437184>` });
 
         }
+        if (foundUser.bot) {
+          return;
+        }
         const foundMember = members.find(m => m.id === userId);
         if (!foundMember) {
           return interaction.followUp({ content: `Member ${userId} not found in server <a:shookysad:949689086665437184>` });

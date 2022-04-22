@@ -39,7 +39,7 @@ const commandsWithPermissions = [
       'temp-role',
       'removerole',
       'rollcall',
-      'reactions'
+      'get reactions'
     ]
   },
   // can MANAGE_ROLES
@@ -56,8 +56,8 @@ const commandsWithPermissions = [
       'removerolestouserinmessage',
       'role_in',
       'role_rin',
-      'user names',
-      'users per server'
+      'get user names',
+      'get users per server'
     ]
   },
   // can MANAGE_CHANNELS

@@ -4,7 +4,7 @@ const got = require('got');
 
 module.exports = {
   data: new ContextMenuCommandBuilder()
-    .setName('user names')
+    .setName('get user names')
     .setType(3)
     .setDefaultPermission(false),
   async execute(interaction) {
@@ -38,6 +38,9 @@ module.exports = {
                 ephemeral: true
               });
 
+            }
+            if (foundUser.bot) {
+              return;
             }
             const foundMember = members.find(m => m.id === userId);
             if (!foundMember) {

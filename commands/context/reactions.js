@@ -3,7 +3,7 @@ const { ContextMenuCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
   data: new ContextMenuCommandBuilder()
-    .setName('reactions')
+    .setName('get reactions')
     .setType(3)
     .setDefaultPermission(false),
   async execute(interaction) {
