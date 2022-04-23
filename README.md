@@ -49,7 +49,7 @@ Bookmarks a message on Discord by reacting to the message with the bookmark emoj
 
 Commands all start with `/` and will give you tool-tips if you start typing in Discord.
 
-### Dictionary
+### 📘 Dictionary
 
 | Command                            | Description                                                                                | Example                   |
 |------------------------------------|--------------------------------------------------------------------------------------------|---------------------------|
@@ -58,24 +58,78 @@ Commands all start with `/` and will give you tool-tips if you start typing in D
 | `/papago <text> [language_codes]`  | Translate text using Papago. Defaults to English. Optional: Translate to another language. | `/papago 눈이 오고 있다 zh-CN`|
 | `/word <word>`                     | Search the dictionary for a word.                                                          | `/word 눈`                 |
 
-### Role Management
+#### `/examples`
+
+**Options:**
+`<word>` *(string)* Required
+
+**Description:**
+Returns an embedded message with a list of example sentences in Korean that include the `<word>`.
+Adds a 🔖 reaction to bookmark the result.
+
+**Permissions:**
+None
+
+#### `/hanja`
+
+**Options:**
+`<word>` *(string)* Required
+
+**Description:**
+Searches the hanja database for meanings of hanjas and related words that occur in the provided `<word>`.
+Scans the word and returns an embedded messages with all relevant results including meaning of single hanjas as well as related words.
+Users can use buttons to browse through multiple pages of results.
+Adds a 🔖 reaction to bookmark the result.
+
+**Permissions:**
+None
+
+#### `/papago`
+
+**Options:**
+`<text>` *(string)* Required
+`[language_codes]`  *(string)* Optional
+
+**Description:**
+Uses Papago's Neural Machine Translation to translate a `<text>` between two given languages.
+Translates from Korean to English by default, but users can specify source and target language.
+The available language codes are: `ko` (Korean), `en` (English), `zh-CN` (Chinese), `zh-TW` (Taiwanese), `es` (Spanish), `fr` (French), `vi` (Vietnamese), `th` (Thai), `id` (Indonesian).
+Adds a 🔖 reaction to bookmark the result.
+
+**Permissions:**
+None
+
+#### `/word`
+
+**Options:**
+`<word>` *(string)* Required
+
+Performs a dictionary search for a given `<word>`.
+Results are returned in an embedded message and include the word-type and the meanings of the word both in English and in Korean.
+Users can use buttons to switch the language of the meanings.
+Adds a 🔖 reaction to bookmark the result.
+
+**Permissions:**
+None
+
+### ⚙️ Role Management
 
 | Command                                                                                       | Description                                                                                                           | Example                                                                                                    |
 |-----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------|
-| `/addpermissions <role> <command>`                                                            | Give permission to user(s) with role to use command.                                                                  | `/addpermissions @Moderator giveTheApples`                                                                 |
+| `/addpermissions <role> <command>`                                                            | Give permission to user(s) with role to use command.                                                                  | `/addpermissions @Moderator givetheapples`                                                                 |
 | `/addrole <role> <file_url>`                                                                  | Give role to user(s) in the linked csv/txt file.                                                                      | `/addrole @Moderator http://url`                                                                           |
 | `/addrolestouserinmessage <message_ids> <channel> <role>`                                     | Give role to user(s) mentioned in message(s).                                                                         | `/addrolestouserinmessage 1234567812345678 #signup @ClassRole`                                             |
 | `/temp-role <deadline> <role_id> <file_url>`                                                  | Give role to user(s) in the linked csv/txt file for a limited time.                                                   | `/temp-role 2023-06-13 00:00 @Moderator http://url`                                                        |
 | `/ccssgivetheapples <server_id> <message_ids> <channel_id> <first_role_id'> <second_role_id>` | Gives role to user(s) mentioned in message(s) in satellite server. If they have first role, the second role is given. | `/ccssgivetheapples 1234567812345678 1234567812345678 1234567812345678 1234567812345678 1234567812345678`  |
 | `/givetheapples <message_ids> <channel> <first_role'> <second_role>`                          | Gives role to user(s) mentioned in message(s). If they have first role, the second role is given.                     | `/givetheapples 1234567812345678 #class-n-club-logbook @🍏 @🍎`                                            |
-| `/removepermissions <role> <command>`                                                         | Remove permission from user(s) with role to use command.                                                              | `/removepermissions @Moderator giveTheApples`                                                              |
+| `/removepermissions <role> <command>`                                                         | Remove permission from user(s) with role to use command.                                                              | `/removepermissions @Moderator givetheapples`                                                              |
 | `/removerole <role> <file_url>`                                                               | Remove role from user(s) in the linked csv/txt file.                                                                  | `/removerole @Moderator http://url`                                                                        |
 | `/removerolestouserinmessage <message_ids> <channel> <role>`                                  | Remove role from user(s) mentioned in message(s).                                                                     | `/removerolestouserinmessage 1234567812345678 #signup @ClassRole`                                          |
 | `/role_in <base_role> <assigned_role>`                                                        | Give role to all users with another role.                                                                             | `/role_in @ClassRole @ClassAlumniRole`                                                                     |
-| `/role_rin <base_role> <assigned_role>`                                                       | Remove role from all users with another role.                                                                         | `/role_in @ClassAlumniRole @ClassRole`                                                                     |
+| `/role_rin <base_role> <assigned_role>`                                                       | Remove role from all users with another role.                                                                         | `/role_rin @ClassAlumniRole @ClassRole`                                                                    |
 | `/rollcall <role_exception_ids> <rollcall_role_id>`                                           | Starts roll call.                                                                                                     | `/rollcall 1234567812345678 @RollCall`                                                                     |
 
-### Information Request
+### ℹ️ Information Request
 
 | Command                                             | Description                                                              | Example                                                    |
 |-----------------------------------------------------|--------------------------------------------------------------------------|------------------------------------------------------------|
@@ -86,7 +140,7 @@ Commands all start with `/` and will give you tool-tips if you start typing in D
 | `/getusernames <file_url>`                          | Get user nicknames and tags from user(s) in the linked csv/txt file.     | `/getusernames http://url`                                 |
 | `/getusersinserver <message_ids> <channel>`         | Get a list of users per BA server from user(s) mentioned in message(s).  | `/getusersinserver 1234567812345678 #class-n-club-logbook` |
 
-### Reminders
+### 📅 Reminders
 
 | Command                                                                  | Description                                | Example                                                                                     |
 |--------------------------------------------------------------------------|--------------------------------------------|---------------------------------------------------------------------------------------------|
