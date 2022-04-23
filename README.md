@@ -77,7 +77,7 @@ None
 
 **Description:**<br/>
 Searches the hanja database for meanings of hanjas and related words that occur in the provided `<word>`.<br/>
-Scans the word and returns an embedded messages with all relevant results including meaning of single hanjas as well as related words.<br/>
+Scans the word and returns an embedded message with all relevant results including meaning of single hanjas as well as related words.<br/>
 * Users can use buttons to browse through multiple pages of results.<br/>
 * Adds a 🔖 reaction to bookmark the result.
 
@@ -142,6 +142,20 @@ None
 | `/role_rin <base_role> <assigned_role>`                                                       | Remove role from all users with another role.                                                                         | `/role_rin @ClassAlumniRole @ClassRole`                                                                    |
 | `/rollcall <role_exception_ids> <rollcall_role_id>`                                           | Starts roll call.                                                                                                     | `/rollcall 1234567812345678 @RollCall`                                                                     |
 
+#### `/addpermissions`
+
+**Options:**<br/>
+`<role>` *(@role)* Required<br/>
+`<command>` *(string)* Required
+
+**Description:**<br/>
+Gives all users with the <role> provided the permission to use the command with the command name from `<command>`.<br/>
+The `<command>` must match the exact command name of a current slash command including spaces and letter-casing (i.e. ✅ addpermissions, ❌ add Permissions )
+
+**Permissions:**<br/>
+MANAGE_ROLES
+
+
 ### ℹ️ Information Request
 
 | Command                                             | Description                                                              | Example                                                    |
@@ -152,6 +166,23 @@ None
 | `/getuserids <message_ids> <channel>`               | Get a list of user ids for user(s) mentioned in message(s).              | `/getuserids 1234567812345678 #volunteer`                  |
 | `/getusernames <file_url>`                          | Get user nicknames and tags from user(s) in the linked csv/txt file.     | `/getusernames http://url`                                 |
 | `/getusersinserver <message_ids> <channel>`         | Get a list of users per BA server from user(s) mentioned in message(s).  | `/getusersinserver 1234567812345678 #class-n-club-logbook` |
+
+#### `/areactivestudents`
+
+**Options:**<br/>
+`<message_ids>` *(string)* Required<br/>
+`<channel>` *(@channel)* Required<br/>
+`<role>` *(@role)* Required
+
+**Description:**<br/>
+Gets all users mentioned in a single message or messages by `<message_ids>` in a specific channel provided in `<channel>` and checks if they have the active student role provided in `<role>`.<br/>
+Returns a response with a `.txt` attachment named `activeStudents` which includes a list of the ids from the mentioned users who have the `<role>`.<br/>
+Returns a second response with a `.txt` attachment named `notActiveStudents` which includes a list of the ids from the mentioned users who do not have the `<role>`.<br/>
+When entering multiple `<message_ids>` they should be entered with a space between each one: `1234567812345678 1234567812345678`.
+
+**Permissions:**<br/>
+MANAGE_ROLES
+
 
 ### 📅 Reminders
 
