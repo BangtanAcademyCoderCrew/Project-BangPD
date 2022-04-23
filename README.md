@@ -65,7 +65,7 @@ Commands all start with `/` and will give you tool-tips if you start typing in D
 
 **Description:**<br/>
 Returns an embedded message with a list of example sentences in Korean that include the `<word>`.<br/>
-Adds a 🔖 reaction to bookmark the result.
+* Adds a 🔖 reaction to bookmark the result.
 
 **Permissions:**<br/>
 None
@@ -78,8 +78,8 @@ None
 **Description:**<br/>
 Searches the hanja database for meanings of hanjas and related words that occur in the provided `<word>`.<br/>
 Scans the word and returns an embedded messages with all relevant results including meaning of single hanjas as well as related words.<br/>
-Users can use buttons to browse through multiple pages of results.<br/>
-Adds a 🔖 reaction to bookmark the result.
+* Users can use buttons to browse through multiple pages of results.<br/>
+* Adds a 🔖 reaction to bookmark the result.
 
 **Permissions:**<br/>
 None
@@ -88,35 +88,25 @@ None
 
 **Options:**<br/>
 `<text>` *(string)* Required<br/>
-`[language_codes]`  *(string)* Optional
+`[language_codes]`  *(source>target)* Optional
 
 **Description:**<br/>
 Uses Papago's Neural Machine Translation to translate a `<text>` between two given languages.<br/>
 Translates from Korean to English by default, but users can specify source and target language.<br/>
-Adds a 🔖 reaction to bookmark the result.<br/>
-The available language codes are:
- - `ko` (Korean)
- - `en` (English)
- - `zh-CN` (Chinese)
- - `zh-TW` (Taiwanese)
- - `es` (Spanish)
- - `fr` (French)
- - `vi` (Vietnamese)
- - `th` (Thai)
- - `id` (Indonesian)
- - `ja` (Japanese)
-The available combinations are:
- - `ko>en`
- - `ko>zh-CN`
- - `ko>zh-TW`
- - `ko>es`
- - `ko>fr`
- - `ko>vi`
- - `ko>th`
- - `ko>id`
- - `ko>ja`
- - `en>ja`
- - `en>fr`
+* Adds a 🔖 reaction to bookmark the result.<br/>
+* The available language codes are: `ko` (Korean), `en` (English), `zh-CN` (Chinese), `zh-TW` (Taiwanese), `es` (Spanish), `fr` (French), `vi` (Vietnamese), `th` (Thai), `id` (Indonesian), and `ja` (Japanese).<br/>
+* The available `[language_codes]` combinations are:
+  - `ko>en`
+  - `ko>zh-CN`
+  - `ko>zh-TW`
+  - `ko>es`
+  - `ko>fr`
+  - `ko>vi`
+  - `ko>th`
+  - `ko>id`
+  - `ko>ja`
+  - `en>ja`
+  - `en>fr`
 
 **Permissions:**<br/>
 None
@@ -129,8 +119,8 @@ None
 **Description:**<br/>
 Performs a dictionary search for a given `<word>`.<br/>
 Results are returned in an embedded message and include the word-type and the meanings of the word both in English and in Korean.<br/>
-Users can use buttons to switch the language of the meanings.<br/>
-Adds a 🔖 reaction to bookmark the result.
+* Users can use buttons to switch the language of the meanings.<br/>
+* Adds a 🔖 reaction to bookmark the result.
 
 **Permissions:**<br/>
 None
