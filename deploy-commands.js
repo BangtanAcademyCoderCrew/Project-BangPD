@@ -20,15 +20,16 @@ commandDirectories.forEach(dir => {
 
 const rest = new REST({ version: '9' }).setToken(botToken);
 
-(async () => {
-  try {
-    const createdCommands = await rest.put(
-      Routes.applicationGuildCommands(clientId, guildId),
-      { body: commands }
-    );
-
-    await setCommandPermissions(createdCommands);
-  } catch (error) {
-    console.error(error);
+module.exports = {
+  deployCommands: async () => {
+    try {
+      const createdCommands = await rest.put(
+        Routes.applicationGuildCommands(clientId, guildId),
+        { body: commands }
+      );
+      await setCommandPermissions(createdCommands);
+    } catch (error) {
+      console.error(error);
+    }
   }
-})();
+};

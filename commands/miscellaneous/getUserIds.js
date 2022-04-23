@@ -24,8 +24,8 @@ module.exports = {
 
     const checkIDs = (messageId) => {
       channel.messages.fetch(messageId).then((msg) => {
-        const ids = msg.mentions.users.map(user => user.id);
-        const attachment = new Discord.MessageAttachment(Buffer.from(`<@${ids.join('>\n<@')}>`, 'utf-8'), 'usersID.txt');
+        const ids = msg.mentions.users.filter(user => !user.bot).map(user => user.id);
+        const attachment = new Discord.MessageAttachment(Buffer.from(`<@${ids.join('>\n<@')}>`, 'utf-8'), 'userIDs.txt');
         interaction.followUp({ content: `Users in message ${messageId}`, files: [attachment] });
       }).catch((error) => {
         console.log(error);

@@ -38,7 +38,8 @@ const commandsWithPermissions = [
       'getreactions',
       'temp-role',
       'removerole',
-      'rollcall'
+      'rollcall',
+      'get reactions'
     ]
   },
   // can MANAGE_ROLES
@@ -54,7 +55,9 @@ const commandsWithPermissions = [
       'removepermissions',
       'removerolestouserinmessage',
       'role_in',
-      'role_rin'
+      'role_rin',
+      'get user names',
+      'get users per server'
     ]
   },
   // can MANAGE_CHANNELS
@@ -97,10 +100,13 @@ module.exports = {
       });
       obj.roleNames.map(name => {
         const comm = filteredCommands.find(command => command.name === name);
+        if (!comm) {
+          return;
+        }
+
         if (comm.id in customPermissions) {
           permissionsBody.push({ id: comm.id, permissions: rolesWithPermissions.concat(customPermissions[comm.id].permissions) });
-        }
-        else {
+        } else {
           permissionsBody.push({ id: comm.id, permissions: rolesWithPermissions });
         }
       });
