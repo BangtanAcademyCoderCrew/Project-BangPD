@@ -43,3 +43,51 @@ Bookmarks a message on Discord by reacting to the message with the bookmark emoj
 * Unzip the files and go to the folder that contains your bot logic
 * Run **forever -o out.log -e err.log start index.js** to start the bot.
 * To stop it, run **forever stop index.js**
+
+
+## Commands
+
+Commands all start with `/` and will give you tool-tips if you start typing in Discord.
+
+### Dictionary
+
+| Command                            | Description                                                                                | Example                   |
+|------------------------------------|--------------------------------------------------------------------------------------------|---------------------------|
+| `/examples <word>`                 | Search the dictionary for example sentences for a word.                                    | `/examples 눈`             |
+| `/hanja <word>`                    | Search for Hanja in English, Korean, or Hanja itself.                                      | `/hanja 雪`                |
+| `/papago <text> [language_codes]`  | Translate text using Papago. Defaults to English. Optional: Translate to another language. | `/papago 눈이 오고 있다 zh-CN |
+| `/word <word>`                     | Search the dictionary for a word.                                                          | `/word 눈`                 |
+
+### Role Management
+
+| Command                                                                                       | Description                                                                                                           | Example                                                                                                    | Permissions                   |
+|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------|-------------------------------|
+| `/addpermissions <role> <command>`                                                            | Give permission to user(s) with role to use command.                                                                  | `/addpermissions @Moderator giveTheApples`                                                                 | MANAGE_ROLES                  |
+| `/addrole <role> <file_url>`                                                                  | Give role to user(s) in the linked csv/txt file.                                                                      | `/addrole @Moderator http://discordattachmenturl`                                                          | MANAGE_CHANNELS, MANAGE_ROLES |
+| `/addrolestouserinmessage <message_ids> <channel> <role>`                                     | Give role to user(s) mentioned in message(s).                                                                         | `/addrolestouserinmessage 1234567812345678 #signup @ClassRole`                                             | MANAGE_ROLES                  |
+| `/temp-role <deadline> <role_id> <file_url>`                                                  | Give role to user(s) in the linked csv/txt file for a limited time.                                                   | `/temp-role 2023-06-13 00:00 @Moderator http://discordattachmenturl`                                       | MANAGE_CHANNELS, MANAGE_ROLES |
+| `/ccssgivetheapples <server_id> <message_ids> <channel_id> <first_role_id'> <second_role_id>` | Gives role to user(s) mentioned in message(s) in satellite server. If they have first role, the second role is given. | `/ccssgivetheapples 1234567812345678 1234567812345678 1234567812345678 1234567812345678 1234567812345678`  | MANAGE_ROLES                  |
+| `/givetheapples <message_ids> <channel> <first_role'> <second_role>`                          | Gives role to user(s) mentioned in message(s). If they have first role, the second role is given.                     | `/givetheapples 1234567812345678 #class-n-club-logbook @🍏 @🍎`                                            | MANAGE_ROLES                  |
+| `/removepermissions <role> <command>`                                                         | Remove permission from user(s) with role to use command.                                                              | `/removepermissions @Moderator giveTheApples`                                                              | MANAGE_ROLES                  |
+| `/removerole <role> <file_url>`                                                               | Remove role from user(s) in the linked csv/txt file.                                                                  | `/removerole @Moderator http://discordattachmenturl`                                                       | MANAGE_CHANNELS, MANAGE_ROLES |
+| `/removerolestouserinmessage <message_ids> <channel> <role>`                                  | Remove role from user(s) mentioned in message(s).                                                                     | `/removerolestouserinmessage 1234567812345678 #signup @ClassRole`                                          | MANAGE_ROLES                  |
+| `/role_in <base_role> <assigned_role>`                                                        | Give role to all users with another role.                                                                             | `/role_in @ClassRole @ClassAlumniRole`                                                                     | MANAGE_ROLES                  |
+| `/role_rin <base_role> <assigned_role>`                                                       | Remove role from all users with another role.                                                                         | `/role_in @ClassAlumniRole @ClassRole`                                                                     | MANAGE_ROLES                  |
+| `/rollcall <role_exception_ids> <rollcall_role_id>`                                           | Starts roll call.                                                                                                     | `/rollcall 1234567812345678 @RollCall`                                                                     | MANAGE_CHANNELS, MANAGE_ROLES |
+
+### Information Request
+
+| Command                                             | Description                                                              | Example                                                    | Permissions                   |
+|-----------------------------------------------------|--------------------------------------------------------------------------|------------------------------------------------------------|-------------------------------|
+| `/areactivestudents <message_ids> <channel> <role>` | Get active student status for user(s) in message(s).                     | `/areactivestudents 12345677812345678 @ActiveStudent`      | MANAGE_MESSAGES               |
+| `/getfilelink <message_id> <channel>`               | Get the link to a message attachment.                                    | `/getfilelink 12345677812345678 #logbook-logging`          |                               |
+| `/getreactions <message_id> <channel>`              | Get all reactions to a message.                                          | `/getreactions 1234567812345678 #signup`                   | MANAGE_CHANNELS, MANAGE_ROLES |
+| `/getuserids <message_ids> <channel>`               | Get a list of user ids for user(s) mentioned in message(s).              | `/getuserids 1234567812345678 #volunteer`                  |                               |
+| `/getusernames <file_url>`                          | Get user nicknames and tags from user(s) in the linked csv/txt file.     | `/getusernames http://discordattachmenturl`                | MANAGE_ROLES                  |
+| `/getusersinserver <message_ids> <channel>`         | Get a list of users per BA server from user(s) mentioned in message(s).  | `/getusersinserver 1234567812345678 #class-n-club-logbook` | MANAGE_ROLES                  |
+
+### Reminders
+
+| Command                                                                  | Description                                | Example                                                                                     | Permissions                   |
+|--------------------------------------------------------------------------|--------------------------------------------|---------------------------------------------------------------------------------------------|-------------------------------|
+| `/setreminder <deadline> <channel> <time_in_advance> <reminder_message>` | Set a reminder message to send in channel. | `/setreminder 2023-06-13 00:00 #volunteer 1d Volunteer applications will close in 24 hours` | MANAGE_CHANNELS               |
