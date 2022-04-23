@@ -149,8 +149,8 @@ None
 `<command>` *(string)* Required
 
 **Description:**<br/>
-Gives all users with the <role> provided the permission to use the command with the command name from `<command>`.<br/>
-* The `<command>` must match the exact command name of a current slash command including spaces and letter-casing (i.e. ✅ addpermissions, ❌ add Permissions )
+Gives all users with the `<role>` provided the permission to use the command with the command name from `<command>`.<br/>
+* The `<command>` must match the exact command name of a current slash command, including any spaces and letter-casing (i.e. ✅ addpermissions, ❌ add Permissions )
 
 **Permissions:**<br/>
 MANAGE_ROLES
