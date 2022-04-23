@@ -55,61 +55,84 @@ Commands all start with `/` and will give you tool-tips if you start typing in D
 |------------------------------------|--------------------------------------------------------------------------------------------|---------------------------|
 | `/examples <word>`                 | Search the dictionary for example sentences for a word.                                    | `/examples 눈`             |
 | `/hanja <word>`                    | Search for Hanja in English, Korean, or Hanja itself.                                      | `/hanja 雪`                |
-| `/papago <text> [language_codes]`  | Translate text using Papago. Defaults to English. Optional: Translate to another language. | `/papago 눈이 오고 있다 zh-CN`|
+| `/papago <text> [language_codes]`  | Translate text using Papago. Defaults to English. Optional: Translate to another language. | `/papago 눈이 오고 있다 ko>zh-CN`|
 | `/word <word>`                     | Search the dictionary for a word.                                                          | `/word 눈`                 |
 
 #### `/examples`
 
-**Options:**
+**Options:**<br/>
 `<word>` *(string)* Required
 
-**Description:**
+**Description:**<br/>
 Returns an embedded message with a list of example sentences in Korean that include the `<word>`.<br/>
 Adds a 🔖 reaction to bookmark the result.
 
-**Permissions:**
+**Permissions:**<br/>
 None
 
 #### `/hanja`
 
-**Options:**
+**Options:**<br/>
 `<word>` *(string)* Required
 
-**Description:**
+**Description:**<br/>
 Searches the hanja database for meanings of hanjas and related words that occur in the provided `<word>`.<br/>
 Scans the word and returns an embedded messages with all relevant results including meaning of single hanjas as well as related words.<br/>
 Users can use buttons to browse through multiple pages of results.<br/>
 Adds a 🔖 reaction to bookmark the result.
 
-**Permissions:**
+**Permissions:**<br/>
 None
 
 #### `/papago`
 
-**Options:**
+**Options:**<br/>
 `<text>` *(string)* Required<br/>
 `[language_codes]`  *(string)* Optional
 
-**Description:**
+**Description:**<br/>
 Uses Papago's Neural Machine Translation to translate a `<text>` between two given languages.<br/>
 Translates from Korean to English by default, but users can specify source and target language.<br/>
-The available language codes are: `ko` (Korean), `en` (English), `zh-CN` (Chinese), `zh-TW` (Taiwanese), `es` (Spanish), `fr` (French), `vi` (Vietnamese), `th` (Thai), `id` (Indonesian).<br/>
-Adds a 🔖 reaction to bookmark the result.
+Adds a 🔖 reaction to bookmark the result.<br/>
+The available language codes are:
+ - `ko` (Korean)
+ - `en` (English)
+ - `zh-CN` (Chinese)
+ - `zh-TW` (Taiwanese)
+ - `es` (Spanish)
+ - `fr` (French)
+ - `vi` (Vietnamese)
+ - `th` (Thai)
+ - `id` (Indonesian)
+ - `ja` (Japanese)
+The available combinations are:
+ - `ko>en`
+ - `ko>zh-CN`
+ - `ko>zh-TW`
+ - `ko>es`
+ - `ko>fr`
+ - `ko>vi`
+ - `ko>th`
+ - `ko>id`
+ - `ko>ja`
+ - `en>ja`
+ - `en>fr`
 
-**Permissions:**
+**Permissions:**<br/>
 None
 
 #### `/word`
 
-**Options:**
+**Options:**<br/>
 `<word>` *(string)* Required
 
+**Description:**<br/>
 Performs a dictionary search for a given `<word>`.<br/>
 Results are returned in an embedded message and include the word-type and the meanings of the word both in English and in Korean.<br/>
 Users can use buttons to switch the language of the meanings.<br/>
 Adds a 🔖 reaction to bookmark the result.
 
-**Permissions:**
+**Permissions:**<br/>
 None
 
 ### ⚙️ Role Management
