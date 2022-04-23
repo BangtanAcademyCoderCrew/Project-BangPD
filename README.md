@@ -150,7 +150,7 @@ None
 
 **Description:**<br/>
 Gives all users with the <role> provided the permission to use the command with the command name from `<command>`.<br/>
-The `<command>` must match the exact command name of a current slash command including spaces and letter-casing (i.e. ✅ addpermissions, ❌ add Permissions )
+* The `<command>` must match the exact command name of a current slash command including spaces and letter-casing (i.e. ✅ addpermissions, ❌ add Permissions )
 
 **Permissions:**<br/>
 MANAGE_ROLES
@@ -178,10 +178,10 @@ MANAGE_ROLES
 Gets all users mentioned in a single message or messages by `<message_ids>` in a specific channel provided in `<channel>` and checks if they have the active student role provided in `<role>`.<br/>
 Returns a response with a `.txt` attachment named `activeStudents` which includes a list of the ids from the mentioned users who have the `<role>`.<br/>
 Returns a second response with a `.txt` attachment named `notActiveStudents` which includes a list of the ids from the mentioned users who do not have the `<role>`.<br/>
-When entering multiple `<message_ids>` they should be entered with a space between each one: `1234567812345678 1234567812345678`.
+* When entering multiple `<message_ids>` they should be entered with a space between each one: `1234567812345678 1234567812345678`.
 
 **Permissions:**<br/>
-MANAGE_ROLES
+MANAGE_MESSAGES
 
 
 ### 📅 Reminders
@@ -189,3 +189,20 @@ MANAGE_ROLES
 | Command                                                                  | Description                                | Example                                                                                     |
 |--------------------------------------------------------------------------|--------------------------------------------|---------------------------------------------------------------------------------------------|
 | `/setreminder <deadline> <channel> <time_in_advance> <reminder_message>` | Set a reminder message to send in channel. | `/setreminder 2023-06-13 00:00 #volunteer 1d Volunteer applications will close in 24 hours` |
+
+
+#### `/setreminder`
+
+**Options:**<br/>
+`<deadline>` *(string)* Required<br/>
+`<channel>` *(@channel)* Required<br/>
+`<time_in_advance>` *(string @choice)* Required<br/>
+`<reminder_message>` *(string)* Required
+
+**Description:**<br/>
+Sends a message (`reminder_message>`) to a the specified channel (`<channel>`) at a specific time in advance from a deadline (`<deadline>`) provided.<br/>
+* When entering the `<deadline>` the format should be CT (America/Chicago) in `YYYY-MM-DD HH:MM` format. It may not be a date time that has already passed.<br/>
+* When entering the `<time_in_advance>` the three choices provided are: 30 min, 1 hour, and 1 day in advance of the deadline.
+
+**Permissions:**<br/>
+MANAGE_CHANNELS
