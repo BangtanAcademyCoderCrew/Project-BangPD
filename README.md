@@ -38,8 +38,8 @@ Bang PD is a bot used in Bangtan Academy.
 Commands all start with `/` and will give you tool-tips if you start typing in Discord.
 
 - [Dictionary Commands](#-dictionary-commands)
-- [Role Management Commands](#-role-management-commands)
-- [Information Request Commands](#-information-request-commands)
+- [Role Management Commands](#%EF%B8%8F-role-management-commands)
+- [Information Request Commands](#ℹ%EF%B8%8F-information-request-commands)
 - [Reminder Command](#-reminder-command)
 
 
@@ -87,7 +87,7 @@ Adds a 🔖 reaction to bookmark the result.<br/>
 > The available language codes are: <br/><br/>
 > `ko` (Korean), `en` (English), `zh-CN` (Chinese), `zh-TW` (Taiwanese), `es` (Spanish), `fr` (French), `vi` (Vietnamese), `th` (Thai), `id` (Indonesian), and `ja` (Japanese).<br/>
 
-The available `[language_codes]` combinations are:
+When entering `[language_codes]` the available combinations are:
   - `ko>en`
   - `ko>zh-CN`
   - `ko>zh-TW`
@@ -135,7 +135,7 @@ Adds a 🔖 reaction to bookmark the result.
   
 > **Options:**<br/>
 > `<role>` *(@role)* Required<br/>
-> `<file_url>` *(string)* Required
+> `<command>` *(string)* Required
 >
 > **Description:**<br/>
 > Gives all users with the `<role>` provided the permission to use the command with the command name from `<command>`.<br/>
@@ -169,11 +169,21 @@ Adds a 🔖 reaction to bookmark the result.
   
 > **Options:**<br/>
 > `<message_id>` *(string)* Required<br/>
+> `<channel>` *(@channel)* Required<br/>
 > `<role>` *(@role)* Required
 >
 > **Description:**<br/>
-> Assigns the `<role>` provided to all the users tagged in a message. This command works for messages in chats and threads.<br/>
+> Assigns the `<role>` provided to all the users tagged in a message in a specific channel. This command works for messages in chats and threads.<br/>
 >
+> Returns a response, per message, with a `.txt` attachment named `usersID.txt`, which includes a list of the ids from the mentioned users who had the `<role>` removed.
+>
+> User ids are separated by a new line and in the following format.
+>
+> ```
+> <@12345678XXXXXXXX>
+> <@12345678XXXXXXXX>
+> <@12345678XXXXXXXX>
+> ```
 > **Permissions:** MANAGE_ROLES
 </details>
 
@@ -232,6 +242,122 @@ Adds a 🔖 reaction to bookmark the result.
 > **Permissions:** MANAGE_ROLES
 </details>
 
+<details>
+<summary>/removepermissions</summary>
+
+> **Options:**<br/>
+> `<role>` *(@role)* Required<br/>
+> `<command>` *(string)* Required
+>
+> **Description:**<br/>
+> Removes permissions for all users with the `<role>` provided to use the command with the command name from `<command>`.<br/>
+>
+> - The `<command>` must match the exact command name of a current slash command, including any spaces and letter-casing (i.e. ✅ removepermissions, ❌ remove Permissions )
+>
+> **Permissions:** MANAGE_ROLES
+</details>
+
+<details>
+<summary>/removerole</summary>
+
+> **Options:**<br/>
+> `<role>` *(@role)* Required<br/>
+> `<file_url>` *(string)* Optional
+>
+> **Description:**<br/>
+> Remove the `<role>` provided from all users listed in the csv/txt file.<br/>
+>
+> - The usernames in the txt/csv file must be the unique username that includes the numbers at the end
+>   - ✅ minyoongi#0309
+>   - ❌ minyoongi
+>   - ❌ SUGA 🎹 슈가)
+> - Slash commands currently do not support file attachments, so attaching the file will not work. The `file_url` is technically optional, but until file attachments are supported, this command won't work as expected without a `file_url`. Please upload the file before using the command, and grab the file url using the `get file url` menu command.
+>
+> **Permissions:** MANAGE_ROLES and MANAGE_CHANNELS
+</details>
+
+<details>
+<summary>/removerolestouserinmessage</summary>
+
+> **Options:**<br/>
+> `<message_id>` *(string)* Required<br/>
+> `<channel>` *(@channel)* Required<br/>
+> `<role>` *(@role)* Required
+>
+> **Description:**<br/>
+> Removes the `<role>` provided from all the users tagged in a message in a specific channel. This command works for messages in chats and threads.<br/>
+>
+> Returns a response, per message, with a `.txt` attachment named `usersID.txt`, which includes a list of the ids from the mentioned users who had the `<role>` removed.
+>
+> User ids are separated by a new line and in the following format.
+>
+> ```
+> <@12345678XXXXXXXX>
+> <@12345678XXXXXXXX>
+> <@12345678XXXXXXXX>
+> ```
+> **Permissions:** MANAGE_ROLES
+</details>
+
+<details>
+<summary>/role_in</summary>
+
+> **Options:**<br/>
+> `<base_role>` *(@role)* Required<br/>
+> `<assigned_role>` *(@role)* Required<br/>
+>
+> **Description:**<br/>
+> Gives the `<assigned_role>` provided to all the users who currently have the `<base_role>`.
+>
+> Returns a response with a `.txt` attachment named `usersID.txt`, which includes a list of the ids for the users who had the `<role>` added.
+>
+> User ids are separated by a new line and in the following format.
+>
+> ```
+> <@12345678XXXXXXXX>
+> <@12345678XXXXXXXX>
+> <@12345678XXXXXXXX>
+> ```
+> **Permissions:** MANAGE_ROLES
+</details>
+
+<details>
+<summary>/role_rin</summary>
+
+> **Options:**<br/>
+> `<base_role>` *(@role)* Required<br/>
+> `<assigned_role>` *(@role)* Required<br/>
+>
+> **Description:**<br/>
+> Removes the `<assigned_role>` provided from all the users who currently have the `<base_role>`.
+>
+> Returns a response with a `.txt` attachment named `usersID.txt`, which includes a list of the ids for the users who had the `<role>` removed.
+>
+> User ids are separated by a new line and in the following format.
+>
+> ```
+> <@12345678XXXXXXXX>
+> <@12345678XXXXXXXX>
+> <@12345678XXXXXXXX>
+> ```
+> **Permissions:** MANAGE_ROLES
+</details>
+
+<details>
+<summary>/rollcall</summary>
+
+> **Options:**<br/>
+> `<role_exception_ids>` *(string)* Required<br/>
+> `<rollcall_role_id>` *(@role)* Required<br/>
+>
+> **Description:**<br/>
+> Starts rollcall. Users with the roles provided in `<role_exception_ids>` will not have the rollcall role (`<rollcall_role_id>`) added.
+>
+> When entering multiple `<role_exception_ids>` they should be entered with a space between each one: `12345678XXXXXXXX 12345678XXXXXXXX`.
+>
+> **Permissions:** MANAGE_CHANNELS, MANAGE_ROLES
+</details>
+
 ### ℹ️ Information Request Commands
 
 | Command                                             | Description                                                             | Example                                                    |
@@ -261,7 +387,7 @@ Returns a second response with a `.txt` attachment named `notActiveStudents.txt`
 > <@12345678XXXXXXXX>
 > ```
 
-When entering multiple `<message_ids>` they should be entered with a space between each one: `1234567812345678 1234567812345678`.
+When entering multiple `<message_ids>` they should be entered with a space between each one: `12345678XXXXXXXX 12345678XXXXXXXX`.
 
 
 #### <font size=3>`/getfilelink`</font>
