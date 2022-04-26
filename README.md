@@ -37,23 +37,23 @@ Bang PD is a bot used in Bangtan Academy.
 
 Commands all start with `/` and will give you tool-tips if you start typing in Discord.
 
-- [Dictionary Commands](#-dictionary-commands)
-- [Role Management Commands](#%EF%B8%8F-role-management-commands)
-- [Information Request Commands](#ℹ%EF%B8%8F-information-request-commands)
-- [Reminder Command](#-reminder-command)
+- 📘 [Dictionary Commands](#-dictionary-commands)
+- ⚙️ [Role Management Commands](#%EF%B8%8F-role-management-commands)
+- ℹ️ [Information Request Commands](#ℹ%EF%B8%8F-information-request-commands)
+- 📅 [Reminder Command](#-reminder-command)
 
 
 ### 📘 Dictionary Commands
 
-| Command              | Description                                                                                | Example                           |
-| -------------------- | ------------------------------------------------------------------------------------------ | --------------------------------- |
-| `/examples <word>`   | Search the dictionary for example sentences for a word.                                    | `/examples 눈`                    |
-| `/hanja <word>`      | Search for Hanja in English, Korean, or Hanja itself.                                      | `/hanja 雪`                       |
-| `/papago <text> [language_codes]` | Translate text using Papago. Defaults to English. Optional: Translate to another language. | `/papago 눈이 오고 있다 ko>zh-CN` |
-| `/word <word>`       | Search the dictionary for a word.                                                          | `/word 눈`                        |
+| Command                                      | Description                                                                                | Example                           |
+|----------------------------------------------| ------------------------------------------------------------------------------------------ | --------------------------------- |
+| [`/examples <word>`](#examples)              | Search the dictionary for example sentences for a word.                                    | `/examples 눈`                    |
+| [`/hanja <word>`](#hanja)                    | Search for Hanja in English, Korean, or Hanja itself.                                      | `/hanja 雪`                       |
+| [`/papago <text> [language_codes]`](#papago) | Translate text using Papago. Defaults to English. Optional: Translate to another language. | `/papago 눈이 오고 있다 ko>zh-CN` |
+| [`/word <word>`](#word)                      | Search the dictionary for a word.                                                          | `/word 눈`                        |
 
-
-#### <font size="3">`/examples`</font>
+<details>
+<summary><a id=examples>/examples</a></summary>
 
 - **Options:** `<word>` _(string)_ Required
 - **Permissions:** None
@@ -61,9 +61,11 @@ Commands all start with `/` and will give you tool-tips if you start typing in D
 Returns an embedded message with a list of example sentences in Korean that include the `<word>`.
 
 Adds a 🔖 reaction to bookmark the result.
+</details><br/>
 
 
-#### <font size="3">`/hanja`</font>
+<details>
+<summary><a id=hanja>/hanja</a></summary>
 
 - **Options:** `<word>` _(string)_ Required
 - **Permissions:** None<br/>
@@ -73,9 +75,11 @@ Searches the hanja database for meanings of hanjas and related words that occur 
 Users can use buttons to browse through multiple pages of results.
 
 Adds a 🔖 reaction to bookmark the result.
+</details><br/>
 
 
-#### <font size="3">`/papago`</font>
+<details>
+<summary><a id=papago>/papago</a></summary>
 
 - **Options:** `<text>` _(string)_ Required, `[language_codes]` _(source>target)_ Optional
 - **Permissions:** None
@@ -99,9 +103,11 @@ When entering `[language_codes]` the available combinations are:
   - `ko>ja`
   - `en>ja`
   - `en>fr`
+</details><br/>
 
 
-#### <font size="3">`/word`</font>
+<details>
+<summary><a id=word>/word</a></summary>
 
 - **Options:** `<word>` _(string)_ Required
 - **Permissions:** None
@@ -111,7 +117,7 @@ Performs a dictionary search for a given `<word>`. Results are returned in an em
 Users can use buttons to switch the language of the meanings.
 
 Adds a 🔖 reaction to bookmark the result.
-
+</details><br/>
 
 ### ⚙️ Role Management Commands
 
