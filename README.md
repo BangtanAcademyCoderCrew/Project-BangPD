@@ -53,9 +53,9 @@ Commands all start with `/` and will give you tool-tips if you start typing in D
 | [`/papago <text> [language_codes]`](#papago) | Translate text using Papago. Defaults to English. Optional: Translate to another language. |
 | [`/word <word>`](#word)                      | Search the dictionary for a word.                                                          |
 
-#### <font size=3>/examples</font>
+#### <font size=3>⚡ /examples</font>
 
-⚡ **Example:** `/examples 눈`
+**Example:** `/examples 눈`
 
 - **Options:** `<word>` _(string)_ Required
 - **Permissions:** None
@@ -64,9 +64,9 @@ Returns an embedded message with a list of example sentences in Korean that incl
 
 Adds a 🔖 reaction to bookmark the result.
 
-#### <font size=3>/hanja</font>
+#### <font size=3>⚡ /hanja</font>
 
-⚡ **Example:** `/hanja 雪`
+**Example:** `/hanja 雪`
 
 - **Options:** `<word>` _(string)_ Required
 - **Permissions:** None<br/>
@@ -77,9 +77,9 @@ Users can use buttons to browse through multiple pages of results.
 
 Adds a 🔖 reaction to bookmark the result.
 
-#### <font size=3>/papago</font>
+#### <font size=3>⚡ /papago</font>
 
-⚡ **Example:** `/papago 눈이 오고 있다 ko>zh-CN`
+**Example:** `/papago 눈이 오고 있다 ko>zh-CN`
 
 - **Options:** `<text>` _(string)_ Required, `[language_codes]` _(source>target)_ Optional
 - **Permissions:** None
@@ -104,9 +104,9 @@ When entering `[language_codes]` the available combinations are:
   - `en>ja`
   - `en>fr`
 
-#### <font size=3>/word</font>
+#### <font size=3>⚡ /word</font>
 
-⚡ **Example:** `/word 눈`
+**Example:** `/word 눈`
 
 - **Options:** `<word>` _(string)_ Required
 - **Permissions:** None
@@ -121,23 +121,24 @@ Adds a 🔖 reaction to bookmark the result.
 
 ### ⚙️ Role Management Commands
 
-| Command                                                                                                             | Description                                                                                                           | Example                                                                                                   |
-|---------------------------------------------------------------------------------------------------------------------| --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| [`/addpermissions <role> <command>`](#addpermissions)                                                               | Give permission to user(s) with role to use command.                                                                  | `/addpermissions @Moderator givetheapples`                                                                |
-| [`/addrole <role> <file_url>`](#addrole)                                                                            | Give role to user(s) in the linked csv/txt file.                                                                      | `/addrole @Moderator http://url`                                                                          |
-| [`/addrolestouserinmessage <message_ids> <channel> <role>`](#addrolestouserinmessage)                               | Give role to user(s) mentioned in message(s).                                                                         | `/addrolestouserinmessage 1234567812345678 #signup @ClassRole`                                            |
-| [`/temp-role <deadline> <role_id> <file_url>`](#temp-role)                                                          | Give role to user(s) in the linked csv/txt file for a limited time.                                                   | `/temp-role 2023-06-13 00:00 @Moderator http://url`                                                       |
-| [`/ccssgivetheapples <server_id> <message_ids> <channel_id> <first_role_id'> <second_role_id>`](#ccssgivetheapples) | Gives role to user(s) mentioned in message(s) in satellite server. If they have first role, the second role is given. | `/ccssgivetheapples 1234567812345678 1234567812345678 1234567812345678 1234567812345678 1234567812345678` |
-| [`/givetheapples <message_ids> <channel> <first_role> <second_role>`](#givetheapples)                               | Gives role to user(s) mentioned in message(s). If they have first role, the second role is given.                     | `/givetheapples 1234567812345678 #class-n-club-logbook @🍏 @🍎`                                           |
-| [`/removepermissions <role> <command>`](#removepermissions)                                                         | Remove permission from user(s) with role to use command.                                                              | `/removepermissions @Moderator givetheapples`                                                             |
-| [`/removerole <role> <file_url>`](#removerole)                                                                      | Remove role from user(s) in the linked csv/txt file.                                                                  | `/removerole @Moderator http://url`                                                                       |
-| [`/removerolestouserinmessage <message_ids> <channel> <role>`](#removerolestouserinmessage)                         | Remove role from user(s) mentioned in message(s).                                                                     | `/removerolestouserinmessage 1234567812345678 #signup @ClassRole`                                         |
-| [`/role_in <base_role> <assigned_role>`](#role_in)                                                                  | Give role to all users with another role.                                                                             | `/role_in @ClassRole @ClassAlumniRole`                                                                    |
-| [`/role_rin <base_role> <assigned_role>`](#role_rin)                                                                | Remove role from all users with another role.                                                                         | `/role_rin @ClassAlumniRole @ClassRole`                                                                   |
-| [`/rollcall <role_exception_ids> <rollcall_role_id>`](#rollcall)                                                    | Starts roll call.                                                                                                     | `/rollcall 1234567812345678 @RollCall`                                                                    |
-<br/>
+| Command                                                                                                             | Description                                                                                                           |
+|---------------------------------------------------------------------------------------------------------------------| --------------------------------------------------------------------------------------------------------------------- |
+| [`/addpermissions <role> <command>`](#addpermissions)                                                               | Give permission to user(s) with role to use command.                                                                  |
+| [`/addrole <role> <file_url>`](#addrole)                                                                            | Give role to user(s) in the linked csv/txt file.                                                                      |
+| [`/addrolestouserinmessage <message_ids> <channel> <role>`](#addrolestouserinmessage)                               | Give role to user(s) mentioned in message(s).                                                                         |
+| [`/temp-role <deadline> <role_id> <file_url>`](#temp-role)                                                          | Give role to user(s) in the linked csv/txt file for a limited time.                                                   |
+| [`/ccssgivetheapples <server_id> <message_ids> <channel_id> <first_role_id'> <second_role_id>`](#ccssgivetheapples) | Gives role to user(s) mentioned in message(s) in satellite server. If they have first role, the second role is given. |
+| [`/givetheapples <message_ids> <channel> <first_role> <second_role>`](#givetheapples)                               | Gives role to user(s) mentioned in message(s). If they have first role, the second role is given.                     |
+| [`/removepermissions <role> <command>`](#removepermissions)                                                         | Remove permission from user(s) with role to use command.                                                              |
+| [`/removerole <role> <file_url>`](#removerole)                                                                      | Remove role from user(s) in the linked csv/txt file.                                                                  |
+| [`/removerolestouserinmessage <message_ids> <channel> <role>`](#removerolestouserinmessage)                         | Remove role from user(s) mentioned in message(s).                                                                     |
+| [`/role_in <base_role> <assigned_role>`](#role_in)                                                                  | Give role to all users with another role.                                                                             |
+| [`/role_rin <base_role> <assigned_role>`](#role_rin)                                                                | Remove role from all users with another role.                                                                         |
+| [`/rollcall <role_exception_ids> <rollcall_role_id>`](#rollcall)                                                    | Starts roll call.                                                                                                     |
 
-#### <font size=3>`/addpermissions`</font>
+#### <font size=3>⚡ /addpermissions </font>
+
+**Example:** `/addpermissions @Moderator givetheapples`
 
 - **Options:** `<role>` *(@role)* Required, `<command>` *(string)* Required
 - **Permissions:** MANAGE_ROLES
@@ -146,7 +147,9 @@ Gives all users with the `<role>` provided the permission to use the command wit
 
 The `<command>` must match the exact command name of a current slash command, including any spaces and letter-casing (i.e. ✅ addpermissions, ❌ add Permissions )
 
-#### <font size=3>`/addrole`</font>
+#### <font size=3>⚡ /addrole </font>
+
+**Example:** `/addrole @Moderator http://url`
 
 - **Options:** `<role>` *(@role)* Required, `<file_url>` *(string)* Optional
 - **Permissions:** MANAGE_ROLES, MANAGE_CHANNELS
@@ -163,7 +166,9 @@ Gives all users listed in the csv/txt file the `<role>` provided.
 
 Slash commands currently do not support file attachments, so attaching the file will not work. The `file_url` is technically optional, but until file attachments are supported, this command won't work as expected without a `file_url`. Please upload the file before using the command, and grab the file url using the `get file url` message context menu command.
 
-#### <font size=3>`/addrolestouserinmessage`</font>
+#### <font size=3>⚡ /addrolestouserinmessage</font>
+
+**Example:** `/addrolestouserinmessage 1234567812345678 #signup @ClassRole`
 
 - **Options:** `<message_id>` *(string)* Required, `<channel>` *(@channel)* Required, `<role>` *(@role)* Required
 - **Permissions:** MANAGE_ROLES
@@ -180,7 +185,9 @@ Returns a response, per message, with a `.txt` attachment named `usersID.txt`, w
 > <@12345678XXXXXXXX>
 > ```
 
-#### <font size=3>`/temp-role`</font>
+#### <font size=3>⚡ /temp-role</font>
+
+**Example:** `/temp-role 2023-06-13 00:00 @Moderator http://url`
 
 - **Options:** `<deadline>` *(string)* Required, `<role>` *(@role)* Required, `<file_url>` *(string)* Required
 - **Permissions:** MANAGE_ROLES, MANAGE_CHANNELS
@@ -194,7 +201,9 @@ When entering the <deadline> the format should be in CT (America/Chicago) timezo
 
 Slash commands currently do not support file attachments, so attaching the file will not work. Please upload the file before using the command, and grab the file url using the `get file url` message context menu command. 
 
-#### <font size=3>`/ccssgivetheapples`</font>
+#### <font size=3>⚡ /ccssgivetheapples</font>
+
+**Example:** `/ccssgivetheapples 1234567812345678 1234567812345678 1234567812345678 1234567812345678 1234567812345678`
 
 - **Options:** `<server_id>` *(string)* Required, `<message_ids>` *(string)* Required, `<channel_id>` *(string)* Required, `<first_role_id>` *(string)* Required, `<file_url>` *(string)* Required, `<second_role_id>` *(string)* Required
 - **Permissions:** MANAGE_ROLES
@@ -203,7 +212,9 @@ Gives role to user(s) mentioned in message(s) in the satellite server. If they h
 
 All options must be in their string ID format since you will not be able to directly access the `<role>` or `<channel>` objects of the satellite server.
 
-#### <font size=3>`/givetheapples`</font>
+#### <font size=3>⚡ /givetheapples</font>
+
+**Example:** `/givetheapples 1234567812345678 #class-n-club-logbook @🍏 @🍎`
 
 - **Options:** `<message_ids>` *(string)* Required, `<channel_id>` *(string)* Required, `<first_role_id>` *(string)* Required, `<file_url>` *(string)* Required, `<second_role_id>` *(string)* Required
 - **Permissions:** MANAGE_ROLES
@@ -212,7 +223,9 @@ Gives role to user(s) mentioned in message(s). If they have first role, the seco
 
 This command is mainly for giving apples, but can technically work for any 2 roles.
 
-#### <font size=3>`/removepermissions`</font>
+#### <font size=3>⚡ /removepermissions</font>
+
+**Example:** `/removepermissions @Moderator givetheapples`
 
 - **Options:** `<role>` *(@role)* Required, `<command>` *(string)* Required
 - **Permissions:** MANAGE_ROLES
@@ -221,7 +234,9 @@ Removes permissions for all users with the `<role>` provided to use the command 
 
 The `<command>` must match the exact command name of a current slash command, including any spaces and letter-casing (i.e. ✅ removepermissions, ❌ remove Permissions )
 
-#### <font size=3>`/removerole`</font>
+#### <font size=3>⚡ /removerole</font>
+
+**Example:** `/removerole @Moderator http://url`
 
 - **Options:** `<role>` *(@role)* Required, `<file_url>` *(string)* Optional
 - **Permissions:** MANAGE_ROLES, MANAGE_CHANNELS
@@ -238,7 +253,9 @@ Remove the `<role>` provided from all users listed in the csv/txt file.<br/>
 
 Slash commands currently do not support file attachments, so attaching the file will not work. The `file_url` is technically optional, but until file attachments are supported, this command won't work as expected without a `file_url`. Please upload the file before using the command, and grab the file url using the `get file url` message context menu command.
 
-#### <font size=3>`/removerolestouserinmessage`</font>
+#### <font size=3>⚡ /removerolestouserinmessage</font>
+
+**Example:** `/removerolestouserinmessage 1234567812345678 #signup @ClassRole`
 
 - **Options:** `<message_id>` *(string)* Required, `<channel>` *(@channel)* Required, `<role>` *(@role)* Required
 - **Permissions:** MANAGE_ROLES
@@ -255,7 +272,9 @@ Returns a response, per message, with a `.txt` attachment named `usersID.txt`, w
 > <@12345678XXXXXXXX>
 > ```
 
-#### <font size=3>`/role_in`</font>
+#### <font size=3>⚡ /role_in</font>
+
+**Example:** `/role_in @ClassRole @ClassAlumniRole`
 
 - **Options:** `<base_role>` *(@role)* Required, `<assigned_role>` *(@role)* Required
 - **Permissions:** MANAGE_ROLES
@@ -272,7 +291,9 @@ Returns a response with a `.txt` attachment named `usersID.txt`, which includes 
 > <@12345678XXXXXXXX>
 > ```
 
-#### <font size=3>`/role_rin`</font>
+#### <font size=3>⚡ /role_rin</font>
+
+**Example:** `/role_rin @ClassAlumniRole @ClassRole`
 
 - **Options:** `<base_role>` *(@role)* Required, `<assigned_role>` *(@role)* Required
 - **Permissions:** MANAGE_ROLES
@@ -289,7 +310,9 @@ Returns a response with a `.txt` attachment named `usersID.txt`, which includes 
 > <@12345678XXXXXXXX>
 > ```
 
-#### <font size=3>`/rollcall`</font>
+#### <font size=3>⚡ /rollcall</font>
+
+**Example:** `/rollcall 1234567812345678 @RollCall`
 
 - **Options:** `<role_exception_ids>` *(string)* Required, `<rollcall_role_id>` *(@role)* Required
 - **Permissions:** MANAGE_ROLES, MANAGE_CHANNELS
@@ -302,17 +325,18 @@ When entering multiple `<role_exception_ids>` they should be entered with a spac
 
 ### ℹ️ Information Request Commands
 
-| Command                                                                   | Description                                                             | Example                                                    |
-|---------------------------------------------------------------------------| ----------------------------------------------------------------------- | ---------------------------------------------------------- |
-| [`/areactivestudents <message_ids> <channel> <role>`](#areactivestudents) | Get active student status for user(s) in message(s).                    | `/areactivestudents 12345677812345678 @ActiveStudent`      |
-| [`/getfilelink <message_id> <channel>`](#getfilelink)                     | Get the link to a message attachment.                                   | `/getfilelink 12345677812345678 #logbook-logging`          |
-| [`/getreactions <message_id> <channel>`](#getreactions)                   | Get all reactions to a message.                                         | `/getreactions 1234567812345678 #signup`                   |
-| [`/getuserids <message_ids> <channel>`](#getuserids)                      | Get a list of user ids for user(s) mentioned in message(s).             | `/getuserids 1234567812345678 #volunteer`                  |
-| [`/getusernames <file_url>`](#getusernames)                               | Get user nicknames and tags from user(s) in the linked csv/txt file.    | `/getusernames http://url`                                 |
-| [`/getusersinserver <message_ids> <channel>`](#getusersinserver)          | Get a list of users per BA server from user(s) mentioned in message(s). | `/getusersinserver 1234567812345678 #class-n-club-logbook` |
-<br/>
+| Command                                                                   | Description                                                             |
+|---------------------------------------------------------------------------| ----------------------------------------------------------------------- |
+| [`/areactivestudents <message_ids> <channel> <role>`](#areactivestudents) | Get active student status for user(s) in message(s).                    |
+| [`/getfilelink <message_id> <channel>`](#getfilelink)                     | Get the link to a message attachment.                                   |
+| [`/getreactions <message_id> <channel>`](#getreactions)                   | Get all reactions to a message.                                         |
+| [`/getuserids <message_ids> <channel>`](#getuserids)                      | Get a list of user ids for user(s) mentioned in message(s).             |
+| [`/getusernames <file_url>`](#getusernames)                               | Get user nicknames and tags from user(s) in the linked csv/txt file.    |
+| [`/getusersinserver <message_ids> <channel>`](#getusersinserver)          | Get a list of users per BA server from user(s) mentioned in message(s). |
 
-#### <font size=3>`/areactivestudents`</font>
+#### <font size=3>⚡ /areactivestudents</font>
+
+**Example:** `/areactivestudents 12345677812345678 @ActiveStudent`
 
 - **Options:** `<message_ids>` _(string)_ Required, `<channel>` _(@channel)_ Required, `<role>` _(@role)_ Required
 - **Permissions:** MANAGE_MESSAGES
@@ -331,7 +355,9 @@ Returns a second response with a `.txt` attachment named `notActiveStudents.txt`
 
 When entering multiple `<message_ids>` they should be entered with a space between each one: `12345678XXXXXXXX 12345678XXXXXXXX`.
 
-#### <font size=3>`/getfilelink`</font>
+#### <font size=3>⚡ /getfilelink</font>
+
+**Example:** `/getfilelink 12345677812345678 #logbook-logging`
 
 - **Options:** `<message_id>` _(string)_ Required, `<channel>` _(@channel)_ Required
 - **Permissions:** None
@@ -340,7 +366,9 @@ Gets the file url from an attachment in a message (`<message_id>`) in a specific
 
 Also available as a context menu command when right-clicking on a message, named `get file url`. Response from the context command is only viewable to the user who executes it.
 
-#### <font size=3>`/getreactions`</font>
+#### <font size=3>⚡ /getreactions</font>
+
+**Example:** `/getreactions 1234567812345678 #signup`
 
 - **Options:** `<message_id>` _(string)_ Required, `<channel>` _(@channel)_ Required
 - **Permissions:** MANAGE_CHANNELS, MANAGE_ROLES
@@ -358,7 +386,9 @@ Returns a response, per different emoji reaction, with a `.txt` attachment named
 
 Also available as a context menu command when right-clicking on a message, named `get reactions`. Response from the context command is only viewable to the user who executes it.
 
-#### <font size=3>`/getuserids`</font>
+#### <font size=3>⚡ /getuserids</font>
+
+**Example:** `/getuserids 1234567812345678 #volunteer`
 
 - **Options:** `<message_ids>` _(string)_ Required, `<channel>` _(@channel)_ Required
 - **Permissions:** None
@@ -378,7 +408,9 @@ When entering multiple `<message_ids>` they should be entered with a space betwe
 
 Also available as a context menu command when right-clicking on a message, named `get user ids`. Response from the context command is only viewable to the user who executes it.
 
-#### <font size=3>`/getusernames`</font>
+#### <font size=3>⚡ /getusernames</font>
+
+**Example:** `/getusernames http://url`
 
 - **Options:** `<file_url>` _(string)_ Required
 - **Permissions:** MANAGE_ROLES
@@ -409,7 +441,9 @@ Returns a response with a `.txt` attachment named `userNames.txt` which includes
 
 Also available as a context menu command when right-clicking on a message with an attachment, named `get user names`. Response from the context command is only viewable to the user who executes it.
 
-#### <font size=3>`/getusersinserver`</font>
+#### <font size=3>⚡ /getusersinserver</font>
+
+**Example:** `/getusersinserver 1234567812345678 #class-n-club-logbook`
 
 - **Options:** `<message_ids>` _(string)_ Required, `<channel>` _(@channel)_ Required
 - **Permissions:** MANAGE_ROLES
@@ -443,12 +477,13 @@ Also available as a context menu command when right-clicking on a message, named
 
 ### 📅 Reminder Command
 
-| Command                                                                                   | Description                                | Example                                                                                     |
-|-------------------------------------------------------------------------------------------| ------------------------------------------ | ------------------------------------------------------------------------------------------- |
-| [`/setreminder <deadline> <channel> <time_in_advance> <reminder_message>`](#setreminder) | Set a reminder message to send in channel. | `/setreminder 2023-06-13 00:00 #volunteer 1d Volunteer applications will close in 24 hours` |
-<br/>
+| Command                                                                                   | Description                                |
+|-------------------------------------------------------------------------------------------| ------------------------------------------ |
+| [`/setreminder <deadline> <channel> <time_in_advance> <reminder_message>`](#setreminder) | Set a reminder message to send in channel. |
 
-#### <font size=3>/setreminder</font>
+#### <font size=3>⚡ /setreminder</font>
+
+**Example:** `/setreminder 2023-06-13 00:00 #volunteer 1d Volunteer applications will close in 24 hours`
 
 - **Options:** `<deadline>` _(string)_ Required, `<channel>` _(@channel)_ Required, `<time_in_advance>` _(string @choice)_ Required, `<reminder_message>` _(string)_ Required
 - **Permissions:** MANAGE_CHANNELS
