@@ -46,12 +46,12 @@ Commands all start with `/` and will give you tool-tips if you start typing in D
 
 ### 📘 Dictionary Commands
 
-| Command                                      | Description                                                                                |
-|----------------------------------------------| ------------------------------------------------------------------------------------------ |
-| [`/examples <word>`](#examples)              | Search the dictionary for example sentences for a word.                                    |
-| [`/hanja <word>`](#hanja)                    | Search for Hanja in English, Korean, or Hanja itself.                                      |
-| [`/papago <text> [language_codes]`](#papago) | Translate text using Papago. Defaults to English. Optional: Translate to another language. |
-| [`/word <word>`](#word)                      | Search the dictionary for a word.                                                          |
+| Command                                       | Description                                                                                |
+|-----------------------------------------------| ------------------------------------------------------------------------------------------ |
+| [`/examples <word>`](#-examples)              | Search the dictionary for example sentences for a word.                                    |
+| [`/hanja <word>`](#-hanja)                    | Search for Hanja in English, Korean, or Hanja itself.                                      |
+| [`/papago <text> [language_codes]`](#-papago) | Translate text using Papago. Defaults to English. Optional: Translate to another language. |
+| [`/word <word>`](#-word)                      | Search the dictionary for a word.                                                          |
 
 #### <font size=3>⚡ /examples</font>
 
@@ -123,18 +123,18 @@ Adds a 🔖 reaction to bookmark the result.
 
 | Command                                                                                                             | Description                                                                                                           |
 |---------------------------------------------------------------------------------------------------------------------| --------------------------------------------------------------------------------------------------------------------- |
-| [`/addpermissions <role> <command>`](#addpermissions)                                                               | Give permission to user(s) with role to use command.                                                                  |
-| [`/addrole <role> <file_url>`](#addrole)                                                                            | Give role to user(s) in the linked csv/txt file.                                                                      |
-| [`/addrolestouserinmessage <message_ids> <channel> <role>`](#addrolestouserinmessage)                               | Give role to user(s) mentioned in message(s).                                                                         |
-| [`/temp-role <deadline> <role_id> <file_url>`](#temp-role)                                                          | Give role to user(s) in the linked csv/txt file for a limited time.                                                   |
+| [`/addpermissions <role> <command>`](#-addpermissions)                                                              | Give permission to user(s) with role to use command.                                                                  |
+| [`/addrole <role> <file_url>`](#-addrole)                                                                           | Give role to user(s) in the linked csv/txt file.                                                                      |
+| [`/addrolestouserinmessage <message_ids> <channel> <role>`](#-addrolestouserinmessage)                              | Give role to user(s) mentioned in message(s).                                                                         |
+| [`/temp-role <deadline> <role_id> <file_url>`](#-temp-role)                                                         | Give role to user(s) in the linked csv/txt file for a limited time.                                                   |
 | [`/ccssgivetheapples <server_id> <message_ids> <channel_id> <first_role_id'> <second_role_id>`](#ccssgivetheapples) | Gives role to user(s) mentioned in message(s) in satellite server. If they have first role, the second role is given. |
-| [`/givetheapples <message_ids> <channel> <first_role> <second_role>`](#givetheapples)                               | Gives role to user(s) mentioned in message(s). If they have first role, the second role is given.                     |
-| [`/removepermissions <role> <command>`](#removepermissions)                                                         | Remove permission from user(s) with role to use command.                                                              |
-| [`/removerole <role> <file_url>`](#removerole)                                                                      | Remove role from user(s) in the linked csv/txt file.                                                                  |
-| [`/removerolestouserinmessage <message_ids> <channel> <role>`](#removerolestouserinmessage)                         | Remove role from user(s) mentioned in message(s).                                                                     |
-| [`/role_in <base_role> <assigned_role>`](#role_in)                                                                  | Give role to all users with another role.                                                                             |
-| [`/role_rin <base_role> <assigned_role>`](#role_rin)                                                                | Remove role from all users with another role.                                                                         |
-| [`/rollcall <role_exception_ids> <rollcall_role_id>`](#rollcall)                                                    | Starts roll call.                                                                                                     |
+| [`/givetheapples <message_ids> <channel> <first_role> <second_role>`](#-givetheapples)                              | Gives role to user(s) mentioned in message(s). If they have first role, the second role is given.                     |
+| [`/removepermissions <role> <command>`](#-removepermissions)                                                        | Remove permission from user(s) with role to use command.                                                              |
+| [`/removerole <role> <file_url>`](#-removerole)                                                                     | Remove role from user(s) in the linked csv/txt file.                                                                  |
+| [`/removerolestouserinmessage <message_ids> <channel> <role>`](#-removerolestouserinmessage)                        | Remove role from user(s) mentioned in message(s).                                                                     |
+| [`/role_in <base_role> <assigned_role>`](#-role_in)                                                                 | Give role to all users with another role.                                                                             |
+| [`/role_rin <base_role> <assigned_role>`](#-role_rin)                                                               | Remove role from all users with another role.                                                                         |
+| [`/rollcall <role_exception_ids> <rollcall_role_id>`](#-rollcall)                                                   | Starts roll call.                                                                                                     |
 
 #### <font size=3>⚡ /addpermissions </font>
 
@@ -325,14 +325,14 @@ When entering multiple `<role_exception_ids>` they should be entered with a spac
 
 ### ℹ️ Information Request Commands
 
-| Command                                                                   | Description                                                             |
-|---------------------------------------------------------------------------| ----------------------------------------------------------------------- |
-| [`/areactivestudents <message_ids> <channel> <role>`](#areactivestudents) | Get active student status for user(s) in message(s).                    |
-| [`/getfilelink <message_id> <channel>`](#getfilelink)                     | Get the link to a message attachment.                                   |
-| [`/getreactions <message_id> <channel>`](#getreactions)                   | Get all reactions to a message.                                         |
-| [`/getuserids <message_ids> <channel>`](#getuserids)                      | Get a list of user ids for user(s) mentioned in message(s).             |
-| [`/getusernames <file_url>`](#getusernames)                               | Get user nicknames and tags from user(s) in the linked csv/txt file.    |
-| [`/getusersinserver <message_ids> <channel>`](#getusersinserver)          | Get a list of users per BA server from user(s) mentioned in message(s). |
+| Command                                                                    | Description                                                             |
+|----------------------------------------------------------------------------| ----------------------------------------------------------------------- |
+| [`/areactivestudents <message_ids> <channel> <role>`](#-areactivestudents) | Get active student status for user(s) in message(s).                    |
+| [`/getfilelink <message_id> <channel>`](#-getfilelink)                     | Get the link to a message attachment.                                   |
+| [`/getreactions <message_id> <channel>`](#-getreactions)                   | Get all reactions to a message.                                         |
+| [`/getuserids <message_ids> <channel>`](#-getuserids)                      | Get a list of user ids for user(s) mentioned in message(s).             |
+| [`/getusernames <file_url>`](#-getusernames)                               | Get user nicknames and tags from user(s) in the linked csv/txt file.    |
+| [`/getusersinserver <message_ids> <channel>`](#-getusersinserver)          | Get a list of users per BA server from user(s) mentioned in message(s). |
 
 #### <font size=3>⚡ /areactivestudents</font>
 
@@ -479,7 +479,7 @@ Also available as a context menu command when right-clicking on a message, named
 
 | Command                                                                                   | Description                                |
 |-------------------------------------------------------------------------------------------| ------------------------------------------ |
-| [`/setreminder <deadline> <channel> <time_in_advance> <reminder_message>`](#setreminder) | Set a reminder message to send in channel. |
+| [`/setreminder <deadline> <channel> <time_in_advance> <reminder_message>`](#-setreminder) | Set a reminder message to send in channel. |
 
 #### <font size=3>⚡ /setreminder</font>
 
