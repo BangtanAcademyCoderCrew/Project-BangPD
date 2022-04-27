@@ -46,15 +46,16 @@ Commands all start with `/` and will give you tool-tips if you start typing in D
 
 ### 📘 Dictionary Commands
 
-| Command                                      | Description                                                                                | Example                           |
-|----------------------------------------------| ------------------------------------------------------------------------------------------ | --------------------------------- |
-| [`/examples <word>`](#examples)              | Search the dictionary for example sentences for a word.                                    | `/examples 눈`                    |
-| [`/hanja <word>`](#hanja)                    | Search for Hanja in English, Korean, or Hanja itself.                                      | `/hanja 雪`                       |
-| [`/papago <text> [language_codes]`](#papago) | Translate text using Papago. Defaults to English. Optional: Translate to another language. | `/papago 눈이 오고 있다 ko>zh-CN` |
-| [`/word <word>`](#word)                      | Search the dictionary for a word.                                                          | `/word 눈`                        |
-<br/>
+| Command                                      | Description                                                                                |
+|----------------------------------------------| ------------------------------------------------------------------------------------------ |
+| [`/examples <word>`](#examples)              | Search the dictionary for example sentences for a word.                                    |
+| [`/hanja <word>`](#hanja)                    | Search for Hanja in English, Korean, or Hanja itself.                                      |
+| [`/papago <text> [language_codes]`](#papago) | Translate text using Papago. Defaults to English. Optional: Translate to another language. |
+| [`/word <word>`](#word)                      | Search the dictionary for a word.                                                          |
 
-#### <font size=3>`/examples`</font>
+#### <font size=3>/examples</font>
+
+⚡ **Example:** `/examples 눈`
 
 - **Options:** `<word>` _(string)_ Required
 - **Permissions:** None
@@ -63,7 +64,9 @@ Returns an embedded message with a list of example sentences in Korean that incl
 
 Adds a 🔖 reaction to bookmark the result.
 
-#### <font size=3>`/hanja`</font>
+#### <font size=3>/hanja</font>
+
+⚡ **Example:** `/hanja 雪`
 
 - **Options:** `<word>` _(string)_ Required
 - **Permissions:** None<br/>
@@ -74,7 +77,9 @@ Users can use buttons to browse through multiple pages of results.
 
 Adds a 🔖 reaction to bookmark the result.
 
-#### <font size=3>`/papago`</font>
+#### <font size=3>/papago</font>
+
+⚡ **Example:** `/papago 눈이 오고 있다 ko>zh-CN`
 
 - **Options:** `<text>` _(string)_ Required, `[language_codes]` _(source>target)_ Optional
 - **Permissions:** None
@@ -99,7 +104,9 @@ When entering `[language_codes]` the available combinations are:
   - `en>ja`
   - `en>fr`
 
-#### <font size=3>`/word`</font>
+#### <font size=3>/word</font>
+
+⚡ **Example:** `/word 눈`
 
 - **Options:** `<word>` _(string)_ Required
 - **Permissions:** None
@@ -441,7 +448,7 @@ Also available as a context menu command when right-clicking on a message, named
 | [`/setreminder <deadline> <channel> <time_in_advance> <reminder_message>`](#setreminder) | Set a reminder message to send in channel. | `/setreminder 2023-06-13 00:00 #volunteer 1d Volunteer applications will close in 24 hours` |
 <br/>
 
-#### <font size=3>`/setreminder`</font>
+#### <font size=3>/setreminder</font>
 
 - **Options:** `<deadline>` _(string)_ Required, `<channel>` _(@channel)_ Required, `<time_in_advance>` _(string @choice)_ Required, `<reminder_message>` _(string)_ Required
 - **Permissions:** MANAGE_CHANNELS
