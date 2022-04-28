@@ -5,16 +5,16 @@ const { ChannelType } = require('discord-api-types/v9');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('addrolestouserinmessage')
-    .setDescription('Gets a list of user ids that were mentioned in a message.')
+    .setDescription('Adds a role to users that were mentioned in a message(s).')
     .addStringOption(option => option.setName('message_ids')
-      .setDescription('What messages would you like to get the user ids from?')
+      .setDescription('What message(s) would you like to get the user ids from?')
       .setRequired(true))
     .addChannelOption(option => option.setName('channel')
-      .setDescription('In what channel is this message?')
+      .setDescription('In what channel are the message(s)?')
       .addChannelTypes([ChannelType.GuildText, ChannelType.GuildPublicThread, ChannelType.GuildPrivateThread])
       .setRequired(true))
     .addRoleOption(option => option.setName('role')
-      .setDescription('What role would you like to add to user?')
+      .setDescription('What role would you like to add to user(s)?')
       .setRequired(true))
     .setDefaultPermission(false),
   async execute(interaction) {
