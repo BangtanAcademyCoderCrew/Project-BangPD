@@ -61,12 +61,11 @@ module.exports = class Hanja {
     });
 
     const characters = [];
-    args.forEach((arg) => {
-      const split = arg.split('');
-      split.forEach((char) => {
-        characters.push(char);
-      });
+    const split = args.split('');
+    split.forEach((char) => {
+      characters.push(char);
     });
+    
 
     await asyncForEach(characters, async (character) => {
       const hanjas = await this.sequelize

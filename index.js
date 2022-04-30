@@ -1,97 +1,94 @@
-const { CommandoClient } = require('discord.js-commando');
-const Discord = require('discord.js');
+const fs = require('fs');
+const { Client, Collection, Intents } = require('discord.js');
 const DiscordUtil = require('./common/discordutil');
-const path = require('path');
-const got = require('got');
-const { DateTime } = require("luxon");
-const {
-	prefix, enabledCommands, status, devIds, llkId, devServerId, enableDictionaryReply, token
-  } = require('./config.json');
+const { botToken, commandDirectories } = require('./config.json');
+const { deployCommands } = require('./deploy-commands');
 
-const client = new CommandoClient({
-	commandPrefix: prefix,
-	owner: '708723153605754910',
+const client = new Client({
   partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
-  intents: ['GUILD_PRESENCES', 'GUILD_MEMBERS', 'GUILD_MESSAGES']
+  intents: [
+      Intents.FLAGS.GUILDS,
+      Intents.FLAGS.GUILD_PRESENCES,
+      Intents.FLAGS.GUILD_MEMBERS,
+      Intents.FLAGS.GUILD_MESSAGES,
+      Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+      Intents.FLAGS.DIRECT_MESSAGES,
+      Intents.FLAGS.DIRECT_MESSAGE_REACTIONS
+    ]
 });
 
-client.registry
-	.registerDefaultTypes()
-	.registerGroups([
-		['reminder', 'Command Group for Reminder functionalities'],
-		['dictionary', 'Command Group for Dictionary functionalities'],
-    ['roles', 'Command Group for role management'],
-    ['miscellaneous', 'Command Group for misc commands']
-	])
-	.registerDefaultGroups()
-	.registerDefaultCommands()
-	.registerCommandsIn(path.join(__dirname, 'commands'));
+client.commands = new Collection();
+commandDirectories.forEach(dir => {
+  const commandFiles = fs.readdirSync(dir).filter(file => file.endsWith('.js'));
+  commandFiles.forEach((file) => {
+    const command = require(`${dir}/${file}`);
+    client.commands.set(command.data.name, command);
+  });
+});
 
 client.once('ready', () => {
-	console.log(`Bang PD is online!`);
+  console.log('Bang PD is online!');
+  deployCommands();
   client.user.setActivity('BE', { type: 'LISTENING' });
-
 });
 
-// CATCH RAW REACTION
-const rawEventTypes = {
-  MESSAGE_REACTION_ADD: 'messageReactionAdd',
-};
+client.on('interactionCreate', async (interaction) => {
+  if (interaction.isCommand() || interaction.isContextMenu()) {
+    const command = client.commands.get(interaction.commandName);
 
-client.on('raw', async (event) => {
-  if (!rawEventTypes[event.t]) return;
-  const { d: data } = event;
-  const user = client.users.cache.get(data.user_id);
-  const channel = client.channels.cache.get(data.channel_id) || await user.createDM();
+    if (!command) {
+      return;
+    }
 
-  const message = await channel.messages.fetch(data.message_id);
-  const emojiKey = (data.emoji.id) ? `${data.emoji.name}:${data.emoji.id}` : data.emoji.name;
-
-  let reaction = message.reactions.cache;
-  if (!reaction) {
-    const emoji = new Discord.Emoji(client.guilds.get(data.guild_id), data.emoji);
-    reaction = new Discord.MessageReaction(message, emoji, 1, data.user_id === client.user.id);
+    try {
+      await command.execute(interaction);
+    } catch (error) {
+      console.error(error);
+      return interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+    }
   }
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {
-  // When we receive a reaction we check if the reaction is partial or not
-	if (reaction.partial) {
-		// If the message this reaction belongs to was removed the fetching might result in an API error, which we need to handle
-		try {
-			await reaction.fetch();
-		} catch (error) {
-			console.error('Something went wrong when fetching the message: ', error);
-			// Return as `reaction.message.author` may be undefined/null
-			return;
-		}
-	}
-
-  if (reaction.message.author.id === client.user.id && reaction.emoji.name === '❌' && reaction.message.channel.type !== 'text') {
-    if (user.id !== client.user.id) {
-      reaction.message.delete();
+  if (reaction.partial && !user.bot) {
+    try {
+      await reaction.fetch();
+    } catch (error) {
+      console.error('Something went wrong when fetching the message: ', error);
+      // Return as `reaction.message.author` may be undefined/null
+       return;
     }
   }
-  if (reaction.emoji.name === '🔖' && reaction.message.channel.type === 'text') {
-    if (user.id !== client.user.id) {
+
+  if (user.id === client.user.id || user.bot) {
+    return;
+  }
+    const validChannels = ['GUILD_TEXT', 'GUILD_PUBLIC_THREAD', 'GUILD_PRIVATE_THREAD'];
+    if (reaction.emoji.name === '🔖' && validChannels.includes(reaction.message.channel.type)) {
       if (reaction.message.embeds[0] && reaction.message.author.id === client.user.id) {
         const embed = reaction.message.embeds[0];
-        user.send({ embed }).then(msg => msg.react('❌'));
+        user.send({ embeds: [embed] }).then(msg => msg.react('❌'));
         console.log(`${user.username} - result bookmark `);
       } else {
         console.log(`${user.username} - message bookmark `);
-        DiscordUtil.bookmark(reaction.message, user);
+          DiscordUtil.bookmark(reaction.message, user);
       }
     }
-  }
+    if (reaction.emoji.name === '❌' && !validChannels.includes(reaction.message.channel.type)) {
+      if (user.id !== client.user.id && reaction.message.author.id == client.user.id) {
+        reaction.message.delete();
+      }
+    }
 });
 
-//log voice channel join/leave activities
-client.on('voiceStateUpdate', (oldVoiceState, newVoiceState) => {
-  const newVoiceChannel = newVoiceState.channelID;
-  const oldVoiceChannel = oldVoiceState.channelID;
+/*
 
-  //TODO: Update these channel IDs to the correct ones
+// log voice channel join/leave activities
+client.on('voiceStateUpdate', (oldVoiceState, newVoiceState) => {
+  const newVoiceChannel = newVoiceState.channelId;
+  const oldVoiceChannel = oldVoiceState.channelId;
+
+  // TODO: Update these channel IDs to the correct ones
   const voiceChannelId = '825428308749058119';
   const logChannelId = '807333762433548328';
 
@@ -101,60 +98,53 @@ client.on('voiceStateUpdate', (oldVoiceState, newVoiceState) => {
   const username = newVoiceState.member.user.tag;
 
   // User joins a voice channel
-  if(!oldVoiceChannel && newVoiceChannel === voiceChannelId)
-  { 
+  if (!oldVoiceChannel && newVoiceChannel === voiceChannelId) {
     const joinEmbed = DiscordUtil.createLoggingEmbed(
       `:arrow_right: <@${memberId}> - ${username} joined **${voiceChannel.name}**`,
       'GREEN'
     );
-      logChannel.send(joinEmbed);
-    
+    logChannel.send({ embeds: [joinEmbed] });
+
   }
   // User leaves a voice channel
-  else if(!newVoiceChannel && oldVoiceChannel === voiceChannelId) {
-
+  else if (!newVoiceChannel && oldVoiceChannel === voiceChannelId) {
     const leaveEmbed = DiscordUtil.createLoggingEmbed(
       `:arrow_left: <@${memberId}>  - ${username} left **${voiceChannel.name}**`,
       'RED'
     );
-      logChannel.send(leaveEmbed);
+    logChannel.send({ embeds: [leaveEmbed] });
   }
   // User switches to/from voice channel
-  else if (newVoiceChannel && oldVoiceChannel && (newVoiceChannel === voiceChannelId || oldVoiceChannel === voiceChannelId)){
-    //User starts/stops streaming
-    if(newVoiceState.streaming && !oldVoiceState.streaming){
-
+  else if (newVoiceChannel && oldVoiceChannel && (newVoiceChannel === voiceChannelId || oldVoiceChannel === voiceChannelId)) {
+    // User starts/stops streaming
+    if (newVoiceState.streaming && !oldVoiceState.streaming) {
       const startStreamingEmbed = DiscordUtil.createLoggingEmbed(
         `:desktop: <@${memberId}> - ${username} started streaming.`,
         'PURPLE'
       );
-
-      logChannel.send(startStreamingEmbed);
-
+      logChannel.send({ embeds: [startStreamingEmbed] });
     }
-    //stops streaming
-    else if(!newVoiceState.streaming && oldVoiceState.streaming){
-
+    // stops streaming
+    else if (!newVoiceState.streaming && oldVoiceState.streaming) {
       const stopStreamingEmbed = DiscordUtil.createLoggingEmbed(
         `:desktop: <@${memberId}> - ${username} stopped streaming.`,
         'PURPLE'
       );
-
-      logChannel.send(stopStreamingEmbed);
+      logChannel.send({ embeds: [stopStreamingEmbed] });
     }
-    //switched to tour voice channel
+    // switched to tour voice channel
     else {
       const switchEmbed = DiscordUtil.createLoggingEmbed(
         `:repeat: <@${memberId}> - ${username} switched from **${oldVoiceState.channel.name}** to **${newVoiceState.channel.name}**`,
         'YELLOW'
       );
-
-      logChannel.send(switchEmbed);
+      logChannel.send({ embeds: [switchEmbed] });
     }
   }
 });
 
+*/
 
 client.on('error', console.error);
 
-client.login(token);
+client.login(botToken);

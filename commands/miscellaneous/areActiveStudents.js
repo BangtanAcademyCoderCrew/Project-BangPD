@@ -1,62 +1,57 @@
-const { Command } = require("discord.js-commando");
-const Discord = require('discord.js');
+const { MessageAttachment } = require('discord.js');
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const { ChannelType } = require('discord-api-types/v9');
 
-module.exports = class AreActiveStudentsCommand extends Command {
-  constructor(client) {
-    super(client, {
-      name: "areactivestudents",
-      aliases: ["activestudents"],
-      group: "miscellaneous",
-      memberName: "areactivestudents",
-      description: "Gets a list of user ids that were mentioned in a message and see if they are active or not.\n Usage:areactivestudents [messageID] [channelID] [roleID]",
-      userPermissions: ['MANAGE_MESSAGES'],
-      args: [
-        {
-          key: "messageIDs",
-          prompt: "What messages would you like to get the user ids from?",
-          type: "string",
-        },
-        {
-            key: "channel",
-            prompt: "In what channel is this message?",
-            type: "channel",
-        },
-        {
-          key: "roleID",
-          prompt: "What's the active student role?",
-          type: "string",
-        },
-      ],
-    });
-  }
 
-  run(message, { messageIDs, channel, roleID }) {
+module.exports = {
+  data: new SlashCommandBuilder()
+    .setName('areactivestudents')
+    .setDescription('Gets a list of user ids that were mentioned in a message and see if they are active or not.')
+    .addStringOption(option =>
+      option.setName('message_ids')
+        .setDescription('What messages would you like to get the user ids from?')
+        .setRequired(true))
+    .addChannelOption(option =>
+      option.setName('channel')
+        .setDescription('In what channel is this message?')
+        .addChannelTypes([ChannelType.GuildText, ChannelType.GuildPublicThread, ChannelType.GuildPrivateThread])
+        .setRequired(true))
+    .addRoleOption(option =>
+      option.setName('role')
+        .setDescription('What\'s the active student role?')
+        .setRequired(true))
+    .setDefaultPermission(false),
+  async execute(interaction) {
+    const options = interaction.options;
+    const messageIds = options.getString('message_ids');
+    const roleId = options.getRole('role').id;
+    const channel = options.getChannel('channel');
 
-    var allMessageIDs = messageIDs.split(" "); 
-    roleID = roleID.replace(/\D/g, "");
-    allMessageIDs.forEach(message =>checkIDs(message))
+    await interaction.deferReply();
 
-    function checkIDs(messageID){
-      channel.messages.fetch(messageID).then( msg => {
-          var content = msg.content.replace(/\D/g, " ");
-          content = content.split(" ");
-          var ids = content.filter(e => e.length >= 16);
-          var activeStudents = hasActiveStudentRole(ids, roleID);
-          var notActiveStudents = ids.filter(id => !activeStudents.includes(id));
-          const attachmentActive = new Discord.MessageAttachment(Buffer.from(`<@${activeStudents.join(">\n<@")}>`, 'utf-8'), 'activeStudents.txt');
-          const attachmentNotActive = new Discord.MessageAttachment(Buffer.from(`<@${notActiveStudents.join(">\n<@")}>`, 'utf-8'), 'activeStudents.txt');
-          message.channel.send(`Users in message ${messageID} who are active`, attachmentActive);
-          message.channel.send(`Users in message ${messageID} who are not active`, attachmentNotActive);
-      }).catch(function(error) {
-          console.log(error);
-          message.channel.send(`Message with ID ${messageID} wasn't found in channel <#${channel.id}>`)
-        });
-    }
-
-    function hasActiveStudentRole(ids, roleID){
-      const activeStudents = Array.from(message.guild.roles.cache.get(roleID).members.keys());
+    const hasActiveStudentRole = (ids, roleID) => {
+      const activeStudents = Array.from(interaction.guild.roles.cache.get(roleID).members.keys());
       const areActiveStudents = ids.filter(id => activeStudents.includes(id));
       return areActiveStudents;
-    }
+    };
+
+    const checkIDs = (messageID) => {
+      channel.messages.fetch(messageID).then(msg => {
+        const content = msg.content.replace(/\D/g, ' ').split(' ');
+        const ids = content.filter(e => e.length >= 16);
+        const activeStudents = hasActiveStudentRole(ids, roleId);
+        const notActiveStudents = ids.filter(id => !activeStudents.includes(id));
+        const attachmentActive = new MessageAttachment(Buffer.from(`<@${activeStudents.join('>\n<@')}>`, 'utf-8'), 'activeStudents.txt');
+        const attachmentNotActive = new MessageAttachment(Buffer.from(`<@${notActiveStudents.join('>\n<@')}>`, 'utf-8'), 'notActiveStudents.txt');
+        interaction.followUp({ content: `Users in message ${messageID} who are active`, files: [attachmentActive] });
+        interaction.followUp({ content: `Users in message ${messageID} who are not active`, files: [attachmentNotActive] });
+      }).catch((error) => {
+        console.error(error);
+        interaction.followUp({ content: `Message with ID ${messageID} wasn't found in channel <#${channel.id}> <a:shookysad:949689086665437184>` });
+      });
+    };
+
+    const allMessageIDs = messageIds.split(' ');
+    allMessageIDs.forEach(message => checkIDs(message));
   }
 };

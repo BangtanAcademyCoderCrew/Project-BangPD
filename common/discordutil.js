@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const { prefix, accentColor, avatar } = require('../config.json');
 const langs = require('./langs.js');
-const { DateTime } = require("luxon");
+const { DateTime } = require('luxon');
 const got = require('got');
 
 module.exports = {
@@ -24,34 +24,46 @@ module.exports = {
       }
     }
 
-    if(message.content.length >= 2048){
-      splittedText = this.splitText(message.content);
+    if (message.content.length >= 2048) {
+      const splittedText = this.splitText(message.content);
       this.createBookMarkMessage(message, splittedText[0], image, user);
       this.createBookMarkMessage(message, splittedText[1], image, user);
-    }
-    else {
+    } else {
       this.createBookMarkMessage(message, message.content, image, user);
     }
   },
-  createBookMarkMessage(message, text, image, user){
+  createBookMarkMessage(message, text, image, user) {
+    const author = {
+      name: message.author.username,
+      iconURL: message.author.avatarURL
+    };
     const embed = new Discord.MessageEmbed()
       .setColor(0xDF2B40)
-      .setAuthor(`${message.author.username} said:`, message.author.avatarURL ? message.author.avatarURL : undefined)
+      .setAuthor(author)
       .setDescription(`${text}${image ? `\r\n\r\n${image}` : ''} \r\n\r\n **Message link:** ${message.url}`)
       .setImage(image)
       .setTimestamp(message.editedTimestamp || message.createdTimestamp);
 
-    user.send(embed).then(msg => msg.react('❌'));
+    user.send({ embeds: [embed] }).then(msg => msg.react('❌'));
   },
 
   createBasicEmbed(name) {
+    const author = {
+      name: name || 'BangPD',
+      iconURL: 'https://i.imgur.com/UwOpFvr.png'
+    };
+
     return new Discord.MessageEmbed()
       .setColor(accentColor)
-      .setAuthor(name || 'BangPD', 'https://i.imgur.com/UwOpFvr.png');
+      .setAuthor(author);
   },
 
   setEmbedFooter(embed, footer) {
-    embed.setFooter(footer, avatar);
+    const footerData = {
+      text: footer,
+      iconURL: avatar
+    };
+    embed.setFooter(footerData);
   },
 
   createPendingEmbed(username) {
@@ -130,12 +142,13 @@ module.exports = {
     }
     const pageCount = pages.length;
     if (pageCount > 1) {
-      pages.forEach((page, index) => {
-        page.setAuthor(`BangPD (Page ${index + 1} of ${pageCount})`, 'https://i.imgur.com/UwOpFvr.png');
-        this.setEmbedFooter(page, `${username} can browse pages. ${!isDM ? 'Anyone can bookmark this message.' : ''}`);
+      pages.forEach((page) => {
+        const author = {
+          name: 'BangPD',
+          iconURL: 'https://i.imgur.com/UwOpFvr.png'
+        };
+        page.setAuthor(author);
       });
-    } else if (pageCount === 1 && !isEmpty) {
-      this.setEmbedFooter(pages[0], 'Anyone can bookmark this message.');
     }
     return pages;
   },
@@ -181,7 +194,7 @@ module.exports = {
         name,
         aliases,
         description,
-        examples,
+        examples
       } = c;
 
       const descriptionAndExamples = description + (examples ? `\r\n __(Ex. ${examples})__` : '');
@@ -199,82 +212,83 @@ module.exports = {
     return embed;
   },
 
-  createLoggingEmbed(message, color){
-    const cst = "America/Chicago";
+  createLoggingEmbed(message, color) {
+    const cst = 'America/Chicago';
     const currentTimeUTC = DateTime.utc();
     const currentTimeCST = currentTimeUTC.setZone(cst);
+    const footer = {
+      text: `${currentTimeCST.toLocaleString(DateTime.DATETIME_FULL)}`
+    };
 
     const embed = new Discord.MessageEmbed()
-    .setColor(color)
-    .setFooter(`${currentTimeCST.toLocaleString(DateTime.DATETIME_FULL)}`)
-    .setDescription(message);
+      .setColor(color)
+      .setFooter(footer)
+      .setDescription(message);
 
     return embed;
   },
 
-  getMemberByUsername(message, username){
-    var members = message.guild.members.cache;
-    var user = message.client.users.cache.find(u => u.tag === username);
-    if(!user){
-        return false;
+  getMemberByUsername(interaction, username) {
+    const members = interaction.guild.members.cache;
+    const user = interaction.client.users.cache.find(u => u.tag === username);
+    if (!user) {
+      return false;
     }
-    userID = user.id;
-    return members.get(userID);
+    const userId = user.id;
+    return members.get(userId);
   },
 
-  divideMessageWithUsernamesInParts(usernames, messageChannel){
-    for (var i = 0; i <= Math.ceil(usernames.length / 50); i++) {
-      var List = usernames.slice(i * 50, i * 50 + 50).join('\n')
+  divideMessageWithUsernamesInParts(usernames, messageChannel) {
+    for (let i = 0; i <= Math.ceil(usernames.length / 50); i++) {
+      const list = usernames.slice(i * 50, i * 50 + 50).join('\n');
       if (i < 1) {
-          messageChannel.send(List)
-      }
-      else if (List.length > 0) {
-          messageChannel.send("cont.\n" + List)
+        messageChannel.send(list);
+      } else if (list.length > 0) {
+        messageChannel.send('cont.\n' + list);
       }
     }
-    messageChannel.send("Done with changes")
+    messageChannel.send('Done with changes');
   },
 
-  openFileAndDo(url, aFunction, message) {
+  openFileAndDo(url, callback, interaction) {
     (async () => {
-      usersChanged = []
-        try {
-            const response = await got(url);
-            var csv = response.body;
-            var usernames = csv.split("\r\n");
-            
-            usernames.forEach(username => {
-                var member = module.exports.getMemberByUsername(message, username);
-                if (!member){
-                  return message.reply(`User ${username} not found`);
-                }
-                aFunction(member);
-                usersChanged.push(username)                
-            });
-        } catch (error) {
-            console.log(error);
-        }
-      attachment = new Discord.MessageAttachment(Buffer.from(`${usersChanged.join('\n')}`, 'utf-8'), 'changedusers.txt');
-      message.channel.send('Changed users', attachment);
+      const usersChanged = [];
+      try {
+        const response = await got(url);
+        const csv = response.body;
+        const usernames = csv.split('\r\n');
 
+        usernames.forEach(username => {
+          const member = module.exports.getMemberByUsername(interaction, username);
+          if (!member) {
+            return interaction.followUp({ content: `User ${username} not found` });
+          }
+          callback(member);
+          usersChanged.push(username);
+        });
+      } catch (error) {
+        console.log(error);
+      }
+      const attachment = new Discord.MessageAttachment(Buffer.from(`${usersChanged.join('\n')}`, 'utf-8'), 'changedusers.txt');
+      interaction.followUp({ content: 'Changed users', files: [attachment] });
     })();
   },
 
   splitText(s) {
-    var middle = Math.floor(s.length / 2);
-    var before = s.lastIndexOf(' ', middle);
-    var after = s.indexOf(' ', middle + 1);
+    let middle = Math.floor(s.length / 2);
+    const before = s.lastIndexOf(' ', middle);
+    const after = s.indexOf(' ', middle + 1);
 
-    if (before == -1 || (after != -1 && middle - before >= after - middle)) {
-        middle = after;
+    if (before === -1 || (after !== -1 && middle - before >= after - middle)) {
+      middle = after;
     } else {
-        middle = before;
+      middle = before;
     }
 
-    var s1 = s.substr(0, middle);
-    var s2 = s.substr(middle + 1);
+    const s1 = s.substr(0, middle);
+    const s2 = s.substr(middle + 1);
 
-    return [s1, s2]
+    return [s1, s2];
   }
 
 };

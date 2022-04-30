@@ -1,44 +1,58 @@
-const { prefix } = require('../../config.json');
 const Hanja = require('../../hanja/sql');
 const DiscordUtil = require('../../common/discordutil.js');
-const { Command } = require('discord.js-commando');
-const Paginator = require('../../common/paginator');
+const { ApplicationCommandOptionType } = require('discord-api-types/v9');
+const { DMChannel, MessageButton } = require('discord.js');
+const paginationEmbed = require('discordjs-button-pagination');
 
-module.exports = class DictionaryCommand extends Command {
-  constructor(client) {
-    super(client, {
-      name: 'hanja',
-      group: 'dictionary',
-      memberName: 'hanja',
-      description: 'Search for Hanja in English, Korean, or Hanja itself.',
-      details: 'Searches the hanja database for meanings of hanjas and related words that occur in the provided argument.\r\n Use the reactions below the message to browse pages or bookmark the result to DMs.',
-      aliases: ['h'],
-      args: [ {
-        key:'word',
-        prompt:'What is the word?',
-        type: 'string'
-      }],
-      examples:[`${prefix}hanja 韓國`],
-      cooldown: 5
-    })
-  }
+module.exports = {
+  data: {
+    name: 'hanja',
+    group: 'dictionary',
+    description: 'Search for Hanja in English, Korean, or Hanja itself.',
+    options: [
+      {
+        name: 'word',
+        description: 'What is the word?',
+        type: ApplicationCommandOptionType.String,
+        required: true
+      }
+    ]
+  },
 
-  run(message, word) {
-    const args = [word.word];
-    const isDM = message.channel.type !== 'text';
+  async execute(interaction) {
+    const args = interaction.options.getString('word');
+    const isDM = interaction.channel instanceof DMChannel;
     const hanja = new Hanja();
-    const pendingEmbed = DiscordUtil.createPendingEmbed(message.author.username);
-    message.channel.send(pendingEmbed).then((pendingMessage) => {
-      hanja.searchWords(args).then((results) => {
-        const pages = DiscordUtil.createHanjaEmbeds(
-          results.query,
-          message.author.username,
-          isDM,
-          results,
-        );
-        const paginator = new Paginator(message.author, pages, '◀', '▶', true, !results.empty, 'You can no longer browse pages. Anyone can still bookmark this message.');
-        paginator.start(pendingMessage);
-      });
+
+    await interaction.deferReply();
+
+    const response = await hanja.searchWords(args);
+
+    await interaction.editReply(send(response, interaction)).then((msg) => {
+      if (!isDM) msg.react('🔖');
     });
+
+    function send(response, interaction) {
+      const pages = DiscordUtil.createHanjaEmbeds(
+        response.query,
+        interaction.user.username,
+        isDM,
+        response
+      );
+
+      const button1 = new MessageButton()
+        .setCustomId('previousbtn')
+        .setLabel('Previous')
+        .setStyle('DANGER');
+
+      const button2 = new MessageButton()
+        .setCustomId('nextbtn')
+        .setLabel('Next')
+        .setStyle('SUCCESS');
+
+      const buttonList = [button1, button2];
+
+      paginationEmbed(interaction, pages, buttonList);
+    }
   }
 };

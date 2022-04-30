@@ -1,7 +1,11 @@
 const querystring = require('querystring');
 const got = require('got');
 const et = require('elementtree');
+const Promise = require('promise');
 const { krDictUrl, krDictToken } = require('../apiconfig.json');
+const https = require('https');
+const rootCas = require('ssl-root-cas').create();
+const path = require('path');
 
 module.exports = class ExampleSentenceAPI {
   constructor() {
@@ -11,11 +15,16 @@ module.exports = class ExampleSentenceAPI {
       part: 'exam',
       method: 'exact',
       multimedia: 0,
-      sort: 'dict',
+      sort: 'dict'
     };
   }
 
   searchExamples(q) {
+    //Needed to fix UNABLE_TO_VERIFY_LEAF_SIGNATURE issue - https://stackoverflow.com/a/60020493
+    let reqPath = path.join(__dirname, '../');
+    rootCas.addFile(path.resolve(reqPath, 'krdic_api_cert.pem'));
+    https.globalAgent.options.ca = rootCas;
+
     this.options.q = q;
     const url = `${krDictUrl}search?${querystring.stringify(this.options)}`;
 
@@ -23,11 +32,8 @@ module.exports = class ExampleSentenceAPI {
       url,
       headers: {
         'content-type': 'application/xml',
-        Accept: 'application/xml',
-      },
-      https: {
-        rejectUnauthorized: false
-      },
+        Accept: 'application/xml'
+      }
     };
 
 
@@ -35,10 +41,10 @@ module.exports = class ExampleSentenceAPI {
       try {
         const response = await got(options);
         resolve(response.body);
-        //=> '<!doctype html> ...'
+        // => '<!doctype html> ...'
       } catch (error) {
         console.log(error);
-        //=> 'Internal server error ...'
+        // => 'Internal server error ...'
       }
     })());
     return promise;

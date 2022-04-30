@@ -1,57 +1,51 @@
 const DiscordUtil = require('../../common/discordutil.js');
-const { Command } = require('discord.js-commando');
 const ExampleSentenceAPI = require('../../api/exampleapi.js');
-const { prefix } = require('../../config.json');
+const { ApplicationCommandOptionType } = require('discord-api-types/v9');
+const { DMChannel } = require('discord.js');
 
-module.exports = class DictionaryCommand extends Command {
-  constructor(client) {
-    super(client, {
-      name: 'examples',
-      aliases: ['e', 'ex'],
-      group: 'dictionary',
-      memberName: 'examples',
-      description: 'Search the dictionary for example sentences.',
-      details: 'Searches the dictionary for example sentences including the Korean word provided.\r\n\r\nResults come from the National Institute of Korean Language\'s Korean-English Learners\' Dictionary.\r\n\r\nUse the book reaction to bookmark the message to DMs.',
-      examples: [`${prefix}examples 나무`],
-      cooldown: 5,
-      args: [
-        {
-          key:'word',
-          prompt:'What is the word?',
-          type: 'string'
-        }
-      ]
-    })
-  }
+module.exports = {
+  data: {
+    name: 'examples',
+    group: 'dictionary',
+    description: 'Search the dictionary for example sentences.',
+    options: [
+      {
+        name: 'word',
+        type: ApplicationCommandOptionType.String,
+        description: 'The word to look up examples for',
+        required: true
+      }
+    ]
+  },
 
-  run(message, word) {
-    //const args = word.word;
-    const q = word.word;
+  async execute(interaction) {
+    const query = interaction.options.getString('word');
     const api = new ExampleSentenceAPI();
-    const isDM = message.channel.type !== 'text';
-    const promise = api.searchExamples(q, message);
+    const isDM = interaction.channel instanceof DMChannel;
 
-    function send(dicEntries, answerMessage) {
-      const exEmbed = DiscordUtil.createExampleResultEmbed('en', q, message.author.username, isDM, dicEntries);
-      
-      
+    await interaction.deferReply();
+
+    const response = await api.searchExamples(query);
+    await interaction.editReply(
+      send(api.parseExampleResult(response), interaction)
+    );
+
+    function send(dicEntries, interaction) {
+      const exEmbed = DiscordUtil.createExampleResultEmbed(
+        'en',
+        query,
+        interaction.user.username,
+        isDM,
+        dicEntries
+      );
+
       if (dicEntries.length === 0) {
-        answerMessage.edit(exEmbed);
+        interaction.editReply({ embeds: [exEmbed] });
         return;
       }
-      answerMessage.edit(exEmbed)
-      .then((msg) => {
+      interaction.editReply({ embeds: [exEmbed] }).then((msg) => {
         if (!isDM) msg.react('🔖');
       });
     }
-    
-    const pendingEmbed = DiscordUtil.createPendingEmbed(message.author.username);
-    message.channel.send(pendingEmbed).then((answerMessage) => {
-      promise.then((result) => {
-        send(api.parseExampleResult(result), answerMessage);
-      }, (err) => {
-        throw new Error(err);
-      });
-    });
   }
 };
