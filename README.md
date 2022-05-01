@@ -127,7 +127,7 @@ Adds a 🔖 reaction to bookmark the result.
 | [`/addrole <role> <file_url>`](#-addrole)                                                                           | Give role to user(s) in the linked csv/txt file.                                                                      |
 | [`/addrolestouserinmessage <message_ids> <channel> <role>`](#-addrolestouserinmessage)                              | Give role to user(s) mentioned in message(s).                                                                         |
 | [`/temp-role <deadline> <role_id> <file_url>`](#-temp-role)                                                         | Give role to user(s) in the linked csv/txt file for a limited time.                                                   |
-| [`/ccssgivetheapples <server_id> <message_ids> <channel_id> <first_role_id'> <second_role_id>`](#ccssgivetheapples) | Gives role to user(s) mentioned in message(s) in satellite server. If they have first role, the second role is given. |
+| [`/ccssgivetheapples <server_id> <message_ids> <channel_id> <first_role_id'> <second_role_id>`](#-ccssgivetheapples) | Gives role to user(s) mentioned in message(s) in satellite server. If they have first role, the second role is given. |
 | [`/givetheapples <message_ids> <channel> <first_role> <second_role>`](#-givetheapples)                              | Gives role to user(s) mentioned in message(s). If they have first role, the second role is given.                     |
 | [`/removepermissions <role> <command>`](#-removepermissions)                                                        | Remove permission from user(s) with role to use command.                                                              |
 | [`/removerole <role> <file_url>`](#-removerole)                                                                     | Remove role from user(s) in the linked csv/txt file.                                                                  |
@@ -136,7 +136,7 @@ Adds a 🔖 reaction to bookmark the result.
 | [`/role_rin <base_role> <assigned_role>`](#-role_rin)                                                               | Remove role from all users with another role.                                                                         |
 | [`/rollcall <role_exception_ids> <rollcall_role_id>`](#-rollcall)                                                   | Starts roll call.                                                                                                     |
 
-#### <font size=3>⚡ /addpermissions </font>
+#### <font size=3>⚡ /addpermissions</font>
 
 **Example:** `/addpermissions @Moderator givetheapples`
 
@@ -147,7 +147,7 @@ Gives all users with the `<role>` provided the permission to use the command wit
 
 The `<command>` must match the exact command name of a current slash command, including any spaces and letter-casing (i.e. ✅ addpermissions, ❌ add Permissions )
 
-#### <font size=3>⚡ /addrole </font>
+#### <font size=3>⚡ /addrole</font>
 
 **Example:** `/addrole @Moderator http://url`
 
