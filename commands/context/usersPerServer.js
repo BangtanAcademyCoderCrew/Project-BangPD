@@ -1,8 +1,8 @@
 const Discord = require('discord.js');
 const { ContextMenuCommandBuilder } = require('@discordjs/builders');
-const { BALId, BATId, BAGId } = require('../../config.json');
+const { BALId, BATId, BAGId, BADId } = require('../../config.json');
 
-const ALL_GUILD_IDS = [BATId, BALId, BAGId];
+const ALL_GUILD_IDS = [BATId, BALId, BAGId, BADId];
 
 module.exports = {
   data: new ContextMenuCommandBuilder()
@@ -35,13 +35,18 @@ module.exports = {
       });
 
       const groups = {
+        AllFour: '4 Servers',
         All: '3 Servers',
         BAG: 'only BAG',
         BAL: 'only BAL',
         BAT: 'only BAT',
+        BAD: 'only BAD',
         BALandBAG: 'BAL and BAG',
         BALandBAT: 'BAL and BAT',
-        BATandBAG: 'BAT and BAG'
+        BATandBAG: 'BAT and BAG', 
+        BADandBAG: 'BAD and BAG',
+        BADandBAT: 'BAD and BAT',
+        BADandBAL: 'BAD and BAL'
       };
 
       const usersPerGroup = {};
@@ -49,6 +54,7 @@ module.exports = {
       usersPerGroup[groups.BALandBAG] = usersPerGuild[BALId].filter(id => usersPerGuild[BAGId].includes(id));
       usersPerGroup[groups.BATandBAG] = usersPerGuild[BATId].filter(id => usersPerGuild[BAGId].includes(id));
       usersPerGroup[groups.All] = usersPerGroup[groups.BALandBAT].filter(id => usersPerGuild[BAGId].includes(id));
+      usersPerGroup[groups.AllFour] = usersPerGroup[groups.All].filter(id => usersPerGuild[BADId].includes(id));
       usersPerGroup[groups.BAL] = usersPerGuild[BALId].filter(id => !usersPerGuild[BATId].includes(id)).filter(id => !usersPerGuild[BAGId].includes(id));
       usersPerGroup[groups.BAT] = usersPerGuild[BATId].filter(id => !usersPerGuild[BALId].includes(id)).filter(id => !usersPerGuild[BAGId].includes(id));
       usersPerGroup[groups.BAG] = usersPerGuild[BAGId].filter(id => !usersPerGuild[BATId].includes(id)).filter(id => !usersPerGuild[BALId].includes(id));
