@@ -1,2 +1,4 @@
 node_modules
 apiconfig.json
+.idea
+.idea/*
