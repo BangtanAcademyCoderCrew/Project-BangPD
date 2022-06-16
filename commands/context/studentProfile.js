@@ -1,5 +1,5 @@
 const { ContextMenuCommandBuilder } = require('@discordjs/builders');
-const { ApplicationCommandType } = require('discord-api-types/v9')
+const { ApplicationCommandType } = require('discord-api-types/v9');
 const { MessageEmbed } = require('discord.js');
 const { BATId, BALId, BAGId, BADId, guildId } = require('../../config.json');
 const ALL_GUILD_IDS = [BATId, BALId, BAGId, BADId, guildId];
@@ -15,16 +15,22 @@ module.exports = {
     const fields = [];
     const user = interaction.member.guild.members.cache.find(u => u.id === userId).user;
 
-    await interaction.deferReply();
+    await interaction.deferReply({ ephemeral: true });
     ALL_GUILD_IDS.forEach(guildId => {
       const guild = interaction.client.guilds.cache.get(guildId);
       if (guildId && !guild) return;
       const userInGuild = guild.members.cache.find(u => u.id === userId);
       if (!userInGuild) return;
-      const roles = userInGuild.roles.cache.map(role => role.name).filter(role => role != '@everyone').join(', ');
+      let roles = userInGuild.roles.cache.filter(role => role.name != '@everyone');
+      if (interaction.guild == guildId) {
+        roles = roles.map(role => `<@&${role.id}>`).join(', ');
+      } else {
+        roles = roles.map(role => role.name).join(', ');
+      }
+      const joinedDate = new Date(userInGuild.joinedAt).toLocaleString('ko-KR', { timeZone: 'UTC' });
       fields.push({
         name: `Roles at ${guild.name}`,
-        value: roles,
+        value: `${roles}\n\n **Joined at:** ${joinedDate} UTC`,
         inline: true
       });
     });
@@ -39,7 +45,7 @@ module.exports = {
       .setAuthor({ name: user.tag, iconURL: user.displayAvatarURL() })
       .addFields(fields)
       .setTimestamp();
-    interaction.followUp({ embeds: [embed] });
+    interaction.followUp({ embeds: [embed], ephemeral: true });
 
 
   }

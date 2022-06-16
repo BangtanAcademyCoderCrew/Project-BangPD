@@ -1,11 +1,11 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { MessageEmbed } = require('discord.js');
-const { BATId, BALId, BADId, guildId } = require('../../config.json');
-const ALL_GUILD_IDS = [BATId, BALId, BADId, guildId];
+const { BATId, BALId, BAGId, BADId, guildId } = require('../../config.json');
+const ALL_GUILD_IDS = [BATId, BALId, BAGId, BADId, guildId];
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('studentprofile')
+    .setName('getstudentprofile')
     .setDescription('Gets info of a students across BA servers')
     .setDefaultPermission(false)
     .addUserOption(option =>
@@ -22,10 +22,16 @@ module.exports = {
       if (guildId && !guild) return;
       const userInGuild = guild.members.cache.find(u => u.id === user.id);
       if (!userInGuild) return;
-      const roles = userInGuild.roles.cache.map(role => role.name).filter(role => role != '@everyone').join(', ');
+      let roles = userInGuild.roles.cache.filter(role => role.name != '@everyone');
+      if (interaction.guild == guildId) {
+        roles = roles.map(role => `<@&${role.id}>`).join(', ');
+      } else {
+        roles = roles.map(role => role.name).join(', ');
+      }
+      const joinedDate = new Date(userInGuild.joinedAt).toLocaleString('ko-KR', { timeZone: 'UTC' });
       fields.push({
         name: `Roles at ${guild.name}`,
-        value: roles,
+        value: `${roles}\n\n **Joined at:** ${joinedDate} UTC`,
         inline: true
       });
     });
