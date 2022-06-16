@@ -6,7 +6,7 @@ const ALL_GUILD_IDS = [BATId, BALId, BAGId, BADId, guildId];
 
 module.exports = {
   data: new ContextMenuCommandBuilder()
-    .setName('profile')
+    .setName('get student profile')
     .setType(ApplicationCommandType.User)
     .setDefaultPermission(false),
   async execute(interaction) {
