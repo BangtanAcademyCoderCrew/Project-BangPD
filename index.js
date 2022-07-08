@@ -5,7 +5,7 @@ const { botToken, commandDirectories } = require('./config.json');
 const { deployCommands } = require('./deploy-commands');
 
 const client = new Client({
-  partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
+  partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER'],
   intents: [
       Intents.FLAGS.GUILDS,
       Intents.FLAGS.GUILD_PRESENCES,
