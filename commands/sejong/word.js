@@ -65,7 +65,7 @@ module.exports = {
       );
 
       if (result.length === 0) {
-        interaction.editReply({ embeds: [] });
+        interaction.editReply({ embeds: [enEmbed] });
         return;
       }
 

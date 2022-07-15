@@ -256,10 +256,10 @@ module.exports = {
       try {
         const response = await got(url);
         const csv = response.body;
-        const usernames = csv.split('\r\n');
 
+        const usernames = csv.trim().split(/\r?\n/);
         usernames.forEach(username => {
-          const member = module.exports.getMemberByUsername(interaction, username);
+          const member = module.exports.getMemberByUsername(interaction, username.trim());
           if (!member) {
             return interaction.followUp({ content: `User ${username} not found` });
           }

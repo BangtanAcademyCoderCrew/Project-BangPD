@@ -20,7 +20,7 @@ module.exports = {
     try {
       const response = await got(fileUrl);
       const csv = response.body;
-      const userIds = csv.split(/\r?\n/).map(id => id.replace(/[^\d]/g, ''));
+      const userIds = csv.trim().split(/\r?\n/).map(id => id.replace(/[^\d]/g, ''));
       const users = interaction.client.users.cache.filter(u => userIds.includes(u.id));
       const members = interaction.guild.members.cache.filter(m => userIds.includes(m.id));
 
@@ -29,6 +29,9 @@ module.exports = {
         if (!foundUser) {
           return interaction.followUp({ content: `User ${userId} not found <a:shookysad:949689086665437184>` });
 
+        }
+        if (foundUser.bot) {
+          return;
         }
         const foundMember = members.find(m => m.id === userId);
         if (!foundMember) {

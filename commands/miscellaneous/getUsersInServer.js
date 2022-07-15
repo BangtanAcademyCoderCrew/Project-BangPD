@@ -1,9 +1,9 @@
 const Discord = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { BATId, BALId, BAGId } = require('../../config.json');
+const { BATId, BALId, BAGId, BADId } = require('../../config.json');
 const { ChannelType } = require('discord-api-types/v9');
 
-const ALL_GUILD_IDS = [BATId, BALId, BAGId];
+const ALL_GUILD_IDS = [BATId, BALId, BAGId, BADId];
 
 module.exports = {
   data: new SlashCommandBuilder()

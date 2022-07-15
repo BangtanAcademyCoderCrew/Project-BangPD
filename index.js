@@ -2,9 +2,10 @@ const fs = require('fs');
 const { Client, Collection, Intents } = require('discord.js');
 const DiscordUtil = require('./common/discordutil');
 const { botToken, commandDirectories } = require('./config.json');
+const { deployCommands } = require('./deploy-commands');
 
 const client = new Client({
-  partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
+  partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER'],
   intents: [
       Intents.FLAGS.GUILDS,
       Intents.FLAGS.GUILD_PRESENCES,
@@ -34,20 +35,24 @@ scheduledJobFiles.forEach((file) => {
 
 client.once('ready', () => {
   console.log('Bang PD is online!');
+  deployCommands();
   client.user.setActivity('BE', { type: 'LISTENING' });
 });
 
 client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isCommand()) return;
-  const command = client.commands.get(interaction.commandName);
+  if (interaction.isCommand() || interaction.isContextMenu()) {
+    const command = client.commands.get(interaction.commandName);
 
-  if (!command) return;
+    if (!command) {
+      return;
+    }
 
-  try {
-    await command.execute(interaction);
-  } catch (error) {
-    console.error(error);
-    return interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+    try {
+      await command.execute(interaction);
+    } catch (error) {
+      console.error(error);
+      return interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+    }
   }
 });
 
