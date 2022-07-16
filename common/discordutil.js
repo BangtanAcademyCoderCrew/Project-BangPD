@@ -292,9 +292,9 @@ module.exports = {
   },
 
   async fetchAllMessagesByChannel(channel) {
-    const messages = [];
+    let messages = [];
 
-    // Create message pointer because we can only get 100 at a time
+    // Create message pointer of most recent message because we can only get 100 at a time
     let message = await channel.messages
       .fetch({ limit: 1 })
       .then(messagePage => (messagePage.size === 1 ? messagePage.at(0) : null));
@@ -303,14 +303,36 @@ module.exports = {
       await channel.messages
         .fetch({ limit: 100, before: message.id })
         .then(messagePage => {
-          messagePage.forEach(msg => messages.push(msg));
-
+          messages = messages.concat(messagePage);
           // Update message pointer to be last message in page of messages
           message = messagePage.size > 0 ? messagePage.at(messagePage.size - 1) : null;
         });
     }
 
     return messages;
+  },
+
+  async fetchAllMessagesByChannelSince(channel, sinceDateTime) {
+    let messages = [];
+
+    // Create message pointer of most recent message because we can only get 100 at a time
+    let message = await channel.messages
+        .fetch({ limit: 1 })
+        .then(messagePage => (messagePage.size === 1 ? messagePage.at(0) : null));
+
+    while (message) {
+      await channel.messages
+          .fetch({ limit: 100, before: message.id })
+          .then(messagePage => {
+            const filteredByDate = messagePage.filter(m => m.createdAt >= sinceDateTime);
+            messages = messages.concat(filteredByDate);
+            // Update message pointer to be last message in page of messages
+            message = filteredByDate.size > 0 ? messagePage.at(messagePage.size - 1) : null;
+          });
+    }
+
+    return messages;
   }
+
 
 };
