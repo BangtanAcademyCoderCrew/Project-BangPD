@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { MessageEmbed } = require('discord.js');
+const { splitText } = require('../../common/discordutil');
 const { BATId, BALId, BAGId, BADId, guildId } = require('../../config.json');
 const ALL_GUILD_IDS = [BATId, BALId, BAGId, BADId, guildId];
 
@@ -16,6 +17,16 @@ module.exports = {
     const options = interaction.options;
     const user = options.getUser('user');
     const fields = [];
+
+    const formatStudentInfo = (guildName, value) => {
+      const info = {
+        name: `Roles at ${guildName}`,
+        value: `${value}`,
+        inline: true
+      };
+      return info;
+    };
+
     await interaction.deferReply();
     ALL_GUILD_IDS.forEach(guildId => {
       const guild = interaction.client.guilds.cache.get(guildId);
@@ -24,16 +35,20 @@ module.exports = {
       if (!userInGuild) return;
       let roles = userInGuild.roles.cache.filter(role => role.name != '@everyone');
       if (interaction.guild == guildId) {
-        roles = roles.map(role => `<@&${role.id}>`).join(', ');
+        roles = roles.map(role => `<@&${role.id}>`).join('\n');
       } else {
-        roles = roles.map(role => role.name).join(', ');
+        roles = roles.map(role => role.name).join('\n');
       }
       const joinedDate = new Date(userInGuild.joinedAt).toLocaleString('ko-KR', { timeZone: 'UTC' });
-      fields.push({
-        name: `Roles at ${guild.name}`,
-        value: `${roles}\n\n **Joined at:** ${joinedDate} UTC`,
-        inline: true
-      });
+      const result = `${roles}\n\n **Joined at:** ${joinedDate} UTC`;
+      if (result.length > 1024) {
+        const results = splitText(result, '\n');
+        results.forEach(result => {
+          fields.push(formatStudentInfo(guild.name, result));
+        });
+      } else {
+        fields.push(formatStudentInfo(guild.name, result));
+      }
     });
     const createdAtDate = new Date(user.createdAt).toLocaleString('ko-KR', { timeZone: 'UTC' });
     fields.push({
