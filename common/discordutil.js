@@ -274,10 +274,10 @@ module.exports = {
     })();
   },
 
-  splitText(s) {
+  splitText(s, separator = ' ') {
     let middle = Math.floor(s.length / 2);
-    const before = s.lastIndexOf(' ', middle);
-    const after = s.indexOf(' ', middle + 1);
+    const before = s.lastIndexOf(separator, middle);
+    const after = s.indexOf(separator, middle + 1);
 
     if (before === -1 || (after !== -1 && middle - before >= after - middle)) {
       middle = after;

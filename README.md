@@ -333,6 +333,7 @@ When entering multiple `<role_exception_ids>` they should be entered with a spac
 | [`/getuserids <message_ids> <channel>`](#-getuserids)                      | Get a list of user ids for user(s) mentioned in message(s).             |
 | [`/getusernames <file_url>`](#-getusernames)                               | Get user nicknames and tags from user(s) in the linked csv/txt file.    |
 | [`/getusersinserver <message_ids> <channel>`](#-getusersinserver)          | Get a list of users per BA server from user(s) mentioned in message(s). |
+| [`/getstudentprofile <user>`](#-getstudentprofile)                         | Get all roles from a user in all BA servers.                            |
 
 #### <font size=3>⚡ /areactivestudents</font>
 
@@ -472,6 +473,17 @@ Returns a response, per server or server combination, with a `.txt` attachment n
 When entering multiple `<message_ids>` they should be entered with a space between each one: `12345678XXXXXXXX 12345678XXXXXXXX`.
 
 Also available as a context menu command when right-clicking on a message, named `get user per server`. Response from the context command is only viewable to the user who executes it.
+
+<br/>
+
+
+#### <font size=3>⚡ /getstudentprofile</font>
+
+**Example:** `/getstudentprofile @Bang PD Nim`
+
+- **Options:** `<user>` _(user)_ Required
+
+Get all roles from a user in all BA servers and returns a response with an embed with a list for each server.
 
 <br/>
 
