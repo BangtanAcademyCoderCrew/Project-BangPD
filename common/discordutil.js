@@ -228,6 +228,10 @@ module.exports = {
     return embed;
   },
 
+  createApplesAssignEmbed(title, message) {
+    return this.createBasicEmbed(title).setDescription(`${message}`);
+  },
+
   getMemberByUsername(interaction, username) {
     const members = interaction.guild.members.cache;
     const user = interaction.client.users.cache.find(u => u.tag === username);

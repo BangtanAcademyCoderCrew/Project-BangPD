@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { MessageAttachment } = require('discord.js');
+const DiscordUtil = require('../../common/discordutil.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -48,7 +49,7 @@ module.exports = {
         }
         const content = msg.content.replace(/\D/g, ' ').split(' ');
         const ids = content.filter(e => e.length >= 16);
-        const members = guild.members.cache.filter(member => ids.includes(member.id));
+        const members = interaction.guild.members.cache.filter(member => ids.includes(member.id));
         const bothRoles = [firstRole, secondRole];
         console.log(ids);
         console.log(ids.length);
@@ -80,7 +81,13 @@ module.exports = {
         // Creates attachments and sends txt files with userIds
         const attachmentFirstRole = new MessageAttachment(Buffer.from(usersWithFirstRole, 'utf-8'), 'usersID-firstRole.txt');
         const attachmentSecondRole = new MessageAttachment(Buffer.from(usersWithSecondRole, 'utf-8'), 'usersID-secondRole.txt');
-        interaction.followUp({ content: `Users in message ${messageId} added role ${firstRole} and ${secondRole}`, files: [attachmentFirstRole, attachmentSecondRole] });
+
+        // Creates embeds with userIds and sends them
+
+        const firstRoleEmbed = DiscordUtil.createApplesAssignEmbed('Green Apple', usersWithFirstRole);
+        const secondRoleEmbed = DiscordUtil.createApplesAssignEmbed('Red Apple', usersWithSecondRole);
+
+        interaction.followUp({ content: `Users in message ${messageId} added role ${firstRole} and ${secondRole}`, files: [attachmentFirstRole, attachmentSecondRole], embeds: [firstRoleEmbed, secondRoleEmbed] });
         msg.react('👍');
       }).catch((error) => {
         console.error(error);
