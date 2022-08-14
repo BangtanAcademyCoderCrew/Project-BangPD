@@ -33,6 +33,17 @@ client.once('ready', () => {
 });
 
 client.on('interactionCreate', async (interaction) => {
+  
+  if (interaction.isButton()){
+		const command = client.commands.get(interaction.customId.split("_")[0]);
+		try {
+			await command.executeButton(interaction);
+		} catch (error) {
+			console.error(error);
+			return interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+		}
+	}
+
   if (interaction.isCommand() || interaction.isContextMenu()) {
     const command = client.commands.get(interaction.commandName);
 
