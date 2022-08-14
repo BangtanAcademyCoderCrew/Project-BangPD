@@ -3,6 +3,9 @@ const { prefix, accentColor, avatar } = require('../config.json');
 const langs = require('./langs.js');
 const { DateTime } = require('luxon');
 const got = require('got');
+const { guildId, BATId, BALId, BAGId, BADId, BAEId } = require('../config.json');
+const ALL_GUILD_IDS = [guildId, BATId, BALId, BAGId, BADId, BAEId];
+const GUILD_IDS_WITHOUT_BAE = [guildId, BATId, BALId, BAGId, BADId];
 
 module.exports = {
   bookmark(message, user) {
@@ -289,6 +292,27 @@ module.exports = {
     const s2 = s.substr(middle + 1);
 
     return [s1, s2];
+  },
+
+  getAllGuilds(guildIds, interaction) {
+    let guilds = [];
+    guildIds.forEach(idGuild => {
+      const guild = interaction.client.guilds.cache.get(idGuild);
+      if (idGuild && !guild) {
+        interaction.followUp({ content: `I can't find server with ID ${idGuild} <a:shookysad:949689086665437184>`, ephemeral: true });
+      } else {
+        guilds.push(guild);
+      }
+    });
+    return guilds;
+  },
+
+  getAllGuildIds() {
+    return ALL_GUILD_IDS;
+  },
+
+  getGuildIdsWithoutBAE() {
+    return GUILD_IDS_WITHOUT_BAE;
   }
 
 };

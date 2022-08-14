@@ -1,9 +1,9 @@
+const DiscordUtil = require('../../common/discordutil.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { guildId, BATId, BALId, BAGId, BADId } = require('../../config.json');
 const { ChannelType } = require('discord-api-types/v9');
-const { MessageAttachment } = require('discord.js');
+const { MessageAttachment, MessageButton, MessageActionRow } = require('discord.js');
 
-const ALL_GUILD_IDS = [guildId, BATId, BALId, BAGId, BADId];
+const ALL_GUILD_IDS = DiscordUtil.getGuildIdsWithoutBAE();
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -23,8 +23,19 @@ module.exports = {
         const options = interaction.options;
         const messageIds = options.getString('message_ids');
         const channel = options.getChannel('channel');
+        const interactionId = interaction.id;
 
-        await interaction.deferReply();
+        await interaction.deferReply({ ephemeral: true });
+
+        const guilds = DiscordUtil.getAllGuilds(ALL_GUILD_IDS, interaction);
+        const errorUsersPerServer = {
+            guildId: '',
+            BATId: '',
+            BALId: '',
+            BAGId: '',
+            BADId: '',
+            BAEId: ''
+        };
 
         const kickUsersOnServers = async (messageId) => {
             channel.messages.fetch(messageId).then(async (msg) => {
@@ -32,31 +43,62 @@ module.exports = {
                 const userIds = msg.mentions.users.map(user => user.id);
                 for (const id of userIds) {
                     let errorCount = 0;
-                    for (const idGuild of ALL_GUILD_IDS) {
-                        const guild = interaction.client.guilds.cache.get(idGuild);
-                        if (idGuild && !guild) {
-                            return interaction.followUp({ content: `I can't find server with ID ${idGuild} <a:shookysad:949689086665437184>` });
-                        }
+                    await Promise.all(guilds.map(async (guild) => {
                         await guild.members.kick(id)
-                        .catch((error) => {
-                            console.log(error);
-                            errorCount += 1;
-                            interaction.followUp({ content: `There was an error kicking user <@${id}> in server with ID ${idGuild} <a:shookysad:949689086665437184>` });
-                        });
-                    }
-                    if (errorCount !== ALL_GUILD_IDS.length) {
+                            .catch((error) => {
+                                console.log(error);
+                                errorCount += 1;
+                                errorUsersPerServer[guild.id] += `<@${id}>\n`;
+                            });
+                    }));
+                    if (errorCount !== guilds.length) {
                         membersKicked += `<@${id}>\n`;
                     }
                 }
                 const attachment = new MessageAttachment(Buffer.from(membersKicked, 'utf-8'), 'usersID.txt');
-                interaction.followUp({ content: `Users in message ${messageId} were kicked`, files: [attachment] });
+                interaction.followUp({ content: `These users in message ${messageId} were kicked from at least one server`, files: [attachment], ephemeral: true });
             }).catch((error) => {
                 console.log(error);
-                interaction.followUp({ content: `There was an error checking ${messageId} in channel <#${channel.id}> <a:shookysad:949689086665437184>` });
+                interaction.followUp({ content: `There was an error checking ${messageId} in channel <#${channel.id}> <a:shookysad:949689086665437184>`, ephemeral: true });
             });
         };
 
-        const allMessageIds = messageIds.split(' ');
-        for (const messageId of allMessageIds) { await kickUsersOnServers(messageId); }
+        const confirmButton = new MessageButton()
+            .setCustomId(`confirmKick_${interactionId}`)
+            .setLabel('Kick')
+            .setStyle('DANGER');
+        const cancelButton = new MessageButton()
+            .setCustomId(`cancelKick_${interactionId}`)
+            .setLabel('Cancel')
+            .setStyle('SECONDARY');
+        const actionRow = new MessageActionRow().addComponents(cancelButton, confirmButton);
+        await interaction.followUp({ content: 'Are you sure you want to kick these users from all BA servers?', components: [actionRow], ephemeral: true });
+
+        const filter = (buttonInteraction) => {
+            return interaction.user.id === buttonInteraction.user.id;
+        };
+        const collector = interaction.channel.createMessageComponentCollector({
+            filter
+        });
+        collector.on('collect', async (click) => {
+            if (click.customId === `confirmKick_${interactionId}`) {
+                collector.stop();
+                await interaction.editReply({ content: 'Kick confirmed', components: [], ephemeral: true });
+
+                const allMessageIds = messageIds.split(' ');
+                for (const messageId of allMessageIds) {
+                    await kickUsersOnServers(messageId);
+                    Object.entries(errorUsersPerServer).forEach(([key, value]) => {
+                        if (value !== '') {
+                            const errorAttachment = new MessageAttachment(Buffer.from(value, 'utf-8'), 'usersID.txt');
+                            return interaction.followUp({ content: `There was an error kicking these users from server with ID ${key} <a:shookysad:949689086665437184>`, files: [errorAttachment], ephemeral: true });
+                        }
+                    });
+                }
+            } else if (click.customId === `cancelKick_${interactionId}`) {
+                collector.stop();
+                return interaction.editReply({ content: 'Kick canceled', components: [], ephemeral: true });
+            }
+        });
     }
 };
