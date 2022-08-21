@@ -9,6 +9,7 @@ Bang PD is a bot used in Bangtan Academy.
 - Role management
 - Guild information
 - Setting a reminder
+- User management
 
 ## Development
 
@@ -41,6 +42,7 @@ Commands all start with `/` and will give you tool-tips if you start typing in D
 - ⚙️ [Role Management Commands](#%EF%B8%8F-role-management-commands)
 - ℹ️ [Information Request Commands](#ℹ%EF%B8%8F-information-request-commands)
 - 📅 [Reminder Command](#-reminder-command)
+- 👤 [User Management Commands](#-user-management-commands)
 
 <br/>
 
@@ -508,3 +510,100 @@ When entering the `<deadline>` the format should be in CT (America/Chicago) time
    - ❌ 6-13-2022 10:00
 
 When entering the `<time_in_advance>` the three choices available are: 30 min, 1 hour, and 1 day in advance of the deadline.
+
+<br/>
+
+### 👤 User Management Commands
+
+| Command                                                                                                             | Description                                                                                                           |
+|---------------------------------------------------------------------------------------------------------------------| --------------------------------------------------------------------------------------------------------------------- |
+| [`/kickrollcall`](#-kickrollcall)                                                                                   | Kicks ROLL CALL users from all servers.                                                                                |
+| [`/kickuserinmessage <message_ids> <channel>`](#-kickuserinmessage)                                                 | Kicks user(s) mentioned in message(s) from all servers.                                                               |
+| [`/banuserinmessage <message_ids> <channel>`](#-banuserinmessage)                                                   | Bans user(s) mentioned in message(s) from all servers.                                                               |
+| [`/unbanuseridinmessage <message_ids> <channel>`](#-unbanuseridinmessage)                                           | Unbans user(s) by id(s) in message(s) from all servers.                                                               |
+
+#### <font size=3>⚡ /kickrollcall</font>
+
+**Example:** `/kickrollcall`
+
+Gets all users with the `ROLLCALL 🔔` role and displays them along with a confirmation message to proceed with the command. If confirmed, the command kicks these users from all servers. Otherwise the command is canceled.
+
+The `<command>` must match the exact command name of a current slash command, including any spaces and letter-casing (i.e. ✅ kickrollcall, ❌ kick Roll Call )
+
+Returns a response with a `.txt` attachment named `usersID.txt`, which includes a list of the ids kicked from at least one of the servers.
+
+> User ids are separated by a new line and in the following format.
+>
+> ```
+> <@12345678XXXXXXXX>
+> <@12345678XXXXXXXX>
+> <@12345678XXXXXXXX>
+> ```
+
+If there was an error kicking a user from any of the servers, the command returns also a response, per server, with a `.txt` attachment named `usersID.txt`, which includes a list of the ids that couldn't be kicked from the server. Formatting of the `.txt` is same as above.
+
+#### <font size=3>⚡ /kickuserinmessage</font>
+
+**Example:** `/kickuserinmessage 1234567812345678 #HOV-backstage`
+
+- **Options:** `<message_id>` *(string)* Required, `<channel>` *(@channel)* Required
+
+A confirmation message to proceed with the command is displayed. If confirmed, the command kicks all the users tagged in a message in a specific channel. Otherwise the command is canceled.
+
+Returns a response, per message, with a `.txt` attachment named `usersID.txt`, which includes a list of the ids kicked from at least one of the servers.
+
+> User ids are separated by a new line and in the following format.
+>
+> ```
+> <@12345678XXXXXXXX>
+> <@12345678XXXXXXXX>
+> <@12345678XXXXXXXX>
+> ```
+
+If there was an error kicking a user from any of the servers, the command returns also a response, per message and per server, with a `.txt` attachment named `usersID.txt`, which includes a list of the ids that couldn't be kicked from the server. Formatting of the `.txt` is same as above.
+
+#### <font size=3>⚡ /banuserinmessage</font>
+
+**Example:** `/banuserinmessage 1234567812345678 #HOV-backstage`
+
+- **Options:** `<message_id>` *(string)* Required, `<channel>` *(@channel)* Required
+
+A confirmation message to proceed with the command is displayed. If confirmed, the command bans all the users tagged in a message in a specific channel. Otherwise the command is canceled.
+
+Returns a response, per message, with a `.txt` attachment named `usersID.txt`, which includes a list of the ids banned from at least one of the servers.
+
+> User ids are separated by a new line and in the following format.
+>
+> ```
+> <@12345678XXXXXXXX>
+> <@12345678XXXXXXXX>
+> <@12345678XXXXXXXX>
+> ```
+
+If there was an error banning a user from any of the servers, the command returns also a response, per message and per server, with a `.txt` attachment named `usersID.txt`, which includes a list of the ids that couldn't be banned from the server. Formatting of the `.txt` is same as above.
+
+#### <font size=3>⚡ /unbanuseridinmessage</font>
+
+**Example:** `/unbanuseridinmessage 1234567812345678 #HOV-backstage`
+
+- **Options:** `<message_id>` *(string)* Required, `<channel>` *(@channel)* Required
+
+A confirmation message to proceed with the command is displayed. If confirmed, the command unbans all the users with the id from a message in a specific channel. Otherwise the command is canceled.
+
+> Message with user ids example.
+>
+> ```
+> 12345678XXXXXXXX 12345678XXXXXXXX 12345678XXXXXXXX
+> ```
+
+Returns a response, per message, with a `.txt` attachment named `usersID.txt`, which includes a list of the ids unbanned from at least one of the servers.
+
+> User ids are separated by a new line and in the following format.
+>
+> ```
+> <@12345678XXXXXXXX>
+> <@12345678XXXXXXXX>
+> <@12345678XXXXXXXX>
+> ```
+
+If there was an error unbanning a user from any of the servers, the command returns also a response, per message and per server, with a `.txt` attachment named `usersID.txt`, which includes a list of the ids that couldn't be unbanned from the server. Formatting of the `.txt` is same as above.
