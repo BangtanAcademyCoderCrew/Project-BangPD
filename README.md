@@ -544,7 +544,7 @@ If there was an error kicking a user from any of the servers, the command return
 
 #### <font size=3>⚡ /kickuserinmessage</font>
 
-**Example:** `/kickuserinmessage 1234567812345678 #HOV-backstage`
+**Example:** `/kickuserinmessage 1234567812345678 #staff-backstage`
 
 - **Options:** `<message_id>` *(string)* Required, `<channel>` *(@channel)* Required
 
@@ -564,7 +564,7 @@ If there was an error kicking a user from any of the servers, the command return
 
 #### <font size=3>⚡ /banuserinmessage</font>
 
-**Example:** `/banuserinmessage 1234567812345678 #HOV-backstage`
+**Example:** `/banuserinmessage 1234567812345678 #staff-backstage`
 
 - **Options:** `<message_id>` *(string)* Required, `<channel>` *(@channel)* Required
 
@@ -584,7 +584,7 @@ If there was an error banning a user from any of the servers, the command return
 
 #### <font size=3>⚡ /unbanuseridinmessage</font>
 
-**Example:** `/unbanuseridinmessage 1234567812345678 #HOV-backstage`
+**Example:** `/unbanuseridinmessage 1234567812345678 #staff-backstage`
 
 - **Options:** `<message_id>` *(string)* Required, `<channel>` *(@channel)* Required
 
