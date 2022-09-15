@@ -63,7 +63,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
   if (user.id === client.user.id || user.bot) {
     return;
   }
-    const validChannels = ['GUILD_TEXT', 'GUILD_PUBLIC_THREAD', 'GUILD_PRIVATE_THREAD'];
+    const validChannels = ['GUILD_TEXT', 'GUILD_PUBLIC_THREAD', 'GUILD_PRIVATE_THREAD', 'GUILD_VOICE'];
     if (reaction.emoji.name === '🔖' && validChannels.includes(reaction.message.channel.type)) {
       if (reaction.message.embeds[0] && reaction.message.author.id === client.user.id) {
         const embed = reaction.message.embeds[0];
