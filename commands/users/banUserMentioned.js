@@ -28,40 +28,6 @@ module.exports = {
         await interaction.deferReply({ ephemeral: true });
 
         const guilds = DiscordUtil.getAllGuilds(ALL_GUILD_IDS, interaction);
-        const errorUsersPerServer = {
-            guildId: '',
-            BATId: '',
-            BALId: '',
-            BAGId: '',
-            BADId: '',
-            BAEId: ''
-        };
-
-        const banUsersOnServers = async (messageId) => {
-            channel.messages.fetch(messageId).then(async (msg) => {
-                let membersBanned = '';
-                const userIds = msg.mentions.users.map(user => user.id);
-                for (const id of userIds) {
-                    let errorCount = 0;
-                    await Promise.all(guilds.map(async (guild) => {
-                        await guild.members.ban(id)
-                            .catch((error) => {
-                                console.log(error);
-                                errorCount += 1;
-                                errorUsersPerServer[guild.id] += `<@${id}>\n`;
-                            });
-                    }));
-                    if (errorCount !== guilds.length) {
-                        membersBanned += `<@${id}>\n`;
-                    }
-                }
-                const attachment = new MessageAttachment(Buffer.from(membersBanned, 'utf-8'), 'usersID.txt');
-                interaction.followUp({ content: `These users in message ${messageId} were banned from at least one server`, files: [attachment], ephemeral: true });
-            }).catch((error) => {
-                console.log(error);
-                interaction.followUp({ content: `There was an error checking ${messageId} in channel <#${channel.id}> <a:shookysad:949689086665437184>`, ephemeral: true });
-            });
-        };
 
         const confirmButton = new MessageButton()
             .setCustomId(`confirmBan_${interactionId}`)
@@ -87,12 +53,17 @@ module.exports = {
 
                 const allMessageIds = messageIds.split(' ');
                 for (const messageId of allMessageIds) {
-                    await banUsersOnServers(messageId);
-                    Object.entries(errorUsersPerServer).forEach(([key, value]) => {
-                        if (value !== '') {
-                            const errorAttachment = new MessageAttachment(Buffer.from(value, 'utf-8'), 'usersID.txt');
-                            return interaction.followUp({ content: `There was an error banning these users from server with ID ${key} <a:shookysad:949689086665437184>`, files: [errorAttachment], ephemeral: true });
-                        }
+                    channel.messages.fetch(messageId).then(async (msg) => {
+                        const userIds = msg.mentions.users.map(user => user.id);
+                        const [membersBanned, errorUsersPerServer] = await DiscordUtil.banUsersOnServers(userIds, guilds);
+                        const attachment = new MessageAttachment(Buffer.from(membersBanned, 'utf-8'), 'usersID.txt');
+                        interaction.followUp({ content: `These users in message ${messageId} were banned from at least one server`, files: [attachment], ephemeral: true });
+                        Object.entries(errorUsersPerServer).forEach(([key, value]) => {
+                            if (value !== '') {
+                                const errorAttachment = new MessageAttachment(Buffer.from(value, 'utf-8'), 'usersID.txt');
+                                return interaction.followUp({ content: `There was an error banning these users in message ${messageId} from server with ID ${key} <a:shookysad:949689086665437184>`, files: [errorAttachment], ephemeral: true });
+                            }
+                        });
                     });
                 }
             } else if (click.customId === `cancelBan_${interactionId}`) {

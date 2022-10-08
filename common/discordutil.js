@@ -43,11 +43,11 @@ module.exports = {
       iconURL: message.author.avatarURL
     };
     const embed = new Discord.MessageEmbed()
-      .setColor(0xDF2B40)
-      .setAuthor(author)
-      .setDescription(`${text}${image ? `\r\n\r\n${image}` : ''} \r\n\r\n **Message link:** ${message.url}`)
-      .setImage(image)
-      .setTimestamp(message.editedTimestamp || message.createdTimestamp);
+        .setColor(0xDF2B40)
+        .setAuthor(author)
+        .setDescription(`${text}${image ? `\r\n\r\n${image}` : ''} \r\n\r\n **Message link:** ${message.url}`)
+        .setImage(image)
+        .setTimestamp(message.editedTimestamp || message.createdTimestamp);
 
     user.send({ embeds: [embed] }).then(msg => msg.react('❌'));
   },
@@ -59,8 +59,8 @@ module.exports = {
     };
 
     return new Discord.MessageEmbed()
-      .setColor(accentColor)
-      .setAuthor(author);
+        .setColor(accentColor)
+        .setAuthor(author);
   },
 
   setEmbedFooter(embed, footer) {
@@ -226,9 +226,9 @@ module.exports = {
     };
 
     const embed = new Discord.MessageEmbed()
-      .setColor(color)
-      .setFooter(footer)
-      .setDescription(message);
+        .setColor(color)
+        .setFooter(footer)
+        .setDescription(message);
 
     return embed;
   },
@@ -358,6 +358,27 @@ module.exports = {
       }
     }));
     return [membersKicked, errorUsersPerServer];
+  },
+
+  async banUsersOnServers(userIds, guilds) {
+    let membersBanned = '';
+    let errorUsersPerServer = {};
+    guilds.forEach(guild => errorUsersPerServer[guild.id] = '');
+    await Promise.all(userIds.map(async (id) => {
+      let errorCount = 0;
+      await Promise.all(guilds.map(async (guild) => {
+        await guild.members.ban(id)
+            .catch((error) => {
+              console.log(error);
+              errorCount += 1;
+              errorUsersPerServer[guild.id] += `<@${id}>\n`;
+            });
+      }));
+      if (errorCount !== guilds.length) {
+        membersBanned += `<@${id}>\n`;
+      }
+    }));
+    return [membersBanned, errorUsersPerServer];
   }
 
 };
