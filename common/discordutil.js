@@ -6,6 +6,8 @@ const got = require('got');
 const { guildId, BATId, BALId, BAGId, BADId, BAEId } = require('../config.json');
 const ALL_GUILD_IDS = [guildId, BATId, BALId, BAGId, BADId, BAEId];
 const GUILD_IDS_WITHOUT_BAE = [guildId, BATId, BALId, BAGId, BADId];
+const SATELLITE_GUILD_IDS_WITHOUT_BAE = [BATId, BALId, BAGId, BADId];
+const msgLimit = 2000;
 
 module.exports = {
   bookmark(message, user) {
@@ -311,12 +313,51 @@ module.exports = {
     return guilds;
   },
 
+  getMainGuildId() {
+    return guildId;
+  },
+
   getAllGuildIds() {
     return ALL_GUILD_IDS;
   },
 
   getGuildIdsWithoutBAE() {
     return GUILD_IDS_WITHOUT_BAE;
+  },
+
+  getSatelliteGuildIdsWithoutBAE() {
+    return SATELLITE_GUILD_IDS_WITHOUT_BAE;
+  },
+
+  splitMessages(mentions) {
+    let mentionMessages = [];
+    while (mentions.length !== 0) {
+      let end = mentions.substring(0, msgLimit).lastIndexOf('>');
+      mentionMessages.push(mentions.substring(0, end + 1));
+      mentions = mentions.substring(end + 1, mentions.length);
+    }
+    return mentionMessages;
+  },
+
+  async kickUsersOnServers(userIds, guilds) {
+    let membersKicked = '';
+    let errorUsersPerServer = {};
+    guilds.forEach(guild => errorUsersPerServer[guild.id] = '');
+    await Promise.all(userIds.map(async (id) => {
+      let errorCount = 0;
+      await Promise.all(guilds.map(async (guild) => {
+        await guild.members.kick(id)
+            .catch((error) => {
+              console.log(error);
+              errorCount += 1;
+              errorUsersPerServer[guild.id] += `<@${id}>\n`;
+            });
+      }));
+      if (errorCount !== guilds.length) {
+        membersKicked += `<@${id}>\n`;
+      }
+    }));
+    return [membersKicked, errorUsersPerServer];
   }
 
 };
