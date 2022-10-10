@@ -4,6 +4,7 @@ const langs = require('./langs.js');
 const { DateTime } = require('luxon');
 const got = require('got');
 const { guildId, BATId, BALId, BAGId, BADId, BAEId } = require('../config.json');
+const { Collection } = require('discord.js');
 const ALL_GUILD_IDS = [guildId, BATId, BALId, BAGId, BADId, BAEId];
 const GUILD_IDS_WITHOUT_BAE = [guildId, BATId, BALId, BAGId, BADId];
 
@@ -341,12 +342,12 @@ module.exports = {
   },
 
   async fetchAllMessagesByChannelSince(channel, sinceDateTime) {
-    let messages = [];
-
+    let messages = new Collection();
     // Create message pointer of most recent message because we can only get 100 at a time
     let message = await channel.messages
         .fetch({ limit: 1 })
         .then(messagePage => (messagePage.size === 1 ? messagePage.at(0) : null));
+    messages = messages.concat(message);
 
     while (message) {
       await channel.messages
@@ -359,8 +360,15 @@ module.exports = {
           });
     }
 
-    return messages;
-  }
+    return messages.values();
+  },
 
+  batchItems(items, batchSize) {
+    const batchedItems = [];
+    for (let i = 0; i < Math.ceil(items.length / batchSize); i++) {
+      batchedItems[i] = items.slice(i * batchSize, (i + 1) * batchSize);
+    }
+    return batchedItems;
+  }
 
 };

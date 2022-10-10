@@ -1,8 +1,9 @@
 const cron = require('node-cron');
 const Promise = require('promise');
-const { fetchAllMessagesByChannelSince } = require('../common/discordutil');
+const { fetchAllMessagesByChannelSince, batchItems } = require('../common/discordutil');
 const { DateTime } = require('luxon');
 const { EmbedBuilder, MessageAttachment } = require('discord.js');
+const { guildId } = require('../config.json');
 
 const greenAppleRoleId = '875740793078431825';
 const redAppleRoleId = '875740253980336158';
@@ -23,8 +24,8 @@ module.exports = {
 
             const messagesWithApplesApplied = [];
             let logbookUserIds = [];
-            let membersNeedingApples = [];
-            let membersNeedingGreenApples = [];
+            let membersNeedingApples = new Set();
+            let membersNeedingGreenApples = new Set();
             let usersWithGreenApple = '';
             let usersWithRedApple = '';
 
@@ -36,7 +37,8 @@ module.exports = {
                     userFrequency[logbookUserIds[i]] = userFrequency[logbookUserIds[i]] ? userFrequency[logbookUserIds[i]] + 1 : 1;
                 }
 
-                await Promise.all(membersNeedingApples.map(async (member) => {
+                const members = membersNeedingApples.values();
+                await Promise.all(members.map(async (member) => {
                     if (userFrequency[member.id] >= 2) {
                         await member.roles.add(bothRoles);
                         usersWithGreenApple += `<@${member.id}>\n`;
@@ -53,7 +55,8 @@ module.exports = {
             };
 
             const addGreenAppleRole = async () => {
-                await Promise.all(membersNeedingGreenApples.map(async (member) => {
+                const members = membersNeedingGreenApples.values();
+                await Promise.all(members.map(async (member) => {
                     // must run after addAppleRoles to ensure cache has been updated
                     if (!member.roles.cache.has(greenAppleRoleId)) {
                         await member.roles.add([greenAppleRoleId]);
@@ -90,34 +93,27 @@ module.exports = {
                 }
             };
 
-            const setMembersNeedingApples = (message) => {
-                const filteredMembers = message.client.members.cache.filter(member => logbookUserIds.includes(member.id));
-                membersNeedingApples = membersNeedingApples.concat(filteredMembers);
-            };
-
-            const setMembersNeedingGreenApples = (message) => {
-                const filteredMembers = message.client.members.cache.filter(member => logbookUserIds.includes(member.id));
-                membersNeedingGreenApples = membersNeedingGreenApples.concat(filteredMembers);
-            };
-
             const setGiveTheApples = async (channel) => {
                 const messages = await fetchAllMessagesByChannelSince(channel, messagesSinceDateTime);
                 const filteredMessages = filterOnlyValidMessages(messages);
                 return filteredMessages.map(message => {
                     const hasGreenAppleReaction = message.reactions.cache.find(r => r.name.includes(greenAppleReactionName));
+                    const guild = client.guilds.cache.get(guildId);
+                    const messageUserIds = message.mentions.users.map(user => user.id);
+                    const filteredMembers = guild.members.cache.filter(member => messageUserIds.includes(member.id));
                     if (hasGreenAppleReaction) {
                         // i.e. homework helper logbook
-                        setMembersNeedingGreenApples(messages);
+                        membersNeedingGreenApples = membersNeedingGreenApples.add(filteredMembers);
                     } else {
                         // i.e. homework logbook
                         setLogbookUserIds(message);
-                        setMembersNeedingApples(message);
+                        membersNeedingApples = membersNeedingApples.add(filteredMembers);
                     }
                 });
             };
 
             // gather all logbook channels from every guild running BangPD
-            const logbookChannels = client.channels.cache.filter(c => c.name.toLowerCase().includes(logbookChannelNameStem));
+            const logbookChannels = client.channels.cache.filter((c) => c.name.toLowerCase().includes(logbookChannelNameStem)).toArray();
             const jobDumpChannel = client.channels.cache.get(jobDumpChannelId);
             if (!jobDumpChannel) {
                 console.log(`Scheduled Job: giveTheApples - no job dump channel with id ${jobDumpChannelId} found <a:shookysad:949689086665437184>`);
@@ -136,7 +132,7 @@ module.exports = {
                 jobDumpChannel.send({ embeds: [startedEmbed] });
             }
 
-            if (!logbookChannels && !logbookChannels.length > 0) {
+            if (logbookChannels && logbookChannels.length === 0) {
                 console.log('Scheduled Job: giveTheApples - no logbook channels found <a:shookysad:949689086665437184>');
                 const completedNoLogDateTimeCT = DateTime.utc().setZone(cst);
                 const completedNoLogEmbed = new EmbedBuilder()
@@ -151,26 +147,23 @@ module.exports = {
                 }
             }
 
-            if (logbookChannels && logbookChannels.length) {
+            if (logbookChannels && logbookChannels.length > 0) {
                 await Promise.all(logbookChannels.map(async channel => {
                     await setGiveTheApples(channel);
                 }));
 
-                const chunkSize = 100;
+                const batchSize = 100;
 
                 // assign red apples, remove roll call and send update
                 await addAppleRoles();
                 const allRedApples = usersWithRedApple.split(/\r?\n/);
-                const redChunks = [];
-                for (let i = 0; i < Math.ceil(allRedApples.length / chunkSize); i++) {
-                    redChunks[i] = allRedApples.slice(i * chunkSize, (i + 1) * chunkSize);
-                }
-                redChunks.forEach((chunk, index) => {
+                const redBatches = batchItems(allRedApples, batchSize);
+                redBatches.forEach((chunk, index) => {
                     const redAppleEmbed = new EmbedBuilder()
                         .setColor('5445ff')
-                        .setTitle(`GiveTheApples - Red Apples Assigned! ${index + 1} of ${redChunks.length}`)
+                        .setTitle(`GiveTheApples - Red Apples Assigned! ${index + 1} of ${redBatches.length}`)
                         .setDescription(chunk);
-                    if (jobDumpChannel && index === redChunks.length - 1) {
+                    if (jobDumpChannel && index === redBatches.length - 1) {
                         const attachmentRedApple = new MessageAttachment(Buffer.from(usersWithRedApple, 'utf-8'), 'usersID-redApple.txt');
                         jobDumpChannel.send({ embeds: [redAppleEmbed], files: [attachmentRedApple] });
                     } else {
@@ -181,17 +174,14 @@ module.exports = {
                 // assign green apples, remove roll call and send update
                 await addGreenAppleRole();
                 const allGreenApples = usersWithGreenApple.split(/\r?\n/);
-                const greenChunks = [];
-                for (let i = 0; i < Math.ceil(allGreenApples.length / chunkSize); i++) {
-                    greenChunks[i] = allGreenApples.slice(i * chunkSize, (i + 1) * chunkSize);
-                }
-                greenChunks.forEach((chunk, index) => {
+                const greenBatches = batchItems(allGreenApples, batchSize);
+                greenBatches.forEach((batch, index) => {
                     const greenAppleEmbed = new EmbedBuilder()
                         .setColor('5445ff')
-                        .setTitle(`GiveTheApples - Green Apples Assigned! ${index + 1} of ${greenChunks.length}`)
-                        .setDescription(chunk);
-                    if (jobDumpChannel && index === greenChunks.length - 1) {
-                        const attachmentGreenApple = new MessageAttachment(Buffer.from(usersWithGreenApple, 'utf-8'), 'usersID-redApple.txt');
+                        .setTitle(`GiveTheApples - Green Apples Assigned! ${index + 1} of ${greenBatches.length}`)
+                        .setDescription(batch);
+                    if (jobDumpChannel && index === greenBatches.length - 1) {
+                        const attachmentGreenApple = new MessageAttachment(Buffer.from(usersWithGreenApple, 'utf-8'), 'usersID-greenApple.txt');
                         jobDumpChannel.send({ embeds: [greenAppleEmbed], files: [attachmentGreenApple] });
                     } else {
                         jobDumpChannel.send({ embeds: [greenAppleEmbed] });
