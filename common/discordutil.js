@@ -321,12 +321,12 @@ module.exports = {
   },
 
   async fetchAllMessagesByChannel(channel) {
-    let messages = [];
-
+    let messages = new Collection();
     // Create message pointer of most recent message because we can only get 100 at a time
     let message = await channel.messages
       .fetch({ limit: 1 })
       .then(messagePage => (messagePage.size === 1 ? messagePage.at(0) : null));
+    messages = messages.concat(message);
 
     while (message) {
       await channel.messages
@@ -338,7 +338,7 @@ module.exports = {
         });
     }
 
-    return messages;
+    return messages.values();
   },
 
   async fetchAllMessagesByChannelSince(channel, sinceDateTime) {
