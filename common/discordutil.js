@@ -379,6 +379,11 @@ module.exports = {
       }
     }));
     return [membersBanned, errorUsersPerServer];
+  },
+
+  getUsersWithRoleFromServer(role, guild) {
+    let ids = Array.from(guild.roles.cache.get(role.id).members.keys());
+    return [ids, ids.map(id => `<@${id}>`).join(' ')];
   }
 
 };
