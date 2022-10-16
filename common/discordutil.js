@@ -6,6 +6,8 @@ const got = require('got');
 const { guildId, BATId, BALId, BAGId, BADId, BAEId } = require('../config.json');
 const ALL_GUILD_IDS = [guildId, BATId, BALId, BAGId, BADId, BAEId];
 const GUILD_IDS_WITHOUT_BAE = [guildId, BATId, BALId, BAGId, BADId];
+const SATELLITE_GUILD_IDS_WITHOUT_BAE = [BATId, BALId, BAGId, BADId];
+const msgLimit = 2000;
 
 module.exports = {
   bookmark(message, user) {
@@ -41,11 +43,11 @@ module.exports = {
       iconURL: message.author.avatarURL
     };
     const embed = new Discord.MessageEmbed()
-      .setColor(0xDF2B40)
-      .setAuthor(author)
-      .setDescription(`${text}${image ? `\r\n\r\n${image}` : ''} \r\n\r\n **Message link:** ${message.url}`)
-      .setImage(image)
-      .setTimestamp(message.editedTimestamp || message.createdTimestamp);
+        .setColor(0xDF2B40)
+        .setAuthor(author)
+        .setDescription(`${text}${image ? `\r\n\r\n${image}` : ''} \r\n\r\n **Message link:** ${message.url}`)
+        .setImage(image)
+        .setTimestamp(message.editedTimestamp || message.createdTimestamp);
 
     user.send({ embeds: [embed] }).then(msg => msg.react('❌'));
   },
@@ -57,8 +59,8 @@ module.exports = {
     };
 
     return new Discord.MessageEmbed()
-      .setColor(accentColor)
-      .setAuthor(author);
+        .setColor(accentColor)
+        .setAuthor(author);
   },
 
   setEmbedFooter(embed, footer) {
@@ -224,9 +226,9 @@ module.exports = {
     };
 
     const embed = new Discord.MessageEmbed()
-      .setColor(color)
-      .setFooter(footer)
-      .setDescription(message);
+        .setColor(color)
+        .setFooter(footer)
+        .setDescription(message);
 
     return embed;
   },
@@ -311,12 +313,77 @@ module.exports = {
     return guilds;
   },
 
+  getMainGuildId() {
+    return guildId;
+  },
+
   getAllGuildIds() {
     return ALL_GUILD_IDS;
   },
 
   getGuildIdsWithoutBAE() {
     return GUILD_IDS_WITHOUT_BAE;
+  },
+
+  getSatelliteGuildIdsWithoutBAE() {
+    return SATELLITE_GUILD_IDS_WITHOUT_BAE;
+  },
+
+  splitMessages(mentions) {
+    let mentionMessages = [];
+    while (mentions.length !== 0) {
+      let end = mentions.substring(0, msgLimit).lastIndexOf('>');
+      mentionMessages.push(mentions.substring(0, end + 1));
+      mentions = mentions.substring(end + 1, mentions.length);
+    }
+    return mentionMessages;
+  },
+
+  async kickUsersOnServers(userIds, guilds) {
+    let membersKicked = '';
+    let errorUsersPerServer = {};
+    guilds.forEach(guild => errorUsersPerServer[guild.id] = '');
+    await Promise.all(userIds.map(async (id) => {
+      let errorCount = 0;
+      await Promise.all(guilds.map(async (guild) => {
+        await guild.members.kick(id)
+            .catch((error) => {
+              console.log(error);
+              errorCount += 1;
+              errorUsersPerServer[guild.id] += `<@${id}>\n`;
+            });
+      }));
+      if (errorCount !== guilds.length) {
+        membersKicked += `<@${id}>\n`;
+      }
+    }));
+    return [membersKicked, errorUsersPerServer];
+  },
+
+  async banUsersOnServers(userIds, guilds) {
+    let membersBanned = '';
+    let errorUsersPerServer = {};
+    guilds.forEach(guild => errorUsersPerServer[guild.id] = '');
+    await Promise.all(userIds.map(async (id) => {
+      let errorCount = 0;
+      await Promise.all(guilds.map(async (guild) => {
+        await guild.members.ban(id)
+            .catch((error) => {
+              console.log(error);
+              errorCount += 1;
+              errorUsersPerServer[guild.id] += `<@${id}>\n`;
+            });
+      }));
+      if (errorCount !== guilds.length) {
+        membersBanned += `<@${id}>\n`;
+      }
+    }));
+    return [membersBanned, errorUsersPerServer];
+  },
+
+  getUsersWithRoleFromServer(role, guild) {
+    let ids = Array.from(guild.roles.cache.get(role.id).members.keys());
+    return [ids, ids.map(id => `<@${id}>`).join(' ')];
   }
 
 };

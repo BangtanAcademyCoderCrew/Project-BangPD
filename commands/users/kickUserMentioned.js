@@ -28,40 +28,6 @@ module.exports = {
         await interaction.deferReply({ ephemeral: true });
 
         const guilds = DiscordUtil.getAllGuilds(ALL_GUILD_IDS, interaction);
-        const errorUsersPerServer = {
-            guildId: '',
-            BATId: '',
-            BALId: '',
-            BAGId: '',
-            BADId: '',
-            BAEId: ''
-        };
-
-        const kickUsersOnServers = async (messageId) => {
-            channel.messages.fetch(messageId).then(async (msg) => {
-                let membersKicked = '';
-                const userIds = msg.mentions.users.map(user => user.id);
-                for (const id of userIds) {
-                    let errorCount = 0;
-                    await Promise.all(guilds.map(async (guild) => {
-                        await guild.members.kick(id)
-                            .catch((error) => {
-                                console.log(error);
-                                errorCount += 1;
-                                errorUsersPerServer[guild.id] += `<@${id}>\n`;
-                            });
-                    }));
-                    if (errorCount !== guilds.length) {
-                        membersKicked += `<@${id}>\n`;
-                    }
-                }
-                const attachment = new MessageAttachment(Buffer.from(membersKicked, 'utf-8'), 'usersID.txt');
-                interaction.followUp({ content: `These users in message ${messageId} were kicked from at least one server`, files: [attachment], ephemeral: true });
-            }).catch((error) => {
-                console.log(error);
-                interaction.followUp({ content: `There was an error checking ${messageId} in channel <#${channel.id}> <a:shookysad:949689086665437184>`, ephemeral: true });
-            });
-        };
 
         const confirmButton = new MessageButton()
             .setCustomId(`confirmKick_${interactionId}`)
@@ -87,12 +53,17 @@ module.exports = {
 
                 const allMessageIds = messageIds.split(' ');
                 for (const messageId of allMessageIds) {
-                    await kickUsersOnServers(messageId);
-                    Object.entries(errorUsersPerServer).forEach(([key, value]) => {
-                        if (value !== '') {
-                            const errorAttachment = new MessageAttachment(Buffer.from(value, 'utf-8'), 'usersID.txt');
-                            return interaction.followUp({ content: `There was an error kicking these users from server with ID ${key} <a:shookysad:949689086665437184>`, files: [errorAttachment], ephemeral: true });
-                        }
+                    channel.messages.fetch(messageId).then(async (msg) => {
+                        const userIds = msg.mentions.users.map(user => user.id);
+                        const [membersKicked, errorUsersPerServer] = await DiscordUtil.kickUsersOnServers(userIds, guilds);
+                        const attachment = new MessageAttachment(Buffer.from(membersKicked, 'utf-8'), 'usersID.txt');
+                        interaction.followUp({ content: `These users in message ${messageId} were kicked from at least one server`, files: [attachment], ephemeral: true });
+                        Object.entries(errorUsersPerServer).forEach(([key, value]) => {
+                            if (value !== '') {
+                                const errorAttachment = new MessageAttachment(Buffer.from(value, 'utf-8'), 'usersID.txt');
+                                return interaction.followUp({ content: `There was an error kicking these users in message ${messageId} from server with ID ${key} <a:shookysad:949689086665437184>`, files: [errorAttachment], ephemeral: true });
+                            }
+                        });
                     });
                 }
             } else if (click.customId === `cancelKick_${interactionId}`) {

@@ -24,6 +24,7 @@
     "got": "^11.0.1",
     "krdict-api": "0.0.4",
     "luxon": "^1.25.0",
+    "nodemon": "^2.0.20",
     "promise": "^8.1.0",
     "query-string": "^7.1.1",
     "request": "^2.88.2",
