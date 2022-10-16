@@ -518,6 +518,7 @@ When entering the `<time_in_advance>` the three choices available are: 30 min, 1
 | Command                                                                                                             | Description                                                                                                           |
 |---------------------------------------------------------------------------------------------------------------------| --------------------------------------------------------------------------------------------------------------------- |
 | [`/kickrollcall`](#-kickrollcall)                                                                                   | Kicks ROLL CALL users from all servers.                                                                                |
+| [`/kickroleinservers <role> <server_id_with_role> <server_ids_to_kick_from>`](#-kickroleinservers)                  | Kicks user(s) with a specified role from all specified servers.                                                     |
 | [`/kickuserinmessage <message_ids> <channel>`](#-kickuserinmessage)                                                 | Kicks user(s) mentioned in message(s) from all servers.                                                               |
 | [`/banuserinmessage <message_ids> <channel>`](#-banuserinmessage)                                                   | Bans user(s) mentioned in message(s) from all servers.                                                               |
 | [`/unbanuseridinmessage <message_ids> <channel>`](#-unbanuseridinmessage)                                           | Unbans user(s) by id(s) in message(s) from all servers.                                                               |
@@ -529,6 +530,29 @@ When entering the `<time_in_advance>` the three choices available are: 30 min, 1
 Gets all users with the `ROLLCALL 🔔` role and displays them along with a confirmation message to proceed with the command. If confirmed, the command kicks these users from all servers. Otherwise the command is canceled.
 
 The `<command>` must match the exact command name of a current slash command, including any spaces and letter-casing (i.e. ✅ kickrollcall, ❌ kick Roll Call )
+
+Returns a response with a `.txt` attachment named `usersID.txt`, which includes a list of the ids kicked from at least one of the servers.
+
+> User ids are separated by a new line and in the following format.
+>
+> ```
+> <@12345678XXXXXXXX>
+> <@12345678XXXXXXXX>
+> <@12345678XXXXXXXX>
+> ```
+
+If there was an error kicking a user from any of the servers, the command returns also a response, per server, with a `.txt` attachment named `usersID.txt`, which includes a list of the ids that couldn't be kicked from the server. Formatting of the `.txt` is same as above.
+
+#### <font size=3>⚡ /kickroleinservers</font>
+
+**Example:** `/kickroleinservers @Role 1234567812345678 1234567812345678`
+
+- **Options:** `<role>` *(@role)* Required, `<server_id_with_role>` *(string)* Required, `<server_ids_to_kick_from>` *(string)* Required
+
+Gets all users with the `<role>` role from the server with ID `<server_id_with_role>` and displays them along with a confirmation message to proceed with the command. If confirmed, the command kicks these users from all specified servers with IDs `<server_ids_to_kick_from>`. Otherwise the command is canceled. 
+Example scenario: I want to kick users that have the `@TTMIK L1 Alumni` role in `BAT` server from `BAL` and `BAG` servers.
+
+The `<command>` must match the exact command name of a current slash command, including any spaces and letter-casing (i.e. ✅ kickroleinservers, ❌ kick Role in Servers)
 
 Returns a response with a `.txt` attachment named `usersID.txt`, which includes a list of the ids kicked from at least one of the servers.
 
