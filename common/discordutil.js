@@ -4,7 +4,7 @@ const langs = require('./langs.js');
 const { DateTime } = require('luxon');
 const got = require('got');
 const { guildId, BATId, BALId, BAGId, BADId, BAEId } = require('../config.json');
-const { Collection } = require('discord.js');
+const { Collection, EmbedBuilder } = require('discord.js');
 const ALL_GUILD_IDS = [guildId, BATId, BALId, BAGId, BADId, BAEId];
 const GUILD_IDS_WITHOUT_BAE = [guildId, BATId, BALId, BAGId, BADId];
 
@@ -72,6 +72,21 @@ module.exports = {
 
   createPendingEmbed(username) {
     return this.createBasicEmbed().setDescription(`I am going over the books for you ${username}, please wait. :eyes:`);
+  },
+
+  sendAppleEmbed(channel, title, description, fields = [], files = []) {
+    const embed = new EmbedBuilder()
+        .setColor('5445ff')
+        .setTitle(title)
+        .setDescription(description);
+    if (fields.length > 0) {
+      embed.addFields(fields);
+    }
+    if (files.length > 0) {
+      channel.send({ embeds: [embed], files: files });
+    } else {
+      channel.send({ embeds: [embed] });
+    }
   },
 
   createWordSearchEmbed(language, query, username, isDM, searchResults) {

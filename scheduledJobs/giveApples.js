@@ -1,8 +1,8 @@
 const cron = require('node-cron');
 const Promise = require('promise');
-const { fetchAllMessagesByChannelSince, batchItems } = require('../common/discordutil');
+const { fetchAllMessagesByChannelSince, batchItems, sendAppleEmbed } = require('../common/discordutil');
 const { DateTime } = require('luxon');
-const { EmbedBuilder, MessageAttachment } = require('discord.js');
+const { MessageAttachment } = require('discord.js');
 const { guildId } = require('../config.json');
 
 const greenAppleRoleId = '875740793078431825';
@@ -119,31 +119,27 @@ module.exports = {
                 console.log(`Scheduled Job: giveTheApples - no job dump channel with id ${jobDumpChannelId} found <a:shookysad:949689086665437184>`);
             }
 
-            const startedEmbed = new EmbedBuilder()
-                .setColor('5445ff')
-                .setTitle('GiveTheApples - Started!')
-                .setDescription('I\'m currently checking in with Manager Sejin. Apples will be awarded shortly.')
-                .addFields(
-                    { name: 'Checking Logbooks From', value: `${messagesSinceDateTime.toLocaleString(DateTime.DATETIME_FULL)}`, inline: true },
-                    { name: 'Until', value: `${currentDateTimeCT.toLocaleString(DateTime.DATETIME_FULL)}`, inline: true }
-                );
+            const appleEmbedTitleBase = 'GiveTheApples';
 
             if (jobDumpChannel) {
-                jobDumpChannel.send({ embeds: [startedEmbed] });
+                const title = `${appleEmbedTitleBase} - Started!`;
+                const description = 'I\'m currently checking in with Manager Sejin. Apples will be awarded shortly.';
+                const fields = [
+                    { name: 'Checking Logbooks From', value: `${messagesSinceDateTime.toLocaleString(DateTime.DATETIME_FULL)}`, inline: true },
+                    { name: 'Until', value: `${currentDateTimeCT.toLocaleString(DateTime.DATETIME_FULL)}`, inline: true }
+                ];
+                sendAppleEmbed(jobDumpChannel, title, description, fields);
             }
 
             if (logbookChannels && logbookChannels.length === 0) {
                 console.log('Scheduled Job: giveTheApples - no logbook channels found <a:shookysad:949689086665437184>');
-                const completedNoLogDateTimeCT = DateTime.utc().setZone(cst);
-                const completedNoLogEmbed = new EmbedBuilder()
-                    .setColor('5445ff')
-                    .setTitle('GiveTheApples - Completed!')
-                    .setDescription('No logbook channels were found. Coder Crew assemble!')
-                    .addFields(
-                        { name: 'Completed at', value: `${completedNoLogDateTimeCT.toLocaleString(DateTime.DATETIME_FULL)}` }
-                    );
                 if (jobDumpChannel) {
-                    jobDumpChannel.send({ embeds: [completedNoLogEmbed] });
+                    const title = `${appleEmbedTitleBase} - Completed!`;
+                    const description = 'No logbook channels were found. Coder Crew assemble!';
+                    const fields = [
+                        { name: 'Completed at', value: `${DateTime.utc().setZone(cst).toLocaleString(DateTime.DATETIME_FULL)}` }
+                    ];
+                    sendAppleEmbed(jobDumpChannel, title, description, fields);
                 }
             }
 
@@ -158,16 +154,13 @@ module.exports = {
                 await addAppleRoles();
                 const allRedApples = usersWithRedApple.split(/\r?\n/);
                 const redBatches = batchItems(allRedApples, batchSize);
-                redBatches.forEach((chunk, index) => {
-                    const redAppleEmbed = new EmbedBuilder()
-                        .setColor('5445ff')
-                        .setTitle(`GiveTheApples - Red Apples Assigned! ${index + 1} of ${redBatches.length}`)
-                        .setDescription(chunk);
+                redBatches.forEach((batch, index) => {
+                    const title = `${appleEmbedTitleBase} - Red Apples Assigned! ${index + 1} of ${redBatches.length}!`;
                     if (jobDumpChannel && index === redBatches.length - 1) {
                         const attachmentRedApple = new MessageAttachment(Buffer.from(usersWithRedApple, 'utf-8'), 'usersID-redApple.txt');
-                        jobDumpChannel.send({ embeds: [redAppleEmbed], files: [attachmentRedApple] });
-                    } else {
-                        jobDumpChannel.send({ embeds: [redAppleEmbed] });
+                        sendAppleEmbed(jobDumpChannel, title, batch, [], [attachmentRedApple]);
+                    } else if (jobDumpChannel) {
+                        sendAppleEmbed(jobDumpChannel, title, batch);
                     }
                 });
 
@@ -176,15 +169,12 @@ module.exports = {
                 const allGreenApples = usersWithGreenApple.split(/\r?\n/);
                 const greenBatches = batchItems(allGreenApples, batchSize);
                 greenBatches.forEach((batch, index) => {
-                    const greenAppleEmbed = new EmbedBuilder()
-                        .setColor('5445ff')
-                        .setTitle(`GiveTheApples - Green Apples Assigned! ${index + 1} of ${greenBatches.length}`)
-                        .setDescription(batch);
+                    const title = `${appleEmbedTitleBase} - Green Apples Assigned! ${index + 1} of ${greenBatches.length}!`;
                     if (jobDumpChannel && index === greenBatches.length - 1) {
                         const attachmentGreenApple = new MessageAttachment(Buffer.from(usersWithGreenApple, 'utf-8'), 'usersID-greenApple.txt');
-                        jobDumpChannel.send({ embeds: [greenAppleEmbed], files: [attachmentGreenApple] });
-                    } else {
-                        jobDumpChannel.send({ embeds: [greenAppleEmbed] });
+                        sendAppleEmbed(jobDumpChannel, title, batch, [], [attachmentGreenApple]);
+                    } else if (jobDumpChannel) {
+                        sendAppleEmbed(jobDumpChannel, title, batch);
                     }
                 });
 
@@ -194,16 +184,13 @@ module.exports = {
                 }));
 
                 // well done bang pd nim, see you tomorrow!
-                const completedDateTimeCT = DateTime.utc().setZone(cst);
-                const completedEmbed = new EmbedBuilder()
-                    .setColor('5445ff')
-                    .setTitle('GiveTheApples - Completed!')
-                    .setDescription('All students from yesterday\'s logbooks have been awarded their apples. See you tomorrow!')
-                    .addFields(
-                        { name: 'Completed at', value: `${completedDateTimeCT.toLocaleString(DateTime.DATETIME_FULL)}` }
-                    );
                 if (jobDumpChannel) {
-                    jobDumpChannel.send({ embeds: [completedEmbed] });
+                    const title = `${appleEmbedTitleBase} - Completed!`;
+                    const description = 'All students from yesterday\'s logbooks have been awarded their apples. See you tomorrow!';
+                    const fields = [
+                        { name: 'Completed at', value: `${DateTime.utc().setZone(cst).toLocaleString(DateTime.DATETIME_FULL)}` }
+                    ];
+                    sendAppleEmbed(jobDumpChannel, title, description, fields);
                 }
             }
         }, {
