@@ -3,6 +3,7 @@ const { Client, Collection, Intents } = require('discord.js');
 const DiscordUtil = require('./common/discordutil');
 const { botToken, commandDirectories } = require('./config.json');
 const { deployCommands } = require('./deploy-commands');
+const { isLeaveServersButton, handleLeaveInteraction } = require('./commands/users/leaveServers.js');
 
 const client = new Client({
   partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER'],
@@ -45,6 +46,11 @@ client.on('interactionCreate', async (interaction) => {
     } catch (error) {
       console.error(error);
       return interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+    }
+  }
+  if (interaction.isButton()) {
+    if (isLeaveServersButton(interaction.customId, interaction.user.id)) {
+      await handleLeaveInteraction(interaction);
     }
   }
 });
