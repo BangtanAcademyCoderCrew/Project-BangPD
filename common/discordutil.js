@@ -1,10 +1,8 @@
-const Discord = require('discord.js');
-const { prefix, accentColor, avatar } = require('../config.json');
+const { Collection, MessageEmbed, MessageAttachment } = require('discord.js');
 const langs = require('./langs.js');
 const { DateTime } = require('luxon');
 const got = require('got');
-const { guildId, BATId, BALId, BAGId, BADId, BAEId } = require('../config.json');
-const { Collection, EmbedBuilder } = require('discord.js');
+const { guildId, BATId, BALId, BAGId, BADId, BAEId, prefix, accentColor, avatar } = require('../config.json');
 const ALL_GUILD_IDS = [guildId, BATId, BALId, BAGId, BADId, BAEId];
 const GUILD_IDS_WITHOUT_BAE = [guildId, BATId, BALId, BAGId, BADId];
 
@@ -41,7 +39,7 @@ module.exports = {
       name: message.author.username,
       iconURL: message.author.avatarURL
     };
-    const embed = new Discord.MessageEmbed()
+    const embed = new MessageEmbed()
       .setColor(0xDF2B40)
       .setAuthor(author)
       .setDescription(`${text}${image ? `\r\n\r\n${image}` : ''} \r\n\r\n **Message link:** ${message.url}`)
@@ -57,7 +55,7 @@ module.exports = {
       iconURL: 'https://i.imgur.com/UwOpFvr.png'
     };
 
-    return new Discord.MessageEmbed()
+    return new MessageEmbed()
       .setColor(accentColor)
       .setAuthor(author);
   },
@@ -74,18 +72,25 @@ module.exports = {
     return this.createBasicEmbed().setDescription(`I am going over the books for you ${username}, please wait. :eyes:`);
   },
 
-  sendAppleEmbed(channel, title, description, fields = [], files = []) {
-    const embed = new EmbedBuilder()
+  async sendAppleEmbed(channel, title, description, fields = [], files = []) {
+    const cst = 'America/Chicago';
+    const embed = new MessageEmbed()
         .setColor('5445ff')
-        .setTitle(title)
-        .setDescription(description);
+        .setTitle(title + '\n')
+        .setDescription('> ' + description + '\n')
+        .setFooter({
+          text: `${DateTime.utc().setZone(cst).toLocaleString(DateTime.DATETIME_FULL)}`,
+          iconURL: 'https://i.imgur.com/UwOpFvr.png'
+        });
+
+
     if (fields.length > 0) {
       embed.addFields(fields);
     }
     if (files.length > 0) {
-      channel.send({ embeds: [embed], files: files });
+      await channel.send({ embeds: [embed], files: files });
     } else {
-      channel.send({ embeds: [embed] });
+      await channel.send({ embeds: [embed] });
     }
   },
 
@@ -239,7 +244,7 @@ module.exports = {
       text: `${currentTimeCST.toLocaleString(DateTime.DATETIME_FULL)}`
     };
 
-    const embed = new Discord.MessageEmbed()
+    const embed = new MessageEmbed()
       .setColor(color)
       .setFooter(footer)
       .setDescription(message);
@@ -292,7 +297,7 @@ module.exports = {
       } catch (error) {
         console.log(error);
       }
-      const attachment = new Discord.MessageAttachment(Buffer.from(`${usersChanged.join('\n')}`, 'utf-8'), 'changedusers.txt');
+      const attachment = new MessageAttachment(Buffer.from(`${usersChanged.join('\n')}`, 'utf-8'), 'changedusers.txt');
       interaction.followUp({ content: 'Changed users', files: [attachment] });
     })();
   },
@@ -341,7 +346,7 @@ module.exports = {
     let message = await channel.messages
       .fetch({ limit: 1 })
       .then(messagePage => (messagePage.size === 1 ? messagePage.at(0) : null));
-    messages = messages.concat(message);
+    messages = messages.set(message.id, message);
 
     while (message) {
       await channel.messages
@@ -353,7 +358,7 @@ module.exports = {
         });
     }
 
-    return messages.values();
+    return messages;
   },
 
   async fetchAllMessagesByChannelSince(channel, sinceDateTime) {
@@ -362,20 +367,20 @@ module.exports = {
     let message = await channel.messages
         .fetch({ limit: 1 })
         .then(messagePage => (messagePage.size === 1 ? messagePage.at(0) : null));
-    messages = messages.concat(message);
+    messages = messages.set(message.id, message);
 
     while (message) {
       await channel.messages
           .fetch({ limit: 100, before: message.id })
           .then(messagePage => {
-            const filteredByDate = messagePage.filter(m => m.createdAt >= sinceDateTime);
+            const filteredByDate = messagePage.filter(m => m.createdTimestamp >= sinceDateTime);
             messages = messages.concat(filteredByDate);
             // Update message pointer to be last message in page of messages
             message = filteredByDate.size > 0 ? messagePage.at(messagePage.size - 1) : null;
           });
     }
 
-    return messages.values();
+    return messages;
   },
 
   batchItems(items, batchSize) {

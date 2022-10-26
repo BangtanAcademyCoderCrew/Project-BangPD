@@ -5,41 +5,58 @@ const { DateTime } = require('luxon');
 const { MessageAttachment } = require('discord.js');
 const { guildId } = require('../config.json');
 
-const greenAppleRoleId = '875740793078431825';
-const redAppleRoleId = '875740253980336158';
-const rollCallRoleId = '763929191715831860';
+// For Testing in BA Code
+const greenAppleRoleId = '964598327775744070';
+const redAppleRoleId = '964597638047612969';
+const rollCallRoleId = '841115841852080129';
+// apple-log channel
+const resultsChannelId = '1033147239343861760';
+// every 5 min
+const cronSchedule = '*/5 * * * *';
+
+// For Release in BA
+// const greenAppleRoleId = '875740793078431825';
+// const redAppleRoleId = '875740253980336158';
+// const rollCallRoleId = '763929191715831860';
+// const resultsChannelId = '876672628692250654';
+// nightly at 2am
+// const cronSchedule = '0 2 * * *';
+
 const ignoreReactionName = 'yoongerine';
-const greenAppleReactionName = 'green_apple';
 const logbookChannelNameStem = 'class-n-club-logbook';
-const jobDumpChannelId = '876672628692250654';
+const appleEmbedTitleBase = 'GiveTheApples';
+const batchSize = 100;
 
 module.exports = {
     name: 'giveApples',
     async start(client) {
         // running job at 02:00 at America/Chicago timezone
-        cron.schedule('0 2 * * *', async () => {
+        cron.schedule(cronSchedule, async () => {
             const cst = 'America/Chicago';
             const currentDateTimeCT = DateTime.utc().setZone(cst);
             const messagesSinceDateTime = currentDateTimeCT.minus({ days: 1 });
 
             const messagesWithApplesApplied = [];
             let logbookUserIds = [];
-            let membersNeedingApples = new Set();
-            let membersNeedingGreenApples = new Set();
+            const membersNeedingApples = new Set();
+            const membersNeedingGreenApples = new Set();
             let usersWithGreenApple = '';
             let usersWithRedApple = '';
 
             const addAppleRoles = async () => {
                 const bothRoles = [greenAppleRoleId, redAppleRoleId];
+                if (logbookUserIds.length === 0 || membersNeedingApples.size === 0) {
+                    return;
+                }
 
                 const userFrequency = {};
                 for (let i = 0; i < logbookUserIds.length; i++) {
                     userFrequency[logbookUserIds[i]] = userFrequency[logbookUserIds[i]] ? userFrequency[logbookUserIds[i]] + 1 : 1;
                 }
 
-                const members = membersNeedingApples.values();
+                const members = Array.from(membersNeedingApples.values());
                 await Promise.all(members.map(async (member) => {
-                    if (userFrequency[member.id] >= 2) {
+                    if (userFrequency[member.id] >= 2 && usersWithGreenApple.indexOf(member.id) === -1) {
                         await member.roles.add(bothRoles);
                         usersWithGreenApple += `<@${member.id}>\n`;
                         usersWithRedApple += `<@${member.id}>\n`;
@@ -55,7 +72,10 @@ module.exports = {
             };
 
             const addGreenAppleRole = async () => {
-                const members = membersNeedingGreenApples.values();
+                if (membersNeedingGreenApples.size === 0) {
+                    return;
+                }
+                const members = Array.from(membersNeedingGreenApples.values());
                 await Promise.all(members.map(async (member) => {
                     // must run after addAppleRoles to ensure cache has been updated
                     if (!member.roles.cache.has(greenAppleRoleId)) {
@@ -74,123 +94,163 @@ module.exports = {
 
             const filterOnlyValidMessages = async (messages) => {
                 return messages.filter(m => {
-                    const hasAlreadyBeenChecked = m.reactions.cache.get('👍');
+                    const hasAlreadyBeenChecked = m.reactions.cache.has('👍') && m.reactions.cache.get('👍').me;
+
                     // i.e. kckc class
-                    const isMarkedToIgnore = m.reactions.cache.find(r => r.name.includes(ignoreReactionName));
-                    return !hasAlreadyBeenChecked && !isMarkedToIgnore;
+                    const ignoreMessageReaction = m.reactions.cache.find(r => r.emoji.name.includes(ignoreReactionName));
+                    const isMarkedToIgnore = ignoreMessageReaction !== undefined;
+
+                    const messageContent = m.content.replace(/\D/g, ' ').split(' ');
+                    const userIds = messageContent.filter(e => e.length >= 16);
+
+                    return !hasAlreadyBeenChecked && !isMarkedToIgnore && userIds.length > 0;
                 });
             };
 
-            const setLogbookUserIds = (message) => {
-                const messageContent = message.content.replace(/\D/g, ' ').split(' ');
-                const userIds = messageContent.filter(e => e.length >= 16);
-                const usersInMessage = message.client.users.cache.filter(u => userIds.includes(u.id));
+            const setLogbookUserIds = (message, userIds) => {
+                const usersInMessage = Array.from(message.client.users.cache.filter(u => userIds.includes(u.id)).values());
                 const messageUserIds = usersInMessage.map(user => user.id);
                 logbookUserIds = logbookUserIds.concat(messageUserIds);
-
                 if (messageUserIds.length > 0) {
                     messagesWithApplesApplied.push(message);
                 }
             };
 
             const setGiveTheApples = async (channel) => {
+                const guild = await client.guilds.cache.get(guildId);
+                if (!guild) {
+                    await sendErrorEmbed(`No guild was found for guildId ${guildId}. 🙁`);
+                    return;
+                }
+
                 const messages = await fetchAllMessagesByChannelSince(channel, messagesSinceDateTime);
-                const filteredMessages = filterOnlyValidMessages(messages);
-                return filteredMessages.map(message => {
-                    const hasGreenAppleReaction = message.reactions.cache.find(r => r.name.includes(greenAppleReactionName));
-                    const guild = client.guilds.cache.get(guildId);
-                    const messageUserIds = message.mentions.users.map(user => user.id);
-                    const filteredMembers = guild.members.cache.filter(member => messageUserIds.includes(member.id));
+                if (messages.size === 0) {
+                    await sendLogEmbed(`No logbooks were found in channel ${channel.id} yesterday. Continuing...`);
+                    return;
+                }
+
+                const filteredMessages = await filterOnlyValidMessages(messages);
+                if (filteredMessages.size === 0) {
+                    await sendLogEmbed(`No unchecked logbooks were found in channel ${channel.id} yesterday. Continuing...`);
+                    return;
+                }
+
+                Promise.all(filteredMessages.map(async message => {
+                    const messageContent = message.content.replace(/\D/g, ' ').split(' ');
+                    const userIds = messageContent.filter(e => e.length >= 16);
+                    const filteredMembers = Array.from(guild.members.cache.filter(member => userIds.includes(member.id)).values());
+                    const hasGreenAppleReaction = message.reactions.cache.has('🍏');
                     if (hasGreenAppleReaction) {
                         // i.e. homework helper logbook
-                        membersNeedingGreenApples = membersNeedingGreenApples.add(filteredMembers);
+                        if (filteredMembers.length > 0) {
+                            messagesWithApplesApplied.push(message);
+                        }
+                        filteredMembers.forEach((m) => membersNeedingGreenApples.add(m));
                     } else {
                         // i.e. homework logbook
-                        setLogbookUserIds(message);
-                        membersNeedingApples = membersNeedingApples.add(filteredMembers);
+                        setLogbookUserIds(message, userIds);
+                        filteredMembers.forEach((m) => membersNeedingApples.add(m));
                     }
-                });
+                }));
+            };
+
+            const sendCompletedEmbed = async (description) => {
+                const title = `${appleEmbedTitleBase} - Completed! 🎉`;
+                await sendAppleEmbed(resultsChannel, title, description);
+            };
+
+            const sendErrorEmbed = async (description) => {
+                const title = `${appleEmbedTitleBase} - Error!`;
+                await sendAppleEmbed(resultsChannel, title, description);
+            };
+
+            const sendLogEmbed = async (description) => {
+                const title = `${appleEmbedTitleBase}`;
+                await sendAppleEmbed(resultsChannel, title, description);
             };
 
             // gather all logbook channels from every guild running BangPD
-            const logbookChannels = client.channels.cache.filter((c) => c.name.toLowerCase().includes(logbookChannelNameStem)).toArray();
-            const jobDumpChannel = client.channels.cache.get(jobDumpChannelId);
-            if (!jobDumpChannel) {
-                console.log(`Scheduled Job: giveTheApples - no job dump channel with id ${jobDumpChannelId} found <a:shookysad:949689086665437184>`);
+            const clientChannels = client.channels.cache;
+            const logbookChannels = clientChannels.filter((c) => c.name.toLowerCase().includes(logbookChannelNameStem));
+
+            const resultsChannel = client.channels.cache.get(resultsChannelId);
+            if (!resultsChannel) {
+                console.log(`Scheduled Job: giveTheApples - no job dump channel with id ${resultsChannelId} found <a:shookysad:949689086665437184>`);
             }
 
-            const appleEmbedTitleBase = 'GiveTheApples';
-
-            if (jobDumpChannel) {
-                const title = `${appleEmbedTitleBase} - Started!`;
-                const description = 'I\'m currently checking in with Manager Sejin. Apples will be awarded shortly.';
-                const fields = [
-                    { name: 'Checking Logbooks From', value: `${messagesSinceDateTime.toLocaleString(DateTime.DATETIME_FULL)}`, inline: true },
-                    { name: 'Until', value: `${currentDateTimeCT.toLocaleString(DateTime.DATETIME_FULL)}`, inline: true }
-                ];
-                sendAppleEmbed(jobDumpChannel, title, description, fields);
-            }
-
-            if (logbookChannels && logbookChannels.length === 0) {
+            if (logbookChannels && logbookChannels.size === 0) {
                 console.log('Scheduled Job: giveTheApples - no logbook channels found <a:shookysad:949689086665437184>');
-                if (jobDumpChannel) {
-                    const title = `${appleEmbedTitleBase} - Completed!`;
-                    const description = 'No logbook channels were found. Coder Crew assemble!';
-                    const fields = [
-                        { name: 'Completed at', value: `${DateTime.utc().setZone(cst).toLocaleString(DateTime.DATETIME_FULL)}` }
-                    ];
-                    sendAppleEmbed(jobDumpChannel, title, description, fields);
+                if (resultsChannel) {
+                    return sendErrorEmbed('No logbook channels were found. 🙁');
                 }
             }
 
-            if (logbookChannels && logbookChannels.length > 0) {
+            if (logbookChannels && logbookChannels.size > 0) {
+                if (resultsChannel) {
+                    const title = `${appleEmbedTitleBase} - Started! 🏁`;
+                    const description = 'I\'m currently checking in with Manager Sejin. Apples will be awarded shortly.';
+                    const fields = [
+                        { name: 'From', value: `${messagesSinceDateTime.toLocaleString(DateTime.DATETIME_FULL)}`, inline: true },
+                        { name: 'Until', value: `${currentDateTimeCT.toLocaleString(DateTime.DATETIME_FULL)}`, inline: true }
+                    ];
+                    await sendAppleEmbed(resultsChannel, title, description, fields);
+                }
+
                 await Promise.all(logbookChannels.map(async channel => {
                     await setGiveTheApples(channel);
                 }));
 
-                const batchSize = 100;
+                await addAppleRoles();
 
                 // assign red apples, remove roll call and send update
-                await addAppleRoles();
-                const allRedApples = usersWithRedApple.split(/\r?\n/);
-                const redBatches = batchItems(allRedApples, batchSize);
-                redBatches.forEach((batch, index) => {
-                    const title = `${appleEmbedTitleBase} - Red Apples Assigned! ${index + 1} of ${redBatches.length}!`;
-                    if (jobDumpChannel && index === redBatches.length - 1) {
-                        const attachmentRedApple = new MessageAttachment(Buffer.from(usersWithRedApple, 'utf-8'), 'usersID-redApple.txt');
-                        sendAppleEmbed(jobDumpChannel, title, batch, [], [attachmentRedApple]);
-                    } else if (jobDumpChannel) {
-                        sendAppleEmbed(jobDumpChannel, title, batch);
-                    }
-                });
+                if (usersWithRedApple.length > 0) {
+                    const allRedApples = usersWithRedApple.split(/\r?\n/);
+                    const redBatches = batchItems(allRedApples, batchSize);
+                    await Promise.all(redBatches.map(async (batch) => {
+                        const index = redBatches.indexOf(batch);
+                        const title = `${appleEmbedTitleBase} - Red Apples Assigned! 🍎 ${index + 1} of ${redBatches.length}!`;
+                        if (resultsChannel && index === redBatches.length - 1) {
+                            const attachmentRedApple = new MessageAttachment(Buffer.from(usersWithRedApple, 'utf-8'), 'usersID-redApple.txt');
+                            await sendAppleEmbed(resultsChannel, title, batch.join(' '), [], [attachmentRedApple]);
+                        } else if (resultsChannel) {
+                            await sendAppleEmbed(resultsChannel, title, batch.join(' '));
+                        }
+                    }));
+                } else {
+                    await sendLogEmbed('No students needing a red apple. 🍎 Continuing...');
+                }
+
+                await addGreenAppleRole();
 
                 // assign green apples, remove roll call and send update
-                await addGreenAppleRole();
-                const allGreenApples = usersWithGreenApple.split(/\r?\n/);
-                const greenBatches = batchItems(allGreenApples, batchSize);
-                greenBatches.forEach((batch, index) => {
-                    const title = `${appleEmbedTitleBase} - Green Apples Assigned! ${index + 1} of ${greenBatches.length}!`;
-                    if (jobDumpChannel && index === greenBatches.length - 1) {
-                        const attachmentGreenApple = new MessageAttachment(Buffer.from(usersWithGreenApple, 'utf-8'), 'usersID-greenApple.txt');
-                        sendAppleEmbed(jobDumpChannel, title, batch, [], [attachmentGreenApple]);
-                    } else if (jobDumpChannel) {
-                        sendAppleEmbed(jobDumpChannel, title, batch);
-                    }
-                });
+                if (usersWithGreenApple.length > 0) {
+                    const allGreenApples = usersWithGreenApple.split(/\r?\n/);
+                    const greenBatches = batchItems(allGreenApples, batchSize);
+                    await Promise.all(greenBatches.map(async (batch) => {
+                        const index = greenBatches.indexOf(batch);
+                        const title = `${appleEmbedTitleBase} - Green Apples Assigned! 🍏 ${index + 1} of ${greenBatches.length}!`;
+                        if (resultsChannel && index === greenBatches.length - 1) {
+                            const attachmentGreenApple = new MessageAttachment(Buffer.from(usersWithGreenApple, 'utf-8'), 'usersID-greenApple.txt');
+                            await sendAppleEmbed(resultsChannel, title, batch.join(' '), [], [attachmentGreenApple]);
+                        } else if (resultsChannel) {
+                            await sendAppleEmbed(resultsChannel, title, batch.join(' '));
+                        }
+                    }));
+                } else {
+                    await sendLogEmbed('No students needing a green apple. 🍏 Continuing...');
+                }
 
                 // mark logbooks as completed
-                await Promise.all(messagesWithApplesApplied.map(async (msg) => {
-                    await msg.react('👍');
-                }));
+                if (messagesWithApplesApplied.length > 0) {
+                    await sendLogEmbed('Marking logbooks as completed. 👍');
+                    await Promise.all(messagesWithApplesApplied.map(async (msg) => {
+                        await msg.react('👍');
+                    }));
+                }
 
-                // well done bang pd nim, see you tomorrow!
-                if (jobDumpChannel) {
-                    const title = `${appleEmbedTitleBase} - Completed!`;
-                    const description = 'All students from yesterday\'s logbooks have been awarded their apples. See you tomorrow!';
-                    const fields = [
-                        { name: 'Completed at', value: `${DateTime.utc().setZone(cst).toLocaleString(DateTime.DATETIME_FULL)}` }
-                    ];
-                    sendAppleEmbed(jobDumpChannel, title, description, fields);
+                // well done bang pd nim!
+                if (resultsChannel) {
+                    await sendCompletedEmbed('All students from yesterday\'s logbooks have been awarded their apples. See you tomorrow! ');
                 }
             }
         }, {
