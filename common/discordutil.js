@@ -72,18 +72,20 @@ module.exports = {
     return this.createBasicEmbed().setDescription(`I am going over the books for you ${username}, please wait. :eyes:`);
   },
 
-  async sendAppleEmbed(channel, title, description, fields = [], files = []) {
+  async sendAppleEmbed(channel, title, description, fields = [], files = [], thumbnail = '') {
     const cst = 'America/Chicago';
     const embed = new MessageEmbed()
         .setColor('5445ff')
-        .setTitle(title + '\n')
-        .setDescription('> ' + description + '\n')
+        .setTitle(title)
+        .setDescription(description)
         .setFooter({
           text: `${DateTime.utc().setZone(cst).toLocaleString(DateTime.DATETIME_FULL)}`,
           iconURL: 'https://i.imgur.com/UwOpFvr.png'
         });
 
-
+    if (thumbnail !== '') {
+      embed.setThumbnail(thumbnail);
+    }
     if (fields.length > 0) {
       embed.addFields(fields);
     }
