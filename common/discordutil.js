@@ -2,9 +2,12 @@ const { Collection, MessageEmbed, MessageAttachment } = require('discord.js');
 const langs = require('./langs.js');
 const { DateTime } = require('luxon');
 const got = require('got');
+const Promise = require('promise');
 const { guildId, BATId, BALId, BAGId, BADId, BAEId, prefix, accentColor, avatar } = require('../config.json');
 const ALL_GUILD_IDS = [guildId, BATId, BALId, BAGId, BADId, BAEId];
 const GUILD_IDS_WITHOUT_BAE = [guildId, BATId, BALId, BAGId, BADId];
+const SATELLITE_GUILD_IDS_WITHOUT_BAE = [BATId, BALId, BAGId, BADId];
+const msgLimit = 2000;
 
 module.exports = {
   bookmark(message, user) {
@@ -40,11 +43,11 @@ module.exports = {
       iconURL: message.author.avatarURL
     };
     const embed = new MessageEmbed()
-      .setColor(0xDF2B40)
-      .setAuthor(author)
-      .setDescription(`${text}${image ? `\r\n\r\n${image}` : ''} \r\n\r\n **Message link:** ${message.url}`)
-      .setImage(image)
-      .setTimestamp(message.editedTimestamp || message.createdTimestamp);
+        .setColor(0xDF2B40)
+        .setAuthor(author)
+        .setDescription(`${text}${image ? `\r\n\r\n${image}` : ''} \r\n\r\n **Message link:** ${message.url}`)
+        .setImage(image)
+        .setTimestamp(message.editedTimestamp || message.createdTimestamp);
 
     user.send({ embeds: [embed] }).then(msg => msg.react('❌'));
   },
@@ -56,8 +59,8 @@ module.exports = {
     };
 
     return new MessageEmbed()
-      .setColor(accentColor)
-      .setAuthor(author);
+        .setColor(accentColor)
+        .setAuthor(author);
   },
 
   setEmbedFooter(embed, footer) {
@@ -75,7 +78,7 @@ module.exports = {
   async sendAppleEmbed(channel, title, description, fields = [], files = [], thumbnail = '') {
     const cst = 'America/Chicago';
     const embed = new MessageEmbed()
-        .setColor('5445ff')
+        .setColor('#5445ff')
         .setTitle(title)
         .setDescription(description)
         .setFooter({
@@ -247,9 +250,9 @@ module.exports = {
     };
 
     const embed = new MessageEmbed()
-      .setColor(color)
-      .setFooter(footer)
-      .setDescription(message);
+        .setColor(color)
+        .setFooter(footer)
+        .setDescription(message);
 
     return embed;
   },
@@ -334,12 +337,77 @@ module.exports = {
     return guilds;
   },
 
+  getMainGuildId() {
+    return guildId;
+  },
+
   getAllGuildIds() {
     return ALL_GUILD_IDS;
   },
 
   getGuildIdsWithoutBAE() {
     return GUILD_IDS_WITHOUT_BAE;
+  },
+
+  getSatelliteGuildIdsWithoutBAE() {
+    return SATELLITE_GUILD_IDS_WITHOUT_BAE;
+  },
+
+  splitMessages(mentions) {
+    const mentionMessages = [];
+    while (mentions.length !== 0) {
+      const end = mentions.substring(0, msgLimit).lastIndexOf('>');
+      mentionMessages.push(mentions.substring(0, end + 1));
+      mentions = mentions.substring(end + 1, mentions.length);
+    }
+    return mentionMessages;
+  },
+
+  async kickUsersOnServers(userIds, guilds) {
+    let membersKicked = '';
+    const errorUsersPerServer = {};
+    guilds.forEach(guild => errorUsersPerServer[guild.id] = '');
+    await Promise.all(userIds.map(async (id) => {
+      let errorCount = 0;
+      await Promise.all(guilds.map(async (guild) => {
+        await guild.members.kick(id)
+            .catch((error) => {
+              console.log(error);
+              errorCount += 1;
+              errorUsersPerServer[guild.id] += `<@${id}>\n`;
+            });
+      }));
+      if (errorCount !== guilds.length) {
+        membersKicked += `<@${id}>\n`;
+      }
+    }));
+    return [membersKicked, errorUsersPerServer];
+  },
+
+  async banUsersOnServers(userIds, guilds) {
+    let membersBanned = '';
+    const errorUsersPerServer = {};
+    guilds.forEach(guild => errorUsersPerServer[guild.id] = '');
+    await Promise.all(userIds.map(async (id) => {
+      let errorCount = 0;
+      await Promise.all(guilds.map(async (guild) => {
+        await guild.members.ban(id)
+            .catch((error) => {
+              console.log(error);
+              errorCount += 1;
+              errorUsersPerServer[guild.id] += `<@${id}>\n`;
+            });
+      }));
+      if (errorCount !== guilds.length) {
+        membersBanned += `<@${id}>\n`;
+      }
+    }));
+    return [membersBanned, errorUsersPerServer];
+  },
+
+  getUsersWithRoleFromServer(role, guild) {
+    const ids = Array.from(guild.roles.cache.get(role.id).members.keys());
+    return [ids, ids.map(id => `<@${id}>`).join(' ')];
   },
 
   async fetchAllMessagesByChannel(channel) {

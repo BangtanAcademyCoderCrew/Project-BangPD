@@ -1,7 +1,6 @@
 const DiscordUtil = require('../../common/discordutil.js');
 const { ContextMenuCommandBuilder } = require('@discordjs/builders');
 const { MessageActionRow, MessageButton } = require('discord.js');
-const Promise = require('promise');
 
 const ALL_GUILD_IDS = DiscordUtil.getGuildIdsWithoutBAE();
 
@@ -13,20 +12,8 @@ module.exports = {
     async execute(interaction) {
         const user = interaction.targetUser;
         const interactionId = interaction.id;
-        let errorCount = 0;
 
-        const kickAcrossServers = async (idGuild) => {
-            const guild = interaction.client.guilds.cache.get(idGuild);
-            if (idGuild && !guild) {
-                return interaction.followUp({ content: `I can't find server with ID ${idGuild} <a:shookysad:949689086665437184>`, ephemeral: true });
-            }
-            await guild.members.kick(user)
-                .catch((error) => {
-                    console.log(error);
-                    errorCount += 1;
-                    return interaction.followUp({ content: `There was an error kicking user ${user} in server ${guild.name} <a:shookysad:949689086665437184>`, ephemeral: true });
-                });
-        };
+        const guilds = DiscordUtil.getAllGuilds(ALL_GUILD_IDS, interaction);
 
         const confirmButton = new MessageButton()
             .setCustomId(`confirmKick_${interactionId}`)
@@ -50,13 +37,18 @@ module.exports = {
             if (click.customId === `confirmKick_${interactionId}`) {
                 collector.stop();
                 await interaction.editReply({ content: 'Kick confirmed', components: [], ephemeral: true });
-                await Promise.all(ALL_GUILD_IDS.map(async (idGuild) => {
-                    await kickAcrossServers(idGuild);
-                }));
-                if (errorCount !== ALL_GUILD_IDS.length) {
+                const [membersKicked, errorUsersPerServer] = await DiscordUtil.kickUsersOnServers([user.id], guilds);
+                let errorGuilds = '';
+                Object.entries(errorUsersPerServer).forEach(([key, value]) => {
+                    if (value !== '') {
+                        errorGuilds += `${key},`;
+                    }
+                });
+                if (errorGuilds === '') {
                     return interaction.followUp({ content: `User ${user} has been kicked`, ephemeral: true });
                 } else {
-                    return interaction.followUp({ content: `User ${user} could not be kicked from any of the servers`, ephemeral: true });
+                    errorGuilds = errorGuilds.slice(0, -1);
+                    return interaction.followUp({ content: `User ${user} could not be kicked from servers with IDs ${errorGuilds}`, ephemeral: true });
                 }
             } else if (click.customId === `cancelKick_${interactionId}`) {
                 collector.stop();
