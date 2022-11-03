@@ -44,8 +44,10 @@ module.exports = {
             let logbookUserIds = [];
             const membersNeedingApples = new Set();
             const membersNeedingOnlyRedApples = new Set();
-            let usersWithGreenApple = '';
-            let usersWithRedApple = '';
+            let usersWithGreenAppleAdded = '';
+            let usersWithRedAppleAdded = '';
+            let usersWithRollCallRemoved = '';
+            let usersWithActiveStudentAdded = '';
 
             const addAppleRoles = async () => {
                 const bothRoles = [greenAppleRoleId, redAppleRoleId];
@@ -62,14 +64,14 @@ module.exports = {
                 await Promise.all(members.map(async (member) => {
                     if (userFrequency[member.id] >= 2) {
                         await member.roles.add(bothRoles);
-                        usersWithGreenApple += `<@${member.id}>\n`;
-                        usersWithRedApple += `<@${member.id}>\n`;
+                        usersWithGreenAppleAdded += `<@${member.id}>\n`;
+                        usersWithRedAppleAdded += `<@${member.id}>\n`;
                     } else if (!member.roles.cache.has(greenAppleRoleId)) {
                         await member.roles.add([greenAppleRoleId]);
-                        usersWithGreenApple += `<@${member.id}>\n`;
+                        usersWithGreenAppleAdded += `<@${member.id}>\n`;
                     } else {
                         await member.roles.add([redAppleRoleId]);
-                        usersWithRedApple += `<@${member.id}>\n`;
+                        usersWithRedAppleAdded += `<@${member.id}>\n`;
                     }
                     await removeRollCallRole(member);
                     await addActiveStudentRole(member);
@@ -85,7 +87,7 @@ module.exports = {
                     // must run after addAppleRoles to ensure cache has been updated
                     if (!member.roles.cache.has(redAppleRoleId)) {
                         await member.roles.add([redAppleRoleId]);
-                        usersWithRedApple += `<@${member.id}>\n`;
+                        usersWithRedAppleAdded += `<@${member.id}>\n`;
                     }
                     await removeRollCallRole(member);
                     await addActiveStudentRole(member);
@@ -96,6 +98,7 @@ module.exports = {
                 // roll call role removed from students given a '🍏'
                 if (member.roles.cache.has(rollCallRoleId) && member.roles.cache.has(greenAppleRoleId)) {
                     await member.roles.remove([rollCallRoleId]);
+                    usersWithRollCallRemoved += `<@${member.id}>\n`;
                 }
             };
 
@@ -103,6 +106,7 @@ module.exports = {
                 // active student role added to students given a '🍎'
                 if (!member.roles.cache.has(activeStudentRoleId) && member.roles.cache.has(redAppleRoleId)) {
                     await member.roles.remove([activeStudentRoleId]);
+                    usersWithActiveStudentAdded += `<@${member.id}>\n`;
                 }
             };
 
@@ -218,18 +222,17 @@ module.exports = {
                     await setApplesToGive(channel);
                 }));
 
-                // apply apples to all messages without an exclusion reaction
+                // add apples, remove roll call, add active student to all messages without an exclusion reaction
                 await addAppleRoles();
 
-                // assign red apples, remove roll call and send update
-                if (usersWithRedApple.length > 0) {
-                    const allRedApples = usersWithRedApple.split(/\r?\n/);
+                if (usersWithRedAppleAdded.length > 0) {
+                    const allRedApples = usersWithRedAppleAdded.split(/\r?\n/);
                     const redBatches = batchItems(allRedApples, batchSize);
                     await Promise.all(redBatches.map(async (batch) => {
                         const index = redBatches.indexOf(batch);
                         const title = `${appleEmbedTitleBase} - Red Apples Assigned! 🍎 ${index + 1} of ${redBatches.length}!`;
                         if (resultsChannel && index === redBatches.length - 1) {
-                            const attachmentRedApple = new MessageAttachment(Buffer.from(usersWithRedApple, 'utf-8'), 'usersID-redApple.txt');
+                            const attachmentRedApple = new MessageAttachment(Buffer.from(usersWithRedAppleAdded, 'utf-8'), 'usersID-redApple.txt');
                             await sendAppleEmbed(resultsChannel, title, batch.join(' '), [], [attachmentRedApple]);
                         } else if (resultsChannel) {
                             await sendAppleEmbed(resultsChannel, title, batch.join(' '));
@@ -240,18 +243,17 @@ module.exports = {
                     await sendLogEmbed(`No students were given the ${redAppleRole} role. Continuing...`);
                 }
 
-                // give red apples to messages with red apple only reaction
+                // give red apples and active student to messages with red apple only reaction
                 await addRedAppleRole();
 
-                // assign green apples, remove roll call and send update
-                if (usersWithGreenApple.length > 0) {
-                    const allGreenApples = usersWithGreenApple.split(/\r?\n/);
+                if (usersWithGreenAppleAdded.length > 0) {
+                    const allGreenApples = usersWithGreenAppleAdded.split(/\r?\n/);
                     const greenBatches = batchItems(allGreenApples, batchSize);
                     await Promise.all(greenBatches.map(async (batch) => {
                         const index = greenBatches.indexOf(batch);
                         const title = `${appleEmbedTitleBase} - Green Apples Assigned! 🍏 ${index + 1} of ${greenBatches.length}!`;
                         if (resultsChannel && index === greenBatches.length - 1) {
-                            const attachmentGreenApple = new MessageAttachment(Buffer.from(usersWithGreenApple, 'utf-8'), 'usersID-greenApple.txt');
+                            const attachmentGreenApple = new MessageAttachment(Buffer.from(usersWithGreenAppleAdded, 'utf-8'), 'usersID-greenApple.txt');
                             await sendAppleEmbed(resultsChannel, title, batch.join(' '), [], [attachmentGreenApple]);
                         } else if (resultsChannel) {
                             await sendAppleEmbed(resultsChannel, title, batch.join(' '));
@@ -262,9 +264,47 @@ module.exports = {
                     await sendLogEmbed(`No students were given the ${greenAppleRole} role. Continuing...`);
                 }
 
+                // log students who had roll call role removed
+                if (usersWithRollCallRemoved.length > 0) {
+                    const allRollCall = usersWithRollCallRemoved.split(/\r?\n/);
+                    const rollCallBatches = batchItems(allRollCall, batchSize);
+                    await Promise.all(rollCallBatches.map(async (batch) => {
+                        const index = rollCallBatches.indexOf(batch);
+                        const title = `${appleEmbedTitleBase} - Roll Call Removed! 🔔 ${index + 1} of ${rollCallBatches.length}!`;
+                        if (resultsChannel && index === rollCallBatches.length - 1) {
+                            const attachmentRollCall = new MessageAttachment(Buffer.from(usersWithRollCallRemoved, 'utf-8'), 'usersID-rollCall.txt');
+                            await sendAppleEmbed(resultsChannel, title, batch.join(' '), [], [attachmentRollCall]);
+                        } else if (resultsChannel) {
+                            await sendAppleEmbed(resultsChannel, title, batch.join(' '));
+                        }
+                    }));
+                } else {
+                    const rollCallRole = guildWithApples.roles.cache.get(rollCallRoleId) || '🔔 Roll Call';
+                    await sendLogEmbed(`No students had the ${rollCallRole} removed. Continuing...`);
+                }
+
+                // log students who had active student role added
+                if (usersWithActiveStudentAdded.length > 0) {
+                    const allActiveStudent = usersWithActiveStudentAdded.split(/\r?\n/);
+                    const activeStudentBatches = batchItems(allActiveStudent, batchSize);
+                    await Promise.all(activeStudentBatches.map(async (batch) => {
+                        const index = activeStudentBatches.indexOf(batch);
+                        const title = `${appleEmbedTitleBase} - Active Student Added!  ${index + 1} of ${activeStudentBatches.length}!`;
+                        if (resultsChannel && index === activeStudentBatches.length - 1) {
+                            const attachmentActiveStudent = new MessageAttachment(Buffer.from(usersWithActiveStudentAdded, 'utf-8'), 'usersID-activeStudent.txt');
+                            await sendAppleEmbed(resultsChannel, title, batch.join(' '), [], [attachmentActiveStudent]);
+                        } else if (resultsChannel) {
+                            await sendAppleEmbed(resultsChannel, title, batch.join(' '));
+                        }
+                    }));
+                } else {
+                    const activeStudentRole = guildWithApples.roles.cache.get(activeStudentRoleId) || 'Active Student';
+                    await sendLogEmbed(`No students had the ${activeStudentRole} added. Continuing...`);
+                }
+
                 // mark logbooks as completed
                 if (messagesWithApplesApplied.length > 0) {
-                    await sendLogEmbed('Marking all logbooks as completed. 👍');
+                    await sendLogEmbed('Marking logbooks as completed. 👍');
                     await Promise.all(messagesWithApplesApplied.map(async (msg) => {
                         await msg.react('👍');
                     }));
