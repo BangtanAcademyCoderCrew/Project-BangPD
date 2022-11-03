@@ -9,6 +9,7 @@ const { guildId } = require('../config.json');
 const greenAppleRoleId = '964598327775744070';
 const redAppleRoleId = '964597638047612969';
 const rollCallRoleId = '841115841852080129';
+const activeStudentRoleId = '841115747475783690';
 // apple-log channel
 const resultsChannelId = '1033147239343861760';
 // every 5 min
@@ -18,8 +19,9 @@ const cronSchedule = '*/5 * * * *';
 // const greenAppleRoleId = '875740793078431825';
 // const redAppleRoleId = '875740253980336158';
 // const rollCallRoleId = '763929191715831860';
+// const activeStudentRoleId = '775548906058416128';
 // const resultsChannelId = '876672628692250654';
-// nightly at 2am
+// nightly at 2am America/Chicago timezone
 // const cronSchedule = '0 2 * * *';
 
 const ignoreReactionName = 'yoongerine';
@@ -27,11 +29,12 @@ const logbookChannelNameStem = 'class-n-club-logbook';
 const appleEmbedTitleBase = 'GiveTheApples';
 const batchSize = 100;
 
+let APPLE_TASK = null;
+
 module.exports = {
     name: 'giveApples',
     async start(client) {
-        // running job at 02:00 at America/Chicago timezone
-        cron.schedule(cronSchedule, async () => {
+        APPLE_TASK = cron.schedule(cronSchedule, async () => {
             const guildWithApples = await client.guilds.cache.get(guildId);
             const cst = 'America/Chicago';
             const currentDateTimeCT = DateTime.utc().setZone(cst);
@@ -40,7 +43,7 @@ module.exports = {
             const messagesWithApplesApplied = [];
             let logbookUserIds = [];
             const membersNeedingApples = new Set();
-            const membersNeedingGreenApples = new Set();
+            const membersNeedingOnlyRedApples = new Set();
             let usersWithGreenApple = '';
             let usersWithRedApple = '';
 
@@ -68,28 +71,38 @@ module.exports = {
                         await member.roles.add([redAppleRoleId]);
                         usersWithRedApple += `<@${member.id}>\n`;
                     }
-                    await removeRollCall(member);
+                    await removeRollCallRole(member);
+                    await addActiveStudentRole(member);
                 }));
             };
 
-            const addGreenAppleRole = async () => {
-                if (membersNeedingGreenApples.size === 0) {
+            const addRedAppleRole = async () => {
+                if (membersNeedingOnlyRedApples.size === 0) {
                     return;
                 }
-                const members = Array.from(membersNeedingGreenApples.values());
+                const members = Array.from(membersNeedingOnlyRedApples.values());
                 await Promise.all(members.map(async (member) => {
                     // must run after addAppleRoles to ensure cache has been updated
-                    if (!member.roles.cache.has(greenAppleRoleId)) {
-                        await member.roles.add([greenAppleRoleId]);
-                        usersWithGreenApple += `<@${member.id}>\n`;
+                    if (!member.roles.cache.has(redAppleRoleId)) {
+                        await member.roles.add([redAppleRoleId]);
+                        usersWithRedApple += `<@${member.id}>\n`;
                     }
-                    await removeRollCall(member);
+                    await removeRollCallRole(member);
+                    await addActiveStudentRole(member);
                 }));
             };
 
-            const removeRollCall = async (member) => {
-                if (member.roles.cache.has(rollCallRoleId)) {
+            const removeRollCallRole = async (member) => {
+                // roll call role removed from students given a '🍏'
+                if (member.roles.cache.has(rollCallRoleId) && member.roles.cache.has(greenAppleRoleId)) {
                     await member.roles.remove([rollCallRoleId]);
+                }
+            };
+
+            const addActiveStudentRole = async (member) => {
+                // active student role added to students given a '🍎'
+                if (!member.roles.cache.has(activeStudentRoleId) && member.roles.cache.has(redAppleRoleId)) {
+                    await member.roles.remove([activeStudentRoleId]);
                 }
             };
 
@@ -136,13 +149,13 @@ module.exports = {
                     const messageContent = message.content.replace(/\D/g, ' ').split(' ');
                     const userIds = messageContent.filter(e => e.length >= 16);
                     const filteredMembers = Array.from(guildWithApples.members.cache.filter(member => userIds.includes(member.user.id)).values());
-                    const hasGreenAppleReaction = message.reactions.cache.has('🍏');
-                    if (hasGreenAppleReaction) {
+                    const hasRedAppleReaction = message.reactions.cache.has('🍎');
+                    if (hasRedAppleReaction) {
                         // i.e. homework helper logbook
                         if (filteredMembers.length > 0) {
                             messagesWithApplesApplied.push(message);
                         }
-                        filteredMembers.forEach((m) => membersNeedingGreenApples.add(m));
+                        filteredMembers.forEach((m) => membersNeedingOnlyRedApples.add(m));
                     } else {
                         // i.e. homework logbook
                         setLogbookUserIds(message, userIds);
@@ -169,7 +182,6 @@ module.exports = {
                     await sendAppleEmbed(resultsChannel, title, description, []);
                 }
             };
-
 
             // gather all logbook channels from every guild running BangPD
             if (!guildWithApples) {
@@ -206,7 +218,7 @@ module.exports = {
                     await setApplesToGive(channel);
                 }));
 
-                // give apples to all except messages with only green apple
+                // apply apples to all messages without an exclusion reaction
                 await addAppleRoles();
 
                 // assign red apples, remove roll call and send update
@@ -228,8 +240,8 @@ module.exports = {
                     await sendLogEmbed(`No students were given the ${redAppleRole} role. Continuing...`);
                 }
 
-                // give apples to messages with only green apple
-                await addGreenAppleRole();
+                // give red apples to messages with red apple only reaction
+                await addRedAppleRole();
 
                 // assign green apples, remove roll call and send update
                 if (usersWithGreenApple.length > 0) {
@@ -267,5 +279,8 @@ module.exports = {
             scheduled: true,
             timezone: 'America/Chicago'
         });
+    },
+    async stop() {
+        APPLE_TASK.stop();
     }
 };

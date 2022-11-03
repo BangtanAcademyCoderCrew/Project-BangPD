@@ -77,13 +77,17 @@ module.exports = {
 
   async sendAppleEmbed(channel, title, description, fields = [], files = [], thumbnail = '') {
     const cst = 'America/Chicago';
+    const author = {
+      name: 'BangPD',
+      iconURL: 'https://i.imgur.com/UwOpFvr.png'
+    };
     const embed = new MessageEmbed()
         .setColor('#5445ff')
+        .setAuthor(author)
         .setTitle(title)
         .setDescription(description)
         .setFooter({
-          text: `${DateTime.utc().setZone(cst).toLocaleString(DateTime.DATETIME_FULL)}`,
-          iconURL: 'https://i.imgur.com/UwOpFvr.png'
+          text: `💜 ${DateTime.utc().setZone(cst).toLocaleString(DateTime.DATETIME_FULL)}`
         });
 
     if (thumbnail !== '') {
