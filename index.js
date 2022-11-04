@@ -3,7 +3,6 @@ const { Client, Collection, Intents } = require('discord.js');
 const DiscordUtil = require('./common/discordutil');
 const { botToken, commandDirectories } = require('./config.json');
 const { deployCommands } = require('./deploy-commands');
-const { startScheduledJobs } = require('./startScheduledJobs');
 
 const client = new Client({
   partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER'],
@@ -30,8 +29,7 @@ commandDirectories.forEach(dir => {
 client.once('ready', () => {
   console.log('Bang PD is online!');
   deployCommands();
-  startScheduledJobs(client);
-  client.user.setActivity('BE', { type: 'LISTENING' });
+  client.user.setActivity('Proof', { type: 'LISTENING' });
 });
 
 client.on('interactionCreate', async (interaction) => {

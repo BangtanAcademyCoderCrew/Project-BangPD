@@ -13,13 +13,24 @@ module.exports = {
                 .setDescription('Start a scheduled job')
                 .addStringOption(option =>
                     option.setName('name')
-                        .setDescription('The name of the schedule job (i.e. "giveApples")')
+                        .setDescription('The name of the scheduled job (i.e. "giveApples")')
                         .setRequired(true)
                 )
                 .addStringOption(option =>
                     option.setName('schedule')
                         .setDescription('The cron schedule to override the default schedule. Default is "0 2 * * *" (daily at 2am)')
                         .setRequired(false)
+                )
+                .addStringOption(option =>
+                    option.setName('server')
+                        .setDescription('The server to run the scheduled job on and override default. Default is all BA servers')
+                        .setRequired(false)
+                        .addChoice('BA', 'guildId')
+                        .addChoice('BA LIBRARY', 'BALId')
+                        .addChoice('BA TTMIK', 'BATId')
+                        .addChoice('BA GAMES', 'BAGId')
+                        .addChoice('BA DEV', 'BADId')
+                        .addChoice('useDev', 'dev')
                 )
         )
         .addSubcommand(subcommand =>
@@ -28,8 +39,20 @@ module.exports = {
                     .setDescription('Stop a scheduled job')
                     .addStringOption(option =>
                         option.setName('name')
-                            .setDescription('The name of the schedule job (i.e. giveApples)')
+                            .setDescription('The name of the scheduled job (i.e. giveApples)')
                             .setRequired(true)
+                    )
+                    .addStringOption(option =>
+                        option.setName('server')
+                            .setDescription('The server to run the scheduled job on and override default. Default is all BA servers')
+                            .setRequired(false)
+                            .addChoice('BA', 'guildId')
+                            .addChoice('BA LIBRARY', 'BALId')
+                            .addChoice('BA TTMIK', 'BATId')
+                            .addChoice('BA GAMES', 'BAGId')
+                            .addChoice('BA DEV', 'BADId')
+                            .addChoice('useDev', 'dev')
+
                     )
         )
         .addSubcommand(subcommand =>
@@ -38,19 +61,29 @@ module.exports = {
                 .setDescription('Run a schedule job now only one time')
                 .addStringOption(option =>
                     option.setName('name')
-                        .setDescription('The name of the schedule job (i.e. giveApples)')
+                        .setDescription('The name of the scheduled job (i.e. giveApples)')
                         .setRequired(true)
                     )
+             .addStringOption(option =>
+                 option.setName('server')
+                     .setDescription('The server to run the scheduled job on and override default. Default is all BA servers')
+                     .setRequired(false)
+                     .addChoice('BA', 'guildId')
+                     .addChoice('BA LIBRARY', 'BALId')
+                     .addChoice('BA TTMIK', 'BATId')
+                     .addChoice('BA GAMES', 'BAGId')
+                     .addChoice('BA DEV', 'BADId')
+                     .addChoice('useDev', 'dev')
+             )
         ),
     async execute(interaction) {
         const client = interaction.client;
         const options = interaction.options;
         const commandName = options.getSubcommand();
         const name = options.getString('name');
+        // ok to be null when not provided with command
         const schedule = options.getString('schedule');
-
-        // nightly at 2am America/Chicago timezone
-        let cronSchedule = '0 2 * * *';
+        const serverId = options.getString('server');
 
         if (name) {
             const scheduledJobsDirectory = './scheduledJobs';
@@ -63,15 +96,13 @@ module.exports = {
 
         if (schedule) {
             const isValidSchedule = cronValidator.isValidCron(schedule);
-            if (isValidSchedule) {
-                cronSchedule = schedule;
-            } else {
+            if (!isValidSchedule) {
                 return interaction.reply({ content: `${schedule} is not a valid cron schedule. 🙁` });
             }
         }
 
         if (commandName === 'start') {
-            const isSuccessful = startScheduledJob(client, name, cronSchedule);
+            const isSuccessful = startScheduledJob(client, name, schedule, serverId);
             if (isSuccessful) {
                 return interaction.reply({ content: `Scheduled Job with name "${name}" has started. 🟢` });
             }
@@ -79,7 +110,7 @@ module.exports = {
         }
 
         if (commandName === 'stop') {
-            const isSuccessful = stopScheduledJob(client, name);
+            const isSuccessful = stopScheduledJob(name);
             if (isSuccessful) {
                 return interaction.reply({ content: `Scheduled Job with name "${name}" has stopped. 🔴` });
             }
@@ -88,7 +119,7 @@ module.exports = {
 
 
         if (commandName === 'runonce') {
-            const isSuccessful = runScheduledJob(client, name);
+            const isSuccessful = runScheduledJob(client, name, serverId);
             if (isSuccessful) {
                 return interaction.reply({ content: `Scheduled Job with name "${name}" has started. 🟢` });
             }

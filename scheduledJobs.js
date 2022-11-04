@@ -14,42 +14,42 @@ module.exports = {
             console.error(error);
         }
     },
-    startScheduledJob: async (client, jobName, schedule) => {
+    startScheduledJob: async (client, jobName, schedule, server) => {
         try {
             const jobFile = scheduledJobFiles.find((file) => file.includes(jobName));
             if (!jobFile) {
                 return false;
             }
             const foundJob = require(`${scheduledJobsDirectory}/${jobFile}`);
-            foundJob.start(client, schedule);
+            foundJob.start(client, schedule, server);
             return true;
         } catch (error) {
             console.error(error);
             return false;
         }
     },
-    stopScheduledJob: async (client, jobName) => {
+    stopScheduledJob: async (jobName) => {
         try {
             const jobFile = scheduledJobFiles.find((file) => file.includes(jobName));
             if (!jobFile) {
                 return false;
             }
             const foundJob = require(`${scheduledJobsDirectory}/${jobFile}`);
-            foundJob.stop(client);
+            foundJob.stop();
             return true;
         } catch (error) {
             console.error(error);
             return false;
         }
     },
-    runScheduledJob: async (client, jobName) => {
+    runScheduledJob: async (client, jobName, server) => {
         try {
             const jobFile = scheduledJobFiles.find((file) => file.includes(jobName));
             if (!jobFile) {
                 return false;
             }
             const foundJob = require(`${scheduledJobsDirectory}/${jobFile}`);
-            foundJob.run(client);
+            foundJob.run(client, server);
             return true;
         } catch (error) {
             console.error(error);

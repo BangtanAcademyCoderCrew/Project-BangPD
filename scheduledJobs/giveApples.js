@@ -1,11 +1,11 @@
 const cron = require('node-cron');
 const Promise = require('promise');
-const { fetchAllMessagesByChannelSince, batchItems, sendGiveApplesEmbed } = require('../common/discordutil');
+const { batchItems, fetchAllMessagesByChannelSince, getGuildIdsWithoutBAE, sendGiveApplesEmbed } = require('../common/discordutil');
 const { DateTime } = require('luxon');
 const { MessageAttachment } = require('discord.js');
-const { guildId } = require('../config.json');
-const { dev } = require('./giveApplesConfig.json');
-const { greenAppleRoleId, redAppleRoleId, rollCallRoleId, activeStudentRoleId, logChannelId, cronSchedule } = dev;
+const appleConfig = require('./giveApplesConfig.json');
+
+const ALL_GUILD_IDS = getGuildIdsWithoutBAE();
 
 let CURRENT_APPLE_TASK = null;
 
@@ -53,7 +53,8 @@ const sendRolesChanged = async (channel, userIds, role, type) => {
     }));
 };
 
-const runGiveApplesJob = async (client) => {
+const runGiveApplesJob = async (client, environment, guildIds) => {
+    const { guildId } = appleConfig[environment];
     const guildWithApples = await client.guilds.cache.get(guildId);
     const currentDateTimeCT = DateTime.utc().setZone('America/Chicago');
     const messagesSinceDateTime = currentDateTimeCT.minus({ days: 1 });
@@ -67,10 +68,21 @@ const runGiveApplesJob = async (client) => {
     const usersWithRollCallRemoved = new Set();
     const usersWithActiveStudentAdded = new Set();
 
+    const { greenAppleRoleId, redAppleRoleId, rollCallRoleId, activeStudentRoleId, logChannelId } = appleConfig[environment];
+
     const getAllLogbookChannels = () => {
-        const clientChannels = client.channels.cache;
         const logbookChannelNameStem = 'class-n-club-logbook';
-        return clientChannels.filter((c) => c.name.toLowerCase().includes(logbookChannelNameStem));
+
+        if (environment === 'dev') {
+            const clientChannels = client.channels.cache;
+            return clientChannels.filter((c) => c.name.toLowerCase().includes(logbookChannelNameStem));
+        } else {
+            return guildIds.map((id) => {
+                const guild = client.guilds.cache.get(id);
+                const clientChannels = guild.channels.cache;
+                return clientChannels.filter((c) => c.name.toLowerCase().includes(logbookChannelNameStem));
+            });
+        }
     };
 
     const setLogbookUserIds = (message, userIds) => {
@@ -269,16 +281,31 @@ const runGiveApplesJob = async (client) => {
 
 module.exports = {
     name: 'giveApples',
-    async start(client, schedule) {
+    async start(client, schedule, serverId) {
         if (CURRENT_APPLE_TASK) {
             CURRENT_APPLE_TASK.stop();
         }
 
-        const jobSchedule = schedule ? schedule : cronSchedule;
+        let guilds = [];
+        let environment = 'BA';
+        let jobSchedule = '';
+
+        if (serverId === 'dev') {
+            environment = 'dev';
+            const { cronSchedule } = appleConfig['dev'];
+            jobSchedule = schedule ? schedule : cronSchedule;
+        } else {
+            const guild = ALL_GUILD_IDS[serverId];
+            guilds = guild ? [guild] : ALL_GUILD_IDS;
+            const { cronSchedule } = appleConfig['BA'];
+            jobSchedule = schedule ? schedule : cronSchedule;
+
+        }
+
         CURRENT_APPLE_TASK = cron.schedule(
             jobSchedule,
             () => {
-                runGiveApplesJob(client);
+                runGiveApplesJob(client, environment, guilds);
             }, {
                 scheduled: true,
                 timezone: 'America/Chicago'
@@ -289,7 +316,17 @@ module.exports = {
             CURRENT_APPLE_TASK.stop();
         }
     },
-    async run(client) {
-        await runGiveApplesJob(client);
+    async run(client, serverId) {
+        let guilds = [];
+        let environment = 'BA';
+
+        if (serverId === 'dev') {
+            environment = 'dev';
+        } else {
+            const guild = ALL_GUILD_IDS[serverId];
+            guilds = guild ? [guild] : ALL_GUILD_IDS;
+        }
+
+        await runGiveApplesJob(client, environment, guilds);
     }
 };
