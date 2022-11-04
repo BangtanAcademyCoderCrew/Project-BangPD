@@ -42,18 +42,6 @@ module.exports = {
                             .setDescription('The name of the scheduled job (i.e. giveApples)')
                             .setRequired(true)
                     )
-                    .addStringOption(option =>
-                        option.setName('server')
-                            .setDescription('The server to run the scheduled job on and override default. Default is all BA servers')
-                            .setRequired(false)
-                            .addChoice('BA', 'guildId')
-                            .addChoice('BA LIBRARY', 'BALId')
-                            .addChoice('BA TTMIK', 'BATId')
-                            .addChoice('BA GAMES', 'BAGId')
-                            .addChoice('BA DEV', 'BADId')
-                            .addChoice('useDev', 'dev')
-
-                    )
         )
         .addSubcommand(subcommand =>
          subcommand
@@ -116,7 +104,6 @@ module.exports = {
             }
             return interaction.reply({ content: `Scheduled Job with name "${name}" could not be stopped. 🙁` });
         }
-
 
         if (commandName === 'runonce') {
             const isSuccessful = runScheduledJob(client, name, serverId);
