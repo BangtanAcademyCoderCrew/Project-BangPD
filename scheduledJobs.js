@@ -14,14 +14,14 @@ module.exports = {
             console.error(error);
         }
     },
-    startScheduledJob: async (client, jobName) => {
+    startScheduledJob: async (client, jobName, schedule) => {
         try {
             const jobFile = scheduledJobFiles.find((file) => file.includes(jobName));
             if (!jobFile) {
                 return false;
             }
             const foundJob = require(`${scheduledJobsDirectory}/${jobFile}`);
-            foundJob.start(client);
+            foundJob.start(client, schedule);
             return true;
         } catch (error) {
             console.error(error);
@@ -36,6 +36,20 @@ module.exports = {
             }
             const foundJob = require(`${scheduledJobsDirectory}/${jobFile}`);
             foundJob.stop(client);
+            return true;
+        } catch (error) {
+            console.error(error);
+            return false;
+        }
+    },
+    runScheduledJob: async (client, jobName) => {
+        try {
+            const jobFile = scheduledJobFiles.find((file) => file.includes(jobName));
+            if (!jobFile) {
+                return false;
+            }
+            const foundJob = require(`${scheduledJobsDirectory}/${jobFile}`);
+            foundJob.run(client);
             return true;
         } catch (error) {
             console.error(error);

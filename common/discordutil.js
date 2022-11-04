@@ -75,7 +75,11 @@ module.exports = {
     return this.createBasicEmbed().setDescription(`I am going over the books for you ${username}, please wait. :eyes:`);
   },
 
-  async sendAppleEmbed(channel, title, description, fields = [], files = [], thumbnail = '') {
+  async sendGiveApplesEmbed(channel, title, description, fields = [], thumbnail = '') {
+    if (!channel) {
+      return;
+    }
+
     const cst = 'America/Chicago';
     const author = {
       name: 'BangPD',
@@ -84,7 +88,7 @@ module.exports = {
     const embed = new MessageEmbed()
         .setColor('#5445ff')
         .setAuthor(author)
-        .setTitle(title)
+        .setTitle(`Scheduled Job: giveApples ${title}`)
         .setDescription(description)
         .setFooter({
           text: `💜 ${DateTime.utc().setZone(cst).toLocaleString(DateTime.DATETIME_FULL)}`
@@ -96,11 +100,8 @@ module.exports = {
     if (fields.length > 0) {
       embed.addFields(fields);
     }
-    if (files.length > 0) {
-      await channel.send({ embeds: [embed], files: files });
-    } else {
-      await channel.send({ embeds: [embed] });
-    }
+
+    await channel.send({ embeds: [embed] });
   },
 
   createWordSearchEmbed(language, query, username, isDM, searchResults) {
@@ -457,7 +458,7 @@ module.exports = {
     return messages;
   },
 
-  batchItems(items, batchSize) {
+  batchItems(items, batchSize = 100) {
     const batchedItems = [];
     for (let i = 0; i < Math.ceil(items.length / batchSize); i++) {
       batchedItems[i] = items.slice(i * batchSize, (i + 1) * batchSize);
