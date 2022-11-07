@@ -1,7 +1,7 @@
 const cron = require('node-cron');
 const Promise = require('promise');
 const { batchItems, fetchAllMessagesByChannelSince, getGuildIdsWithoutBAE, sendGiveApplesEmbed } = require('../common/discordutil');
-const { DateTime } = require('luxon');
+const { DateTime, Duration } = require('luxon');
 const { MessageAttachment } = require('discord.js');
 const appleConfig = require('./giveApplesConfig.json');
 
@@ -128,9 +128,9 @@ const runGiveApplesJob = async (client, environment, guildIds) => {
 
     const removeRollCallRole = async (member) => {
         // roll call role removed from students given a '🍏'
-        const hasRollCollRole = member.roles.cache.has(rollCallRoleId);
+        const hasRollCallRole = member.roles.cache.has(rollCallRoleId);
         const hasGreenAppleRole = member.roles.cache.has(greenAppleRoleId) || usersWithGreenAppleAdded.has(member.id);
-        if (hasRollCollRole && hasGreenAppleRole) {
+        if (hasRollCallRole && hasGreenAppleRole) {
             await member.roles.remove([rollCallRoleId]);
             usersWithRollCallRemoved.add(member.id);
         }
@@ -275,8 +275,20 @@ const runGiveApplesJob = async (client, environment, guildIds) => {
     }
 
     // well done bang pd nim!
+    const jobEndDateTime = DateTime.utc().setZone('America/Chicago');
+    const totalTimeElapsedInMs = jobEndDateTime.diff(currentDateTimeCT);
+    const formattedRuntime = Duration.fromObject({ milliseconds: totalTimeElapsedInMs }).toFormat('hh:mm:ss');
+    const formattedRolesApplied = `${greenAppleRole} added: ${usersWithGreenAppleAdded.size}` + '\n' +
+        `${redAppleRole} added: ${usersWithRedAppleAdded.size}` + '\n' +
+        `${rollCallRole} removed: ${usersWithRollCallRemoved.size}` + '\n' +
+        `${activeStudentRole} added: ${usersWithActiveStudentAdded.size}` + '\n';
+
     const completedDescription = 'All logbooks have been checked. See you next time!';
-    await sendGiveApplesEmbed(resultsChannel, '🎉 Completed!', completedDescription);
+    const fields = [
+        { name: 'Total Runtime', value: `${formattedRuntime}` },
+        { name: 'Roles Applied', value: `${formattedRolesApplied}` }
+    ];
+    await sendGiveApplesEmbed(resultsChannel, '🎉 Completed!', completedDescription, fields);
 };
 
 module.exports = {
