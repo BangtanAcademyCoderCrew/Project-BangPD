@@ -1,0 +1,20 @@
+{
+  "BA": {
+    "guildId": "691714222832484522",
+    "greenAppleRoleId": "875740793078431825",
+    "redAppleRoleId": "875740253980336158",
+    "rollCallRoleId": "763929191715831860",
+    "activeStudentRoleId": "775548906058416128",
+    "logChannelId": "876672628692250654",
+    "cronSchedule": "0 2 * * *"
+  },
+  "dev": {
+    "guildId": "788198695279132672",
+    "greenAppleRoleId": "964598327775744070",
+    "redAppleRoleId": "964597638047612969",
+    "rollCallRoleId": "841115841852080129",
+    "activeStudentRoleId": "841115747475783690",
+    "logChannelId": "1033147239343861760",
+    "cronSchedule": "*/5 * * * *"
+  }
+}

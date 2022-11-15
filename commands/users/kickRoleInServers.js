@@ -1,6 +1,6 @@
 const DiscordUtil = require('../../common/discordutil.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageButton, MessageActionRow, MessageAttachment } = require("discord.js");
+const { MessageButton, MessageActionRow, MessageAttachment } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -44,7 +44,7 @@ module.exports = {
             .setStyle('SECONDARY');
         const actionRow = new MessageActionRow().addComponents(cancelButton, confirmButton);
 
-        let [userIds, mentions] = DiscordUtil.getUsersWithRoleFromServer(role, guildWithRole);
+        const [userIds, mentions] = DiscordUtil.getUsersWithRoleFromServer(role, guildWithRole);
         const guildNames = guilds.map(guild => guild.name);
         if (userIds.length > 0) {
             await interaction.followUp({ content: `Are you sure you want to kick these users from ${guildNames} servers?`, components: [actionRow], ephemeral: true });

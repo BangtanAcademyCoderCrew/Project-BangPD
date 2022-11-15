@@ -1,6 +1,6 @@
 const DiscordUtil = require('../../common/discordutil.js');
 const { ContextMenuCommandBuilder } = require('@discordjs/builders');
-const { MessageButton, MessageActionRow } = require("discord.js");
+const { MessageButton, MessageActionRow } = require('discord.js');
 
 const ALL_GUILD_IDS = DiscordUtil.getAllGuildIds();
 

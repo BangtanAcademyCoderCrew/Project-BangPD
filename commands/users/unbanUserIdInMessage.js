@@ -2,6 +2,7 @@ const DiscordUtil = require('../../common/discordutil.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { ChannelType } = require('discord-api-types/v9');
 const { MessageAttachment, MessageButton, MessageActionRow } = require('discord.js');
+const Promise = require('promise');
 
 const ALL_GUILD_IDS = DiscordUtil.getAllGuildIds();
 
