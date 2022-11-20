@@ -30,7 +30,7 @@ commandDirectories.forEach(dir => {
 client.once('ready', () => {
   console.log('Bang PD is online!');
   deployCommands();
-  client.user.setActivity('BE', { type: 'LISTENING' });
+  client.user.setActivity('Proof', { type: 'LISTENING' });
 });
 
 client.on('interactionCreate', async (interaction) => {
@@ -81,7 +81,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
       }
     }
     if (reaction.emoji.name === '❌' && !validChannels.includes(reaction.message.channel.type)) {
-      if (user.id !== client.user.id && reaction.message.author.id == client.user.id) {
+      if (user.id !== client.user.id && reaction.message.author.id === client.user.id) {
         reaction.message.delete();
       }
     }

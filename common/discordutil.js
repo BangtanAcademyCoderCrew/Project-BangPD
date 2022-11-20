@@ -1,9 +1,9 @@
-const Discord = require('discord.js');
-const { prefix, accentColor, avatar } = require('../config.json');
+const { Collection, MessageEmbed, MessageAttachment } = require('discord.js');
 const langs = require('./langs.js');
 const { DateTime } = require('luxon');
 const got = require('got');
-const { guildId, BATId, BALId, BAGId, BADId, BAEId } = require('../config.json');
+const Promise = require('promise');
+const { guildId, BATId, BALId, BAGId, BADId, BAEId, prefix, accentColor, avatar } = require('../config.json');
 const ALL_GUILD_IDS = [guildId, BATId, BALId, BAGId, BADId, BAEId];
 const GUILD_IDS_WITHOUT_BAE = [guildId, BATId, BALId, BAGId, BADId];
 const SATELLITE_GUILD_IDS_WITHOUT_BAE = [BATId, BALId, BAGId, BADId];
@@ -42,7 +42,7 @@ module.exports = {
       name: message.author.username,
       iconURL: message.author.avatarURL
     };
-    const embed = new Discord.MessageEmbed()
+    const embed = new MessageEmbed()
         .setColor(0xDF2B40)
         .setAuthor(author)
         .setDescription(`${text}${image ? `\r\n\r\n${image}` : ''} \r\n\r\n **Message link:** ${message.url}`)
@@ -58,7 +58,7 @@ module.exports = {
       iconURL: 'https://i.imgur.com/UwOpFvr.png'
     };
 
-    return new Discord.MessageEmbed()
+    return new MessageEmbed()
         .setColor(accentColor)
         .setAuthor(author);
   },
@@ -73,6 +73,35 @@ module.exports = {
 
   createPendingEmbed(username) {
     return this.createBasicEmbed().setDescription(`I am going over the books for you ${username}, please wait. :eyes:`);
+  },
+
+  async sendGiveApplesEmbed(channel, title, description, fields = [], thumbnail = '') {
+    if (!channel) {
+      return;
+    }
+
+    const cst = 'America/Chicago';
+    const author = {
+      name: 'BangPD',
+      iconURL: 'https://i.imgur.com/UwOpFvr.png'
+    };
+    const embed = new MessageEmbed()
+        .setColor('#5445ff')
+        .setAuthor(author)
+        .setTitle(`Scheduled Job: giveApples ${title}`)
+        .setDescription(description)
+        .setFooter({
+          text: `💜 ${DateTime.utc().setZone(cst).toLocaleString(DateTime.DATETIME_FULL)}`
+        });
+
+    if (thumbnail !== '') {
+      embed.setThumbnail(thumbnail);
+    }
+    if (fields.length > 0) {
+      embed.addFields(fields);
+    }
+
+    await channel.send({ embeds: [embed] });
   },
 
   createWordSearchEmbed(language, query, username, isDM, searchResults) {
@@ -225,7 +254,7 @@ module.exports = {
       text: `${currentTimeCST.toLocaleString(DateTime.DATETIME_FULL)}`
     };
 
-    const embed = new Discord.MessageEmbed()
+    const embed = new MessageEmbed()
         .setColor(color)
         .setFooter(footer)
         .setDescription(message);
@@ -278,7 +307,7 @@ module.exports = {
       } catch (error) {
         console.log(error);
       }
-      const attachment = new Discord.MessageAttachment(Buffer.from(`${usersChanged.join('\n')}`, 'utf-8'), 'changedusers.txt');
+      const attachment = new MessageAttachment(Buffer.from(`${usersChanged.join('\n')}`, 'utf-8'), 'changedusers.txt');
       interaction.followUp({ content: 'Changed users', files: [attachment] });
     })();
   },
@@ -301,7 +330,7 @@ module.exports = {
   },
 
   getAllGuilds(guildIds, interaction) {
-    let guilds = [];
+    const guilds = [];
     guildIds.forEach(idGuild => {
       const guild = interaction.client.guilds.cache.get(idGuild);
       if (idGuild && !guild) {
@@ -330,9 +359,9 @@ module.exports = {
   },
 
   splitMessages(mentions) {
-    let mentionMessages = [];
+    const mentionMessages = [];
     while (mentions.length !== 0) {
-      let end = mentions.substring(0, msgLimit).lastIndexOf('>');
+      const end = mentions.substring(0, msgLimit).lastIndexOf('>');
       mentionMessages.push(mentions.substring(0, end + 1));
       mentions = mentions.substring(end + 1, mentions.length);
     }
@@ -341,7 +370,7 @@ module.exports = {
 
   async kickUsersOnServers(userIds, guilds) {
     let membersKicked = '';
-    let errorUsersPerServer = {};
+    const errorUsersPerServer = {};
     guilds.forEach(guild => errorUsersPerServer[guild.id] = '');
     await Promise.all(userIds.map(async (id) => {
       let errorCount = 0;
@@ -362,7 +391,7 @@ module.exports = {
 
   async banUsersOnServers(userIds, guilds) {
     let membersBanned = '';
-    let errorUsersPerServer = {};
+    const errorUsersPerServer = {};
     guilds.forEach(guild => errorUsersPerServer[guild.id] = '');
     await Promise.all(userIds.map(async (id) => {
       let errorCount = 0;
@@ -379,6 +408,62 @@ module.exports = {
       }
     }));
     return [membersBanned, errorUsersPerServer];
+  },
+
+  getUsersWithRoleFromServer(role, guild) {
+    const ids = Array.from(guild.roles.cache.get(role.id).members.keys());
+    return [ids, ids.map(id => `<@${id}>`).join(' ')];
+  },
+
+  async fetchAllMessagesByChannel(channel) {
+    let messages = new Collection();
+    // Create message pointer of most recent message because we can only get 100 at a time
+    let message = await channel.messages
+      .fetch({ limit: 1 })
+      .then(messagePage => (messagePage.size === 1 ? messagePage.at(0) : null));
+    messages = messages.set(message.id, message);
+
+    while (message) {
+      await channel.messages
+        .fetch({ limit: 100, before: message.id })
+        .then(messagePage => {
+          messages = messages.concat(messagePage);
+          // Update message pointer to be last message in page of messages
+          message = messagePage.size > 0 ? messagePage.at(messagePage.size - 1) : null;
+        });
+    }
+
+    return messages;
+  },
+
+  async fetchAllMessagesByChannelSince(channel, sinceDateTime) {
+    let messages = new Collection();
+    // Create message pointer of most recent message because we can only get 100 at a time
+    let message = await channel.messages
+        .fetch({ limit: 1 })
+        .then(messagePage => (messagePage.size === 1 ? messagePage.at(0) : null));
+    messages = messages.set(message.id, message);
+
+    while (message) {
+      await channel.messages
+          .fetch({ limit: 100, before: message.id })
+          .then(messagePage => {
+            const filteredByDate = messagePage.filter(m => m.createdTimestamp >= sinceDateTime);
+            messages = messages.concat(filteredByDate);
+            // Update message pointer to be last message in page of messages
+            message = filteredByDate.size > 0 ? messagePage.at(messagePage.size - 1) : null;
+          });
+    }
+
+    return messages;
+  },
+
+  batchItems(items, batchSize = 100) {
+    const batchedItems = [];
+    for (let i = 0; i < Math.ceil(items.length / batchSize); i++) {
+      batchedItems[i] = items.slice(i * batchSize, (i + 1) * batchSize);
+    }
+    return batchedItems;
   }
 
 };

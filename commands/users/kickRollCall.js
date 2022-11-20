@@ -1,6 +1,6 @@
 const DiscordUtil = require('../../common/discordutil.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageButton, MessageActionRow, MessageAttachment } = require("discord.js");
+const { MessageButton, MessageActionRow, MessageAttachment } = require('discord.js');
 
 const ALL_GUILD_IDS = DiscordUtil.getGuildIdsWithoutBAE();
 
@@ -18,7 +18,7 @@ module.exports = {
         const guilds = DiscordUtil.getAllGuilds(ALL_GUILD_IDS, interaction);
 
         const getUsersWithRollCall = () => {
-            let ids = Array.from(guilds[0].roles.cache.get(rollcallTagId).members.keys());
+            const ids = Array.from(guilds[0].roles.cache.get(rollcallTagId).members.keys());
             return [ids, ids.map(id => `<@${id}>`).join(' ')];
         };
 
@@ -32,7 +32,7 @@ module.exports = {
             .setStyle('SECONDARY');
         const actionRow = new MessageActionRow().addComponents(cancelButton, confirmButton);
 
-        let [userIds, mentions] = getUsersWithRollCall();
+        const [userIds, mentions] = getUsersWithRollCall();
         if (userIds.length > 0) {
             await interaction.followUp({ content: 'Are you sure you want to kick these users from all BA servers?', components: [actionRow], ephemeral: true });
             DiscordUtil.splitMessages(mentions).forEach(msg => interaction.followUp({ content: msg, ephemeral: true }));

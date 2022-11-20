@@ -42,23 +42,31 @@ module.exports = {
       });
 
       const groups = {
-        All: '3 Servers',
+        All: '4 Servers',
         BAG: 'only BAG',
         BAL: 'only BAL',
         BAT: 'only BAT',
+        BAD: 'only BAD',
         BALandBAG: 'BAL and BAG',
         BALandBAT: 'BAL and BAT',
-        BATandBAG: 'BAT and BAG'
+        BALandBAD: 'BAL and BAD',
+        BATandBAG: 'BAT and BAG',
+        BATandBAD: 'BAT and BAD',
+        BAGandBAD: 'BAG and BAD'
       };
 
       const usersPerGroup = {};
-      usersPerGroup[groups.BALandBAT] = usersPerGuild[BALId].filter(id => usersPerGuild[BATId].includes(id));
       usersPerGroup[groups.BALandBAG] = usersPerGuild[BALId].filter(id => usersPerGuild[BAGId].includes(id));
+      usersPerGroup[groups.BALandBAT] = usersPerGuild[BALId].filter(id => usersPerGuild[BATId].includes(id));
+      usersPerGroup[groups.BALandBAD] = usersPerGuild[BALId].filter(id => usersPerGuild[BADId].includes(id));
       usersPerGroup[groups.BATandBAG] = usersPerGuild[BATId].filter(id => usersPerGuild[BAGId].includes(id));
-      usersPerGroup[groups.All] = usersPerGroup[groups.BALandBAT].filter(id => usersPerGuild[BAGId].includes(id));
-      usersPerGroup[groups.BAL] = usersPerGuild[BALId].filter(id => !usersPerGuild[BATId].includes(id)).filter(id => !usersPerGuild[BAGId].includes(id));
-      usersPerGroup[groups.BAT] = usersPerGuild[BATId].filter(id => !usersPerGuild[BALId].includes(id)).filter(id => !usersPerGuild[BAGId].includes(id));
-      usersPerGroup[groups.BAG] = usersPerGuild[BAGId].filter(id => !usersPerGuild[BATId].includes(id)).filter(id => !usersPerGuild[BALId].includes(id));
+      usersPerGroup[groups.BATandBAD] = usersPerGuild[BATId].filter(id => usersPerGuild[BADId].includes(id));
+      usersPerGroup[groups.BAGandBAD] = usersPerGuild[BAGId].filter(id => usersPerGuild[BADId].includes(id));
+      usersPerGroup[groups.All] = usersPerGroup[groups.BALandBAT].filter(id => usersPerGroup[groups.BAGandBAD].includes(id));
+      usersPerGroup[groups.BAG] = usersPerGuild[BAGId].filter(id => !usersPerGuild[BATId].includes(id) && !usersPerGuild[BALId].includes(id) && !usersPerGuild[BADId].includes(id));
+      usersPerGroup[groups.BAL] = usersPerGuild[BALId].filter(id => !usersPerGuild[BATId].includes(id) && !usersPerGuild[BAGId].includes(id) && !usersPerGuild[BADId].includes(id));
+      usersPerGroup[groups.BAT] = usersPerGuild[BATId].filter(id => !usersPerGuild[BALId].includes(id) && !usersPerGuild[BAGId].includes(id) && !usersPerGuild[BADId].includes(id));
+      usersPerGroup[groups.BAD] = usersPerGuild[BADId].filter(id => !usersPerGuild[BATId].includes(id) && !usersPerGuild[BALId].includes(id) && !usersPerGuild[BAGId].includes(id));
       return usersPerGroup;
     };
 

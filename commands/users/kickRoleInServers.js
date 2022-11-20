@@ -1,30 +1,38 @@
 const DiscordUtil = require('../../common/discordutil.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageButton, MessageActionRow, MessageAttachment } = require("discord.js");
-
-const MAIN_GUILD_ID = DiscordUtil.getMainGuildId();
-const SATELLITE_GUILD_IDS = DiscordUtil.getSatelliteGuildIdsWithoutBAE();
+const { MessageButton, MessageActionRow, MessageAttachment } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('kicknonbamembers')
-        .setDescription('Gets all users that are members of satellite servers but not of the main BA server and kicks them.')
+        .setName('kickroleinservers')
+        .setDescription('Gets all users with the specified role and kicks them from specified servers.')
+        .addRoleOption(option =>
+            option.setName('role')
+                .setDescription('The role you would like to kick people having it')
+                .setRequired(true))
+        .addStringOption(option =>
+            option.setName('server_id_with_role')
+                .setDescription('The ID of server where the specified role exists')
+                .setRequired(true))
+        .addStringOption(option =>
+            option.setName('server_ids_to_kick_from')
+                .setDescription('The server ids people should get kicked from')
+                .setRequired(true))
         .setDefaultPermission(false),
     async execute(interaction) {
         const interactionId = interaction.id;
+        const options = interaction.options;
+        const role = options.getRole('role');
+        const serverWithRole = options.getString('server_id_with_role').length >= 16 ? options.getString('server_id_with_role') : null;
+        const servers = options.getString('server_ids_to_kick_from').split(' ').filter(e => e.length >= 16);
 
         await interaction.deferReply({ ephemeral: true });
 
-        const satelliteGuilds = DiscordUtil.getAllGuilds(SATELLITE_GUILD_IDS, interaction);
-        const mainGuild = DiscordUtil.getAllGuilds([MAIN_GUILD_ID], interaction)[0];
-
-        const getNonBAMembers = () => {
-            let nonBAMemberIds = [];
-            satelliteGuilds.forEach(satelliteGuild => {
-                satelliteGuild.members.cache.filter(m => (!mainGuild.members.cache.get(m.id) && !nonBAMemberIds.includes(m.id))).forEach(m => nonBAMemberIds.push(m.id));
-            });
-            return [nonBAMemberIds, nonBAMemberIds.map(id => `<@${id}>`).join(' ')];
-        };
+        const guilds = DiscordUtil.getAllGuilds(servers, interaction);
+        const guildWithRole = DiscordUtil.getAllGuilds([serverWithRole], interaction)[0];
+        if (!guildWithRole || guilds === []) {
+            return interaction.followUp({ content: 'Couldn\'t get servers with specified IDs <a:shookysad:949689086665437184>', ephemeral: true });
+        }
 
         const confirmButton = new MessageButton()
             .setCustomId(`confirmKick_${interactionId}`)
@@ -36,9 +44,10 @@ module.exports = {
             .setStyle('SECONDARY');
         const actionRow = new MessageActionRow().addComponents(cancelButton, confirmButton);
 
-        const [userIds, mentions] = getNonBAMembers();
+        const [userIds, mentions] = DiscordUtil.getUsersWithRoleFromServer(role, guildWithRole);
+        const guildNames = guilds.map(guild => guild.name);
         if (userIds.length > 0) {
-            await interaction.followUp({ content: 'Are you sure you want to kick these users from all satellite servers?', components: [actionRow], ephemeral: true });
+            await interaction.followUp({ content: `Are you sure you want to kick these users from ${guildNames} servers?`, components: [actionRow], ephemeral: true });
             DiscordUtil.splitMessages(mentions).forEach(msg => interaction.followUp({ content: msg, ephemeral: true }));
 
             const filter = (buttonInteraction) => {
@@ -52,9 +61,9 @@ module.exports = {
                     collector.stop();
                     await interaction.editReply({ content: 'Kick confirmed', components: [], ephemeral: true });
 
-                    const [membersKicked, errorUsersPerServer] = await DiscordUtil.kickUsersOnServers(userIds, satelliteGuilds);
+                    const [membersKicked, errorUsersPerServer] = await DiscordUtil.kickUsersOnServers(userIds, guilds);
                     const attachment = new MessageAttachment(Buffer.from(membersKicked, 'utf-8'), 'usersID.txt');
-                    await interaction.followUp({ content: 'These users were kicked from at least one server', files: [attachment], ephemeral: true });
+                    await interaction.followUp({ content: `These ${role} users were kicked from at least one server`, files: [attachment], ephemeral: true });
 
                     Object.entries(errorUsersPerServer).forEach(([key, value]) => {
                         if (value !== '') {
@@ -68,7 +77,7 @@ module.exports = {
                 }
             });
         } else {
-            return interaction.followUp({ content: 'There are no users that are a member of a satellite server but not the main server.', ephemeral: true });
+            return interaction.followUp({ content: `There are no users with ${role} tag`, ephemeral: true });
         }
     }
 };
