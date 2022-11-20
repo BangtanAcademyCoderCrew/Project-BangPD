@@ -307,8 +307,7 @@ module.exports = {
             const { cronSchedule } = appleConfig['dev'];
             jobSchedule = schedule ? schedule : cronSchedule;
         } else {
-            const guild = ALL_GUILD_IDS[serverId];
-            guilds = guild ? [guild] : ALL_GUILD_IDS;
+            guilds = ALL_GUILD_IDS.includes(serverId) ? [serverId] : ALL_GUILD_IDS;
             const { cronSchedule } = appleConfig['BA'];
             jobSchedule = schedule ? schedule : cronSchedule;
 
@@ -335,8 +334,7 @@ module.exports = {
         if (serverId === 'dev') {
             environment = 'dev';
         } else {
-            const guild = ALL_GUILD_IDS[serverId];
-            guilds = guild ? [guild] : ALL_GUILD_IDS;
+            guilds = ALL_GUILD_IDS.includes(serverId) ? [serverId] : ALL_GUILD_IDS;
         }
 
         await runGiveApplesJob(client, environment, guilds);
