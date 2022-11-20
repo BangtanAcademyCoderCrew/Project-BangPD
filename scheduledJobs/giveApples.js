@@ -80,7 +80,10 @@ const runGiveApplesJob = async (client, environment, guildIds) => {
             return guildIds.map((id) => {
                 const guild = client.guilds.cache.get(id);
                 const clientChannels = guild.channels.cache;
-                return clientChannels.filter((c) => c.name.toLowerCase().includes(logbookChannelNameStem));
+                const channelWithStem = clientChannels.find((c) => c.name.toLowerCase().includes(logbookChannelNameStem));
+                if (channelWithStem) {
+                    return channelWithStem;
+                }
             });
         }
     };
@@ -205,7 +208,7 @@ const runGiveApplesJob = async (client, environment, guildIds) => {
     }
 
     // gather all logbook channels from every guild running BangPD
-    const logbookChannels = getAllLogbookChannels();
+    const logbookChannels = getAllLogbookChannels().filter(e => e);
     if (logbookChannels && logbookChannels.size === 0) {
         console.log('Scheduled Job: giveApples - No logbook channels found.');
         if (resultsChannel) {
