@@ -489,7 +489,7 @@ Get all roles from a user in all BA servers and returns a response with an embed
 
 <br/>
 
-### 📅 Reminder Command
+### ⏲️ Reminder Command
 
 | Command                                                                                   | Description                                |
 |-------------------------------------------------------------------------------------------| ------------------------------------------ |
@@ -631,3 +631,59 @@ Returns a response, per message, with a `.txt` attachment named `usersID.txt`, w
 > ```
 
 If there was an error unbanning a user from any of the servers, the command returns also a response, per message and per server, with a `.txt` attachment named `usersID.txt`, which includes a list of the ids that couldn't be unbanned from the server. Formatting of the `.txt` is same as above.
+
+<br/>
+
+### 📆 Scheduled Job Commands
+
+| Command                                                                  | Description                                    |
+|--------------------------------------------------------------------------|------------------------------------------------|
+| [`/scheduledjob start <name> <schedule> <server>`](#-scheduledjob-start) | Starts a scheduled job.                        |
+| [`/scheduledjob stop <name>`](#-scheduledjob-stop)                       | Stops a scheduled job.                         |
+| [`/scheduledjob runonce <name> <server>`](#-scheduledjob-runonce)        | Runs a scheduled job immediately a single time |
+
+#### <font size=3>⚡ /scheduledjob start</font>
+
+**Example:** `/scheduledjob start giveApples`
+
+- **Options:** `<name>` *(string)* Required, `<schedule>` *(string)* Optional, `<server>` *(string)* Optional
+
+Starts the scheduled job requested using default schedule and runs across all BA servers. 
+
+You can override the default schedule of the job by providing a **cron** schedule using the `schedule` option. You can specify a specific server to run the scheduled job on by selecting the server from the options provided.  
+
+#### <font size=3>⚡ /scheduledjob stop</font>
+
+**Example:** `/scheduledjob stop giveApples`
+
+- **Options:** `<name>` *(string)* Required
+
+Stops the running scheduled job requested.
+
+#### <font size=3>⚡ /scheduledjob runonce</font>
+
+**Example:** `/scheduledjob runonce giveApples`
+
+- **Options:** `<name>` *(string)* Required, `<server>` *(string)* Optional
+
+Runs the scheduled job requested immediately, a single time, across all BA servers.
+
+You can specify a specific server to run the scheduled job on by selecting the server from the options provided.  
+
+<br/>
+
+### 📆 Scheduled Jobs
+
+#### <font size=3> giveApples </font>
+
+The `giveApples` scheduled job runs nightly at 2am CT across all BA servers by default. 
+
+It will search through all logbook channel messages within the previous 24 hours. For example, when it runs on June 13, 2023 at 2am, it will collect all logbook messages between June 12, 2023 2am - June 13, 2023 2am. 
+
+Logbook messages already marked as completed by bang pd are ignored. Messages with the ignore emoji reaction from Cider Crew are ignored. 
+
+Bang PD will review each message and give out apple roles accordingly. Students logged once will receive a 🍏 and students logged twice will also receive a 🍎. Messages marked with only the 🍎 by Cider Crew will only have the 🍎 role applied.  
+
+At the time apples are being applied, Bang PD will also remove the Roll Call role from students who have the 🍏 and apply the Active Student role to students with a 🍎.
+
+Bang PD will provide logs as the job is running with a total runtime and roles applied in a summary upon completion. 
