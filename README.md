@@ -678,7 +678,10 @@ You can specify a specific server to run the scheduled job on by selecting the s
 
 The `giveApples` scheduled job runs nightly at 2am CT across all BA servers by default. 
 
-It will search through all logbook channel messages within the previous 24 hours. For example, when it runs on June 13, 2023 at 2am, it will collect all logbook messages between June 12, 2023 2am - June 13, 2023 2am. 
+It will search through all logbook channel messages within the previous 24 hours. 
+
+> For example, when it runs on June 13, 2023 at 2am, 
+> Bang PD will collect all logbook messages between June 12, 2023 2am - June 13, 2023 2am.
 
 Logbook messages already marked as completed by bang pd are ignored. Messages with the ignore emoji reaction from Cider Crew are ignored. 
 
