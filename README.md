@@ -683,7 +683,7 @@ It will search through all logbook channel messages within the previous 24 hours
 > For example, when it runs on June 13, 2023 at 2am, 
 > Bang PD will collect all logbook messages between June 12, 2023 2am - June 13, 2023 2am.
 
-Logbook messages already marked as completed by bang pd are ignored. Messages with the ignore emoji reaction from Cider Crew are ignored. 
+Logbook messages already marked as completed by Bang PD are ignored. Messages with the ignore emoji reaction from Cider Crew are ignored. 
 
 Bang PD will review each message and give out apple roles accordingly. Students logged once will receive a 🍏 and students logged twice will also receive a 🍎. Messages marked with only the 🍎 by Cider Crew will only have the 🍎 role applied.  
 
