@@ -65,6 +65,7 @@ const runGiveApplesJob = async (client, environment, guildIds) => {
     const membersNeedingOnlyRedApples = new Set();
     const usersWithGreenAppleAdded = new Set();
     const usersWithRedAppleAdded = new Set();
+    const usersWithNoApplesAdded = new Set();
     const usersWithRollCallRemoved = new Set();
     const usersWithActiveStudentAdded = new Set();
 
@@ -161,7 +162,9 @@ const runGiveApplesJob = async (client, environment, guildIds) => {
         }
 
         await Promise.all(membersNeedingApples.map(async (member) => {
-            if (userFrequency[member.id] >= 2) {
+            if(member.roles.cache.has(redAppleRoleId) && member.roles.cache.has(greenAppleRoleId)) {
+                usersWithNoApplesAdded.add(member.id);
+            } else if (userFrequency[member.id] >= 2) {
                 await member.roles.add(bothRoles);
                 usersWithGreenAppleAdded.add(member.id);
                 usersWithRedAppleAdded.add(member.id);
@@ -251,6 +254,11 @@ const runGiveApplesJob = async (client, environment, guildIds) => {
         await sendRolesChanged(resultsChannel, usersWithRedAppleAdded, '🍎', 'redApple');
     } else {
         await sendLogEmbed(resultsChannel, `No students were given the ${redAppleRole} role.`);
+    }
+
+    //log students who had no apples added
+    if (resultsChannel && usersWithNoApplesAdded.size > 0) {
+        await sendRolesChanged(resultsChannel, usersWithNoApplesAdded, '➖ no new Apple', 'noNewApples');
     }
 
     // log students who had roll call role removed
