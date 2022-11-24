@@ -42,9 +42,9 @@ client.once('ready', () => {
 });
 
 client.on('interactionCreate', async (interaction) => {
-  
-  if (interaction.isButton()){
-		const command = client.buttons.get(interaction.customId.split("_")[0]);
+
+  if (interaction.isButton()) {
+		const command = client.buttons.get(interaction.customId.split('_')[0]);
 		try {
 			await command.run(interaction, interaction.member);
 		} catch (error) {
@@ -119,39 +119,39 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
   }
 
   const ALL_SATELLITE_GUILD_IDS = DiscordUtil.getSatelliteGuildIdsWithoutBAE();
-  const pronounsRoles = ["name only/no pronoun", "they/them", "she/her", "he/him", "neopronoun"];
-  
+  const pronounsRoles = ['name only/no pronoun', 'they/them', 'she/her', 'he/him', 'neopronoun'];
+
   if(newMember.roles.cache.size < oldMember.roles.cache.size) {
     const removedRole = oldMember.roles.cache
     .filter(r => !newMember.roles.cache.has(r.id))
     .first()
     .name.toLowerCase();
     if (pronounsRoles.includes(removedRole)) {
-      ALL_SATELLITE_GUILD_IDS.forEach(guildId => DiscordUtil.removePronounsRoleInSatelliteServer(guildId, newMember, removedRole, client));
+      ALL_SATELLITE_GUILD_IDS.forEach(gId => DiscordUtil.removePronounsRoleInSatelliteServer(gId, newMember, removedRole, client));
     }
     return;
   }
-  
+
   const newRole = newMember.roles.cache
     .filter(r => !oldMember.roles.cache.has(r.id))
     .first()
     .name.toLowerCase();
-  const passportRoles = ["level", "time zone"].concat(pronounsRoles);
-  
+  const passportRoles = ['level', 'time zone'].concat(pronounsRoles);
+
   if (!passportRoles.some(v => newRole.includes(v))) {
     return;
   }
-  
+
   let roleType;
 
   if (pronounsRoles.includes(newRole)) {
-    roleType = "pronouns";
+    roleType = 'pronouns';
   } else {
     roleType = passportRoles.filter(v => newRole.includes(v));
   }
 
-  ALL_SATELLITE_GUILD_IDS.forEach(guildId => DiscordUtil.updatePassportRolesInSatelliteServer(guildId, newMember, roleType, newRole, client))
-})
+  ALL_SATELLITE_GUILD_IDS.forEach(gId => DiscordUtil.updatePassportRolesInSatelliteServer(gId, newMember, roleType, newRole, client));
+});
 
 /*
 
