@@ -91,7 +91,8 @@ const runGiveApplesJob = async (client, environment, guildIds) => {
 
     const setLogbookUserIds = (message, userIds) => {
         const usersInMessage = Array.from(message.client.users.cache.filter(u => userIds.includes(u.id)).values());
-        const messageUserIds = usersInMessage.map(user => user.id);
+        const usersInMessageIds = usersInMessage.map(user => user.id);
+        const messageUserIds = userIds.filter(uId => usersInMessageIds.includes(uId));
         logbookUserIds = logbookUserIds.concat(messageUserIds);
         if (messageUserIds.length > 0) {
             messagesWithApplesApplied.push(message);
