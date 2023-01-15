@@ -6,7 +6,7 @@ const { errorEmojiId } = require('../../config.json');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('hasrole')
-    .setDescription('Gets a list of user ids that were mentioned in a message and see if they are active or not.')
+    .setDescription('Gets a list of user ids that were mentioned in a message and see if they have a role or not.')
     .addStringOption(option =>
       option.setName('message_ids')
         .setDescription('What messages would you like to get the user ids from?')
@@ -18,7 +18,7 @@ module.exports = {
         .setRequired(true))
     .addRoleOption(option =>
       option.setName('role')
-        .setDescription('What\'s the active student role?')
+        .setDescription('What\'s the role to check?')
         .setRequired(true))
     .setDefaultPermission(false),
   async execute(interaction) {
@@ -29,22 +29,22 @@ module.exports = {
 
     await interaction.deferReply();
 
-    const hasActiveStudentRole = (ids, roleID) => {
-      const activeStudents = Array.from(interaction.guild.roles.cache.get(roleID).members.keys());
-      const areActiveStudents = ids.filter(id => activeStudents.includes(id));
-      return areActiveStudents;
+    const hasRequiredRole = (ids, roleID) => {
+      const usersWithRole = Array.from(interaction.guild.roles.cache.get(roleID).members.keys());
+      const haveTheRequiredRole = ids.filter(id => usersWithRole.includes(id));
+      return haveTheRequiredRole;
     };
 
     const checkIDs = (messageID) => {
       channel.messages.fetch(messageID).then(msg => {
         const content = msg.content.replace(/\D/g, ' ').split(' ');
         const ids = content.filter(e => e.length >= 16);
-        const activeStudents = hasActiveStudentRole(ids, roleId);
-        const notActiveStudents = ids.filter(id => !activeStudents.includes(id));
-        const attachmentActive = new MessageAttachment(Buffer.from(`<@${activeStudents.join('>\n<@')}>`, 'utf-8'), 'activeStudents.txt');
-        const attachmentNotActive = new MessageAttachment(Buffer.from(`<@${notActiveStudents.join('>\n<@')}>`, 'utf-8'), 'notActiveStudents.txt');
-        interaction.followUp({ content: `Users in message ${messageID} who are active`, files: [attachmentActive] });
-        interaction.followUp({ content: `Users in message ${messageID} who are not active`, files: [attachmentNotActive] });
+        const usersWithRequiredRole = hasRequiredRole(ids, roleId);
+        const usersWithoutRequiredRole = ids.filter(id => !usersWithRequiredRole.includes(id));
+        const attachmentUsersWithRole = new MessageAttachment(Buffer.from(`<@${usersWithRequiredRole.join('>\n<@')}>`, 'utf-8'), 'user_with_role.txt');
+        const attachmentUsersWithoutRole = new MessageAttachment(Buffer.from(`<@${usersWithoutRequiredRole.join('>\n<@')}>`, 'utf-8'), 'notActiveStudents.txt');
+        interaction.followUp({ content: `Users in message ${messageID} who are active`, files: [attachmentUsersWithRole] });
+        interaction.followUp({ content: `Users in message ${messageID} who are not active`, files: [attachmentUsersWithoutRole] });
       }).catch((error) => {
         console.error(error);
         interaction.followUp({ content: `Message with ID ${messageID} wasn't found in channel <#${channel.id}> ${errorEmojiId}` });

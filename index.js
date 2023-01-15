@@ -44,13 +44,16 @@ client.once('ready', () => {
 client.on('interactionCreate', async (interaction) => {
 
   if (interaction.isButton()) {
-		const command = client.buttons.get(interaction.customId.split('_')[0]);
-		try {
-			await command.run(interaction, interaction.member);
-		} catch (error) {
-			console.error(error);
-			return interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
-		}
+    const isPermanentButton = interaction.customId.split('_')[0] === 'run' ? true : false;
+    if (isPermanentButton) {
+      const command = client.buttons.get(interaction.customId.split('_')[1]);
+      try {
+        await command.run(interaction, interaction.member);
+      } catch (error) {
+        console.error(error);
+        return interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+      }
+    }
 	}
 
   if (interaction.isCommand() || interaction.isContextMenu()) {

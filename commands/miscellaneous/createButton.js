@@ -36,25 +36,25 @@ module.exports = {
     const options = interaction.options;
     const channel = options.getChannel('channel');
     const description = options.getString('description');
-    const emojiString = options.getString('emoji');
+    const emojiString = options.getString('emoji') ? options.getString('emoji') : '';
     const buttonText = options.getString('button_text');
     const buttonType = options.getString('button_type');
     const row = new MessageActionRow();
     const isEmoji = emojiString.match(/<a?:.+?:\d{18}>|\p{Extended_Pictographic}/gu);
-    if (!isEmoji) {
+    if (emojiString && !isEmoji) {
         return interaction.followUp(`${emojiString} is not a valid emoji!`);
     }
-    const emoji = isEmoji[0];
+    const emoji = emojiString ? isEmoji[0] : '';
 
     row.addComponents(
         new MessageButton()
-            .setCustomId(`${buttonType}_${interaction.createdTimestamp}`)
+            .setCustomId(`run_${buttonType}_${interaction.createdTimestamp}`)
             .setLabel(`${buttonText}`)
             .setStyle('PRIMARY')
             .setEmoji(`${emoji}`)
     );
 
     await channel.send({ content: description, components: [row] });
-    await interaction.followUp({ content: 'Message sent! <:921121105861804063>', ephemeral: true });
+    await interaction.followUp({ content: 'Message sent! <a:taeArmybomb:921121105861804063>', ephemeral: true });
   }
 };
