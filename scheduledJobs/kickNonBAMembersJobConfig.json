@@ -1,0 +1,14 @@
+{
+  "BA": {
+    "logChannelId": "876672628692250654",
+    "cronSchedule": "0 1 * * 1",
+    "descriptionMaxSize": 4096,
+    "color": "#d3b73e"
+  },
+  "dev": {
+    "logChannelId": "1084544265885073569",
+    "cronSchedule": "*/1 * * * *",
+    "descriptionMaxSize": 4096,
+    "color": "#d3b73e"
+  }
+}
