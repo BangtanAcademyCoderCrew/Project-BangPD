@@ -1,7 +1,7 @@
 const fs = require('fs');
 const { Client, Collection, Intents } = require('discord.js');
 const DiscordUtil = require('./common/discordutil');
-const { botToken, commandDirectories } = require('./config.json');
+const { botToken, guildId, commandDirectories, buttonsDirectories } = require('./config.json');
 const { deployCommands } = require('./deploy-commands');
 const { isLeaveServersButton, handleLeaveInteraction } = require('./commands/users/leaveServers.js');
 
@@ -19,11 +19,20 @@ const client = new Client({
 });
 
 client.commands = new Collection();
+client.buttons = new Collection();
 commandDirectories.forEach(dir => {
   const commandFiles = fs.readdirSync(dir).filter(file => file.endsWith('.js'));
   commandFiles.forEach((file) => {
     const command = require(`${dir}/${file}`);
     client.commands.set(command.data.name, command);
+  });
+});
+
+buttonsDirectories.forEach(dir => {
+  const buttonFiles = fs.readdirSync(dir).filter(file => file.endsWith('.js'));
+  buttonFiles.forEach((file) => {
+    const button = require(`${dir}/${file}`);
+    client.buttons.set(button.name, button);
   });
 });
 
@@ -34,6 +43,20 @@ client.once('ready', () => {
 });
 
 client.on('interactionCreate', async (interaction) => {
+
+  if (interaction.isButton()) {
+    const isPermanentButton = interaction.customId.split('_')[0] === 'run' ? true : false;
+    if (isPermanentButton) {
+      const command = client.buttons.get(interaction.customId.split('_')[1]);
+      try {
+        await command.run(interaction, interaction.member);
+      } catch (error) {
+        console.error(error);
+        return interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+      }
+    }
+	}
+
   if (interaction.isCommand() || interaction.isContextMenu()) {
     const command = client.commands.get(interaction.commandName);
 
@@ -85,6 +108,58 @@ client.on('messageReactionAdd', async (reaction, user) => {
         reaction.message.delete();
       }
     }
+});
+
+// BA user joins satellite server
+client.on('guildMemberAdd', async (member) => {
+  if (guildId === member.guild.id) {
+    return;
+  }
+  const mainGuild = client.guilds.cache.get(guildId);
+  const memberOnBA = mainGuild.members.cache.find(u => u.id === member.id);
+  DiscordUtil.assignRolesFromMainServer(member.guild, memberOnBA, member);
+  member.setNickname(memberOnBA.nickname);
+});
+
+// BA user changes role in BA main
+client.on('guildMemberUpdate', async (oldMember, newMember) => {
+  if (guildId != oldMember.guild) {
+    return;
+  }
+
+  const ALL_SATELLITE_GUILD_IDS = DiscordUtil.getSatelliteGuildIdsWithoutBAE();
+  const pronounsRoles = ['name only/no pronoun', 'they/them', 'she/her', 'he/him', 'neopronoun'];
+
+  if(newMember.roles.cache.size < oldMember.roles.cache.size) {
+    const removedRole = oldMember.roles.cache
+    .filter(r => !newMember.roles.cache.has(r.id))
+    .first()
+    .name.toLowerCase();
+    if (pronounsRoles.includes(removedRole)) {
+      ALL_SATELLITE_GUILD_IDS.forEach(gId => DiscordUtil.removePronounsRoleInSatelliteServer(gId, newMember, removedRole, client));
+    }
+    return;
+  }
+
+  const newRole = newMember.roles.cache
+    .filter(r => !oldMember.roles.cache.has(r.id))
+    .first()
+    .name.toLowerCase();
+  const passportRoles = ['level', 'time zone'].concat(pronounsRoles);
+
+  if (!passportRoles.some(v => newRole.includes(v))) {
+    return;
+  }
+
+  let roleType;
+
+  if (pronounsRoles.includes(newRole)) {
+    roleType = 'pronouns';
+  } else {
+    roleType = passportRoles.filter(v => newRole.includes(v));
+  }
+
+  ALL_SATELLITE_GUILD_IDS.forEach(gId => DiscordUtil.updatePassportRolesInSatelliteServer(gId, newMember, roleType, newRole, client));
 });
 
 /*

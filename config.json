@@ -7,5 +7,6 @@
     "BAGId": "848725336366645259",
     "BADId": "946082984203808808",
     "BAEId": "854830922741055527",
-    "commandDirectories": ["./commands/context", "./commands/miscellaneous", "./commands/reminder", "./commands/roles", "./commands/sejong", "./commands/users"]
+    "commandDirectories": ["./commands/context", "./commands/miscellaneous", "./commands/reminder", "./commands/roles", "./commands/sejong", "./commands/users"],
+    "buttonsDirectories": ["./buttons"]
 }

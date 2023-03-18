@@ -65,6 +65,7 @@ const runGiveApplesJob = async (client, environment, guildIds) => {
     const membersNeedingOnlyRedApples = new Set();
     const usersWithGreenAppleAdded = new Set();
     const usersWithRedAppleAdded = new Set();
+    const usersWithNoApplesAdded = new Set();
     const usersWithRollCallRemoved = new Set();
     const usersWithActiveStudentAdded = new Set();
 
@@ -80,14 +81,18 @@ const runGiveApplesJob = async (client, environment, guildIds) => {
             return guildIds.map((id) => {
                 const guild = client.guilds.cache.get(id);
                 const clientChannels = guild.channels.cache;
-                return clientChannels.filter((c) => c.name.toLowerCase().includes(logbookChannelNameStem));
+                const channelWithStem = clientChannels.find((c) => c.name.toLowerCase().includes(logbookChannelNameStem));
+                if (channelWithStem) {
+                    return channelWithStem;
+                }
             });
         }
     };
 
     const setLogbookUserIds = (message, userIds) => {
         const usersInMessage = Array.from(message.client.users.cache.filter(u => userIds.includes(u.id)).values());
-        const messageUserIds = usersInMessage.map(user => user.id);
+        const usersInMessageIds = usersInMessage.map(user => user.id);
+        const messageUserIds = userIds.filter(uId => usersInMessageIds.includes(uId));
         logbookUserIds = logbookUserIds.concat(messageUserIds);
         if (messageUserIds.length > 0) {
             messagesWithApplesApplied.push(message);
@@ -158,7 +163,9 @@ const runGiveApplesJob = async (client, environment, guildIds) => {
         }
 
         await Promise.all(membersNeedingApples.map(async (member) => {
-            if (userFrequency[member.id] >= 2) {
+            if(member.roles.cache.has(redAppleRoleId) && member.roles.cache.has(greenAppleRoleId)) {
+                usersWithNoApplesAdded.add(member.id);
+            } else if (userFrequency[member.id] >= 2) {
                 await member.roles.add(bothRoles);
                 usersWithGreenAppleAdded.add(member.id);
                 usersWithRedAppleAdded.add(member.id);
@@ -205,7 +212,7 @@ const runGiveApplesJob = async (client, environment, guildIds) => {
     }
 
     // gather all logbook channels from every guild running BangPD
-    const logbookChannels = getAllLogbookChannels();
+    const logbookChannels = getAllLogbookChannels().filter(e => e);
     if (logbookChannels && logbookChannels.size === 0) {
         console.log('Scheduled Job: giveApples - No logbook channels found.');
         if (resultsChannel) {
@@ -248,6 +255,11 @@ const runGiveApplesJob = async (client, environment, guildIds) => {
         await sendRolesChanged(resultsChannel, usersWithRedAppleAdded, '🍎', 'redApple');
     } else {
         await sendLogEmbed(resultsChannel, `No students were given the ${redAppleRole} role.`);
+    }
+
+    //log students who had no apples added
+    if (resultsChannel && usersWithNoApplesAdded.size > 0) {
+        await sendRolesChanged(resultsChannel, usersWithNoApplesAdded, '➖ no new Apple', 'noNewApples');
     }
 
     // log students who had roll call role removed
@@ -307,8 +319,7 @@ module.exports = {
             const { cronSchedule } = appleConfig['dev'];
             jobSchedule = schedule ? schedule : cronSchedule;
         } else {
-            const guild = ALL_GUILD_IDS[serverId];
-            guilds = guild ? [guild] : ALL_GUILD_IDS;
+            guilds = ALL_GUILD_IDS.includes(serverId) ? [serverId] : ALL_GUILD_IDS;
             const { cronSchedule } = appleConfig['BA'];
             jobSchedule = schedule ? schedule : cronSchedule;
 
@@ -335,8 +346,7 @@ module.exports = {
         if (serverId === 'dev') {
             environment = 'dev';
         } else {
-            const guild = ALL_GUILD_IDS[serverId];
-            guilds = guild ? [guild] : ALL_GUILD_IDS;
+            guilds = ALL_GUILD_IDS.includes(serverId) ? [serverId] : ALL_GUILD_IDS;
         }
 
         await runGiveApplesJob(client, environment, guilds);

@@ -2,6 +2,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { startScheduledJob, stopScheduledJob, runScheduledJob } = require('../../scheduledJobs');
 const cronValidator = require('cron-validator');
 const fs = require('fs');
+const { guildId, BATId, BALId, BAGId, BADId } = require('../../config.json');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -25,11 +26,11 @@ module.exports = {
                     option.setName('server')
                         .setDescription('The server to run the scheduled job on and override default. Default is all BA servers')
                         .setRequired(false)
-                        .addChoice('BA', 'guildId')
-                        .addChoice('BA LIBRARY', 'BALId')
-                        .addChoice('BA TTMIK', 'BATId')
-                        .addChoice('BA GAMES', 'BAGId')
-                        .addChoice('BA DEV', 'BADId')
+                        .addChoice('BA', `${guildId}`)
+                        .addChoice('BA LIBRARY', `${BALId}`)
+                        .addChoice('BA TTMIK', `${BATId}`)
+                        .addChoice('BA GAMES', `${BAGId}`)
+                        .addChoice('BA DEV', `${BADId}`)
                         .addChoice('useDev', 'dev')
                 )
         )
@@ -56,11 +57,11 @@ module.exports = {
                  option.setName('server')
                      .setDescription('The server to run the scheduled job on and override default. Default is all BA servers')
                      .setRequired(false)
-                     .addChoice('BA', 'guildId')
-                     .addChoice('BA LIBRARY', 'BALId')
-                     .addChoice('BA TTMIK', 'BATId')
-                     .addChoice('BA GAMES', 'BAGId')
-                     .addChoice('BA DEV', 'BADId')
+                     .addChoice('BA', `${guildId}`)
+                     .addChoice('BA LIBRARY', `${BALId}`)
+                     .addChoice('BA TTMIK', `${BATId}`)
+                     .addChoice('BA GAMES', `${BAGId}`)
+                     .addChoice('BA DEV', `${BADId}`)
                      .addChoice('useDev', 'dev')
              )
         ),

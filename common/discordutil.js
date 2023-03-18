@@ -1,4 +1,4 @@
-const { MessageEmbed, MessageAttachment } = require('discord.js');
+const { Collection, MessageEmbed, MessageAttachment } = require('discord.js');
 const langs = require('./langs.js');
 const { DateTime } = require('luxon');
 const got = require('got');
@@ -425,6 +425,138 @@ module.exports = {
   getUsersWithRoleFromServer(role, guild) {
     const ids = Array.from(guild.roles.cache.get(role.id).members.keys());
     return [ids, ids.map(id => `<@${id}>`).join(' ')];
+  },
+
+  async fetchAllMessagesByChannel(channel) {
+    let messages = new Collection();
+    // Create message pointer of most recent message because we can only get 100 at a time
+    let message = await channel.messages
+      .fetch({ limit: 1 })
+      .then(messagePage => (messagePage.size === 1 ? messagePage.at(0) : null));
+    messages = messages.set(message.id, message);
+
+    while (message) {
+      await channel.messages
+        .fetch({ limit: 100, before: message.id })
+        .then(messagePage => {
+          messages = messages.concat(messagePage);
+          // Update message pointer to be last message in page of messages
+          message = messagePage.size > 0 ? messagePage.at(messagePage.size - 1) : null;
+        });
+    }
+
+    return messages;
+  },
+
+  async fetchAllMessagesByChannelSince(channel, sinceDateTime) {
+    let messages = new Collection();
+    // Create message pointer of most recent message because we can only get 100 at a time
+    let message = await channel.messages
+        .fetch({ limit: 1 })
+        .then(messagePage => (messagePage.size === 1 ? messagePage.at(0) : null));
+    messages = messages.set(message.id, message);
+
+    while (message) {
+      await channel.messages
+          .fetch({ limit: 100, before: message.id })
+          .then(messagePage => {
+            const filteredByDate = messagePage.filter(m => m.createdTimestamp >= sinceDateTime);
+            messages = messages.concat(filteredByDate);
+            // Update message pointer to be last message in page of messages
+            message = filteredByDate.size > 0 ? messagePage.at(messagePage.size - 1) : null;
+          });
+    }
+
+    return messages;
+  },
+
+  batchItems(items, batchSize = 100) {
+    const batchedItems = [];
+    for (let i = 0; i < Math.ceil(items.length / batchSize); i++) {
+      batchedItems[i] = items.slice(i * batchSize, (i + 1) * batchSize);
+    }
+    return batchedItems;
+  },
+
+  getUserTimezoneRole(member) {
+    const timezoneRole = 'time zone';
+    return member.roles.cache.find(r => r.name.toLowerCase().includes(timezoneRole)).name.toLowerCase();
+  },
+
+  getUserLevelRole(member) {
+    const levelRoleName = 'level';
+    return member.roles.cache.find(r => r.name.toLowerCase().includes(levelRoleName)).name.toLowerCase();
+  },
+
+  getUserPronounsRoles(member) {
+    const pronounsRoles = ['name only/no pronoun', 'they/them', 'she/her', 'he/him', 'neopronoun'];
+    return member.roles.cache.filter(r => pronounsRoles.includes(r.name.toLowerCase())).map(r => r.name.toLowerCase());
+  },
+
+  getUserPassportRoles(member) {
+    const level = this.getUserLevelRole(member);
+    const timezone = this.getUserTimezoneRole(member);
+    const pronouns = this.getUserPronounsRoles(member);
+    return [level, timezone].concat(pronouns);
+  },
+
+  assignRolesFromMainServer: function(guild, memberOnBA, memberInNewGuild) {
+
+    const passportRoles = this.getUserPassportRoles(memberOnBA);
+
+    const rolesToAddIds = guild.roles.cache.filter(r => passportRoles.includes(r.name.toLowerCase())).map(r => r.id);
+    memberInNewGuild.roles.add(rolesToAddIds);
+  },
+
+  updatePassportRolesInSatelliteServer(newGuildId, newMember, roleType, newRole, client) {
+    const newGuild = client.guilds.cache.get(newGuildId);
+    if (!newGuild) {
+      return;
+    }
+    const guildMember = newGuild.members.cache.find(u => u.id === newMember.id);
+    if (!guildMember) {
+      return;
+    }
+
+    let oldRole;
+    if (roleType != 'pronouns') {
+      oldRole = guildMember.roles.cache.find(r => r.name.toLowerCase().includes(roleType));
+
+      if (!oldRole) {
+        console.log(`User ${guildMember.displayName} doesn't have a ${roleType} role`);
+        return;
+      }
+    }
+
+    const newRoleInGuild = newGuild.roles.cache.find(r => r.name.toLowerCase() === newRole);
+
+    if (!newRoleInGuild) {
+      console.log(`There's no role named ${newRole} in ${newGuild.name}`);
+      return;
+    }
+    guildMember.roles.add(newRoleInGuild.id);
+
+    if (oldRole) {
+      guildMember.roles.remove(oldRole.id);
+    }
+  },
+
+  removePronounsRoleInSatelliteServer(newGuildId, newMember, removedRole, client) {
+    const newGuild = client.guilds.cache.get(newGuildId);
+    if (!newGuild) {
+      return;
+    }
+    const guildMember = newGuild.members.cache.find(u => u.id === newMember.id);
+    if (!guildMember) {
+      return;
+    }
+    const userPronouns = this.getUserPronounsRoles(guildMember);
+    if (!userPronouns.includes(removedRole)) {
+      return;
+    }
+
+    const roleToRemove = newGuild.roles.cache.find(r => r.name.toLowerCase() === removedRole);
+    guildMember.roles.remove(roleToRemove.id);
   },
 
   getNonBAMembers(interaction, client) {
