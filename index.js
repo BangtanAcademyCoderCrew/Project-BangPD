@@ -54,7 +54,7 @@ client.on('interactionCreate', async (interaction) => {
         return interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
       }
     }
-	}
+  }
 
   if (interaction.isCommand() || interaction.isContextMenu()) {
     const command = client.commands.get(interaction.commandName);

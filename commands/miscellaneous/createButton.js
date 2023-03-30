@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { ChannelType } = require('discord-api-types/v9');
-const { MessageActionRow, MessageButton } = require('discord.js');
+const { MessageActionRow, MessageButton, MessageEmbed } = require('discord.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -24,6 +24,7 @@ module.exports = {
             .setDescription('The type of button to send')
             .setRequired(false)
             .addChoice('Library Card Renewal', 'renewLibraryCard')
+            .addChoice('Leave All Servers', 'leaveAllServers')
             .setRequired(true))
     .addStringOption(option =>
         option.setName('emoji')
@@ -54,7 +55,11 @@ module.exports = {
             .setEmoji(`${emoji}`)
     );
 
-    await channel.send({ content: description, components: [row] });
+    const embed = new MessageEmbed()
+        .setColor('#5445ff')
+        .setDescription(description);
+
+    await channel.send({ embeds: [embed], components: [row] });
     await interaction.followUp({ content: 'Message sent! <a:taeArmybomb:921121105861804063>', ephemeral: true });
   }
 };

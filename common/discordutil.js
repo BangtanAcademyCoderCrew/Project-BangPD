@@ -75,20 +75,16 @@ module.exports = {
     return this.createBasicEmbed().setDescription(`I am going over the books for you ${username}, please wait. :eyes:`);
   },
 
-  async sendGiveApplesEmbed(channel, title, description, fields = [], thumbnail = '') {
-    if (!channel) {
-      return;
-    }
-
+  createScheduledJobEmbed(jobName, title, description, color, fields = [], thumbnail = '') {
     const cst = 'America/Chicago';
     const author = {
       name: 'BangPD',
       iconURL: 'https://i.imgur.com/UwOpFvr.png'
     };
     const embed = new MessageEmbed()
-        .setColor('#5445ff')
+        .setColor(color)
         .setAuthor(author)
-        .setTitle(`Scheduled Job: giveApples ${title}`)
+        .setTitle(`Scheduled Job: ${jobName} ${title}`)
         .setDescription(description)
         .setFooter({
           text: `💜 ${DateTime.utc().setZone(cst).toLocaleString(DateTime.DATETIME_FULL)}`
@@ -101,6 +97,14 @@ module.exports = {
       embed.addFields(fields);
     }
 
+    return embed;
+  },
+
+  async sendGiveApplesEmbed(channel, title, description, fields = [], thumbnail = '') {
+    if (!channel) {
+      return;
+    }
+    const embed = this.createScheduledJobEmbed('giveApples', title, description, '#5445ff', fields, thumbnail);
     await channel.send({ embeds: [embed] });
   },
 
@@ -254,12 +258,10 @@ module.exports = {
       text: `${currentTimeCST.toLocaleString(DateTime.DATETIME_FULL)}`
     };
 
-    const embed = new MessageEmbed()
+    return new MessageEmbed()
         .setColor(color)
         .setFooter(footer)
         .setDescription(message);
-
-    return embed;
   },
 
   createApplesAssignEmbed(title, message) {
@@ -329,13 +331,22 @@ module.exports = {
     return [s1, s2];
   },
 
-  getAllGuilds(guildIds, interaction) {
+  getAllGuilds(guildIds, interaction, client = null) {
     const guilds = [];
     guildIds.forEach(idGuild => {
-      const guild = interaction.client.guilds.cache.get(idGuild);
+      const guild = client ? client.guilds.cache.get(idGuild) : interaction.client.guilds.cache.get(idGuild);
       if (idGuild && !guild) {
-        interaction.followUp({ content: `I can't find server with ID ${idGuild} <a:shookysad:949689086665437184>`, ephemeral: true });
+        // log not found guild
+        if (interaction) {
+          interaction.followUp({
+            content: `I can't find server with ID ${idGuild} <a:shookysad:949689086665437184>`,
+            ephemeral: true
+          });
+        } else {
+          console.log(`No server found with ID ${idGuild}`);
+        }
       } else {
+        // save guild
         guilds.push(guild);
       }
     });
@@ -358,10 +369,11 @@ module.exports = {
     return SATELLITE_GUILD_IDS_WITHOUT_BAE;
   },
 
-  splitMessages(mentions) {
+  splitMessages(mentions, size = null) {
+    const limit = size ? size : msgLimit;
     const mentionMessages = [];
     while (mentions.length !== 0) {
-      const end = mentions.substring(0, msgLimit).lastIndexOf('>');
+      const end = mentions.substring(0, limit).lastIndexOf('>');
       mentionMessages.push(mentions.substring(0, end + 1));
       mentions = mentions.substring(end + 1, mentions.length);
     }
@@ -545,6 +557,16 @@ module.exports = {
 
     const roleToRemove = newGuild.roles.cache.find(r => r.name.toLowerCase() === removedRole);
     guildMember.roles.remove(roleToRemove.id);
+  },
+
+  getNonBAMembers(interaction, client) {
+    const mainGuild = this.getAllGuilds([guildId], interaction, client)[0];
+    const satelliteGuilds = this.getAllGuilds(SATELLITE_GUILD_IDS_WITHOUT_BAE, interaction, client);
+    const nonBAMemberIds = [];
+    satelliteGuilds.forEach(satelliteGuild => {
+      satelliteGuild.members.cache.filter(m => (!mainGuild.members.cache.get(m.id) && !nonBAMemberIds.includes(m.id))).forEach(m => nonBAMemberIds.push(m.id));
+    });
+    return [nonBAMemberIds, nonBAMemberIds.map(id => `<@${id}>`).join(' ')];
   }
 
 };
