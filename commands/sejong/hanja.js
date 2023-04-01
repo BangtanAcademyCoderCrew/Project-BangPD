@@ -1,26 +1,26 @@
-const Hanja = require('../../hanja/sql');
-const DiscordUtil = require('../../common/discordutil.js');
-const { ApplicationCommandOptionType } = require('discord-api-types/v9');
-const { DMChannel, MessageButton } = require('discord.js');
-const paginationEmbed = require('discordjs-button-pagination');
+const { ApplicationCommandOptionType } = require("discord-api-types/v9");
+const { DMChannel, MessageButton } = require("discord.js");
+const paginationEmbed = require("discordjs-button-pagination");
+const DiscordUtil = require("../../common/discordutil.js");
+const Hanja = require("../../hanja/sql");
 
 module.exports = {
   data: {
-    name: 'hanja',
-    group: 'dictionary',
-    description: 'Search for Hanja in English, Korean, or Hanja itself.',
+    name: "hanja",
+    group: "dictionary",
+    description: "Search for Hanja in English, Korean, or Hanja itself.",
     options: [
       {
-        name: 'word',
-        description: 'What is the word?',
+        name: "word",
+        description: "What is the word?",
         type: ApplicationCommandOptionType.String,
-        required: true
-      }
-    ]
+        required: true,
+      },
+    ],
   },
 
   async execute(interaction) {
-    const args = interaction.options.getString('word');
+    const args = interaction.options.getString("word");
     const isDM = interaction.channel instanceof DMChannel;
     const hanja = new Hanja();
 
@@ -29,7 +29,7 @@ module.exports = {
     const response = await hanja.searchWords(args);
 
     await interaction.editReply(send(response, interaction)).then((msg) => {
-      if (!isDM) msg.react('🔖');
+      if (!isDM) msg.react("🔖");
     });
 
     function send(response, interaction) {
@@ -41,18 +41,18 @@ module.exports = {
       );
 
       const button1 = new MessageButton()
-        .setCustomId('previousbtn')
-        .setLabel('Previous')
-        .setStyle('DANGER');
+        .setCustomId("previousbtn")
+        .setLabel("Previous")
+        .setStyle("DANGER");
 
       const button2 = new MessageButton()
-        .setCustomId('nextbtn')
-        .setLabel('Next')
-        .setStyle('SUCCESS');
+        .setCustomId("nextbtn")
+        .setLabel("Next")
+        .setStyle("SUCCESS");
 
       const buttonList = [button1, button2];
 
       paginationEmbed(interaction, pages, buttonList);
     }
-  }
+  },
 };

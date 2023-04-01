@@ -1,4 +1,4 @@
-const DiscordUtil = require('../common/discordutil.js');
+const DiscordUtil = require("./discordutil.js");
 
 module.exports = class Paginator {
   constructor(author, pages, back, next, firstLast, bookmark, endMessage) {
@@ -8,10 +8,10 @@ module.exports = class Paginator {
     this.total = pages.length;
     this.pages = pages;
 
-    this.first = '↙';
+    this.first = "↙";
     this.back = back;
     this.next = next;
-    this.last = '↘';
+    this.last = "↘";
     this.endMessage = endMessage;
 
     this.bookmark = bookmark;
@@ -20,34 +20,41 @@ module.exports = class Paginator {
   start(pendingMessage) {
     this.message = pendingMessage;
     if (this.message.member) {
-      this.hasPermission = this.message.member.hasPermission('MANAGE_MESSAGES');
+      this.hasPermission = this.message.member.hasPermission("MANAGE_MESSAGES");
     } else {
       this.hasPermission = false;
     }
     if (this.pages.length === 1) {
       pendingMessage.edit(this.pages[0]);
-      if (this.bookmark) pendingMessage.react('🔖');
+      if (this.bookmark) pendingMessage.react("🔖");
     } else if (this.pages.length === 2) {
-      pendingMessage.edit(this.pages[0])
-        .then(msg => msg.react(this.back))
-        .then(backReact => backReact.message.react(this.next))
+      pendingMessage
+        .edit(this.pages[0])
+        .then((msg) => msg.react(this.back))
+        .then((backReact) => backReact.message.react(this.next))
         .then((backReact) => {
           this.message = backReact.message;
           const emojis = [this.back, this.next];
           if (this.bookmark) {
-            this.message.react('🔖');
+            this.message.react("🔖");
           }
           const reactionFilter = (reaction, user) => {
             if (!reaction.me && emojis.includes(reaction.emoji.name)) {
-              if (user.id === this.author.id && user.id !== this.message.author.id) {
+              if (
+                user.id === this.author.id &&
+                user.id !== this.message.author.id
+              ) {
                 return true;
               }
             }
             return false;
           };
 
-          this.collector = this.message.createReactionCollector(reactionFilter, { time: 300000 });
-          this.collector.on('collect', (reaction, user) => {
+          this.collector = this.message.createReactionCollector(
+            reactionFilter,
+            { time: 300000 }
+          );
+          this.collector.on("collect", (reaction, user) => {
             if (!this.hasPermission && this.message.channel.type != "dm") {
               reaction.remove(this.author);
             }
@@ -68,34 +75,44 @@ module.exports = class Paginator {
             this.refresh();
           });
 
-          this.collector.on('end', () => {
-            DiscordUtil.setEmbedFooter(this.pages[this.current], this.endMessage);
+          this.collector.on("end", () => {
+            DiscordUtil.setEmbedFooter(
+              this.pages[this.current],
+              this.endMessage
+            );
             this.refresh();
           });
         });
     } else if (this.pages.length > 2) {
-      pendingMessage.edit(this.pages[0])
-        .then(edit => edit.react('↙'))
-        .then(first => first.message.react(this.back))
-        .then(back => back.message.react(this.next))
-        .then(next => next.message.react('↘'))
+      pendingMessage
+        .edit(this.pages[0])
+        .then((edit) => edit.react("↙"))
+        .then((first) => first.message.react(this.back))
+        .then((back) => back.message.react(this.next))
+        .then((next) => next.message.react("↘"))
         .then((last) => {
           this.message = last.message;
-          const emojis = ['↙', this.back, this.next, '↘'];
+          const emojis = ["↙", this.back, this.next, "↘"];
           if (this.bookmark) {
-            this.message.react('🔖');
+            this.message.react("🔖");
           }
           const reactionFilter = (reaction, user) => {
             if (!reaction.me && emojis.includes(reaction.emoji.name)) {
-              if (user.id === this.author.id && user.id !== this.message.author.id) {
+              if (
+                user.id === this.author.id &&
+                user.id !== this.message.author.id
+              ) {
                 return true;
               }
             }
             return false;
           };
 
-          this.collector = this.message.createReactionCollector(reactionFilter, { time: 300000 });
-          this.collector.on('collect', (reaction) => {
+          this.collector = this.message.createReactionCollector(
+            reactionFilter,
+            { time: 300000 }
+          );
+          this.collector.on("collect", (reaction) => {
             if (!this.hasPermission && this.message.channel.type != "dm") {
               reaction.remove(this.author);
             }
@@ -126,8 +143,11 @@ module.exports = class Paginator {
             this.refresh();
           });
 
-          this.collector.on('end', () => {
-            DiscordUtil.setEmbedFooter(this.pages[this.current], this.endMessage);
+          this.collector.on("end", () => {
+            DiscordUtil.setEmbedFooter(
+              this.pages[this.current],
+              this.endMessage
+            );
             this.refresh();
           });
         });

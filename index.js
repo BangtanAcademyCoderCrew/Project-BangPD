@@ -1,60 +1,71 @@
-const fs = require('fs');
-const { Client, Collection, Intents } = require('discord.js');
-const DiscordUtil = require('./common/discordutil');
-const { botToken, guildId, commandDirectories, buttonsDirectories } = require('./config.json');
-const { deployCommands } = require('./deploy-commands');
+const fs = require("fs");
+const { Client, Collection, Intents } = require("discord.js");
+const DiscordUtil = require("./common/discordutil");
+const {
+  botToken,
+  guildId,
+  commandDirectories,
+  buttonsDirectories,
+} = require("./config.json");
+const { deployCommands } = require("./deploy-commands");
 
 const client = new Client({
-  partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER'],
+  partials: ["MESSAGE", "CHANNEL", "REACTION", "GUILD_MEMBER"],
   intents: [
-      Intents.FLAGS.GUILDS,
-      Intents.FLAGS.GUILD_PRESENCES,
-      Intents.FLAGS.GUILD_MEMBERS,
-      Intents.FLAGS.GUILD_MESSAGES,
-      Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-      Intents.FLAGS.DIRECT_MESSAGES,
-      Intents.FLAGS.DIRECT_MESSAGE_REACTIONS
-    ]
+    Intents.FLAGS.GUILDS,
+    Intents.FLAGS.GUILD_PRESENCES,
+    Intents.FLAGS.GUILD_MEMBERS,
+    Intents.FLAGS.GUILD_MESSAGES,
+    Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+    Intents.FLAGS.DIRECT_MESSAGES,
+    Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+  ],
 });
 
 client.commands = new Collection();
 client.buttons = new Collection();
-commandDirectories.forEach(dir => {
-  const commandFiles = fs.readdirSync(dir).filter(file => file.endsWith('.js'));
+commandDirectories.forEach((dir) => {
+  const commandFiles = fs
+    .readdirSync(dir)
+    .filter((file) => file.endsWith(".js"));
   commandFiles.forEach((file) => {
     const command = require(`${dir}/${file}`);
     client.commands.set(command.data.name, command);
   });
 });
 
-buttonsDirectories.forEach(dir => {
-  const buttonFiles = fs.readdirSync(dir).filter(file => file.endsWith('.js'));
+buttonsDirectories.forEach((dir) => {
+  const buttonFiles = fs
+    .readdirSync(dir)
+    .filter((file) => file.endsWith(".js"));
   buttonFiles.forEach((file) => {
     const button = require(`${dir}/${file}`);
     client.buttons.set(button.name, button);
   });
 });
 
-client.once('ready', () => {
-  console.log('Bang PD is online!');
+client.once("ready", () => {
+  console.log("Bang PD is online!");
   deployCommands();
-  client.user.setActivity('Proof', { type: 'LISTENING' });
+  client.user.setActivity("Proof", { type: "LISTENING" });
 });
 
-client.on('interactionCreate', async (interaction) => {
-
+client.on("interactionCreate", async (interaction) => {
   if (interaction.isButton()) {
-    const isPermanentButton = interaction.customId.split('_')[0] === 'run' ? true : false;
+    const isPermanentButton = interaction.customId.split("_")[0] === "run";
     if (isPermanentButton) {
-      const command = client.buttons.get(interaction.customId.split('_')[1]);
+      const command = client.buttons.get(interaction.customId.split("_")[1]);
       try {
         await command.run(interaction, interaction.member);
       } catch (error) {
         console.error(error);
-        return interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+        return interaction.followUp({
+          content: "There was an error while executing this command!",
+          ephemeral: true,
+        });
       }
     }
-	}
+  }
 
   if (interaction.isCommand() || interaction.isContextMenu()) {
     const command = client.commands.get(interaction.commandName);
@@ -67,93 +78,134 @@ client.on('interactionCreate', async (interaction) => {
       await command.execute(interaction);
     } catch (error) {
       console.error(error);
-      return interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+      return interaction.followUp({
+        content: "There was an error while executing this command!",
+        ephemeral: true,
+      });
     }
   }
 });
 
-client.on('messageReactionAdd', async (reaction, user) => {
+client.on("messageReactionAdd", async (reaction, user) => {
   if (reaction.partial && !user.bot) {
     try {
       await reaction.fetch();
     } catch (error) {
-      console.error('Something went wrong when fetching the message: ', error);
+      console.error("Something went wrong when fetching the message: ", error);
       // Return as `reaction.message.author` may be undefined/null
-       return;
+      return;
     }
   }
 
   if (user.id === client.user.id || user.bot) {
     return;
   }
-    const validChannels = ['GUILD_TEXT', 'GUILD_PUBLIC_THREAD', 'GUILD_PRIVATE_THREAD', 'GUILD_VOICE'];
-    if (reaction.emoji.name === '🔖' && validChannels.includes(reaction.message.channel.type)) {
-      if (reaction.message.embeds[0] && reaction.message.author.id === client.user.id) {
-        const embed = reaction.message.embeds[0];
-        user.send({ embeds: [embed] }).then(msg => msg.react('❌'));
-        console.log(`${user.username} - result bookmark `);
-      } else {
-        console.log(`${user.username} - message bookmark `);
-          DiscordUtil.bookmark(reaction.message, user);
-      }
+  const validChannels = [
+    "GUILD_TEXT",
+    "GUILD_PUBLIC_THREAD",
+    "GUILD_PRIVATE_THREAD",
+    "GUILD_VOICE",
+  ];
+  if (
+    reaction.emoji.name === "🔖" &&
+    validChannels.includes(reaction.message.channel.type)
+  ) {
+    if (
+      reaction.message.embeds[0] &&
+      reaction.message.author.id === client.user.id
+    ) {
+      const embed = reaction.message.embeds[0];
+      user.send({ embeds: [embed] }).then((msg) => msg.react("❌"));
+      console.log(`${user.username} - result bookmark `);
+    } else {
+      console.log(`${user.username} - message bookmark `);
+      DiscordUtil.bookmark(reaction.message, user);
     }
-    if (reaction.emoji.name === '❌' && !validChannels.includes(reaction.message.channel.type)) {
-      if (user.id !== client.user.id && reaction.message.author.id === client.user.id) {
-        reaction.message.delete();
-      }
+  }
+  if (
+    reaction.emoji.name === "❌" &&
+    !validChannels.includes(reaction.message.channel.type)
+  ) {
+    if (
+      user.id !== client.user.id &&
+      reaction.message.author.id === client.user.id
+    ) {
+      reaction.message.delete();
     }
+  }
 });
 
 // BA user joins satellite server
-client.on('guildMemberAdd', async (member) => {
+client.on("guildMemberAdd", async (member) => {
   if (guildId === member.guild.id) {
     return;
   }
   const mainGuild = client.guilds.cache.get(guildId);
-  const memberOnBA = mainGuild.members.cache.find(u => u.id === member.id);
+  const memberOnBA = mainGuild.members.cache.find((u) => u.id === member.id);
   DiscordUtil.assignRolesFromMainServer(member.guild, memberOnBA, member);
   member.setNickname(memberOnBA.nickname);
 });
 
 // BA user changes role in BA main
-client.on('guildMemberUpdate', async (oldMember, newMember) => {
+client.on("guildMemberUpdate", async (oldMember, newMember) => {
   if (guildId != oldMember.guild) {
     return;
   }
 
   const ALL_SATELLITE_GUILD_IDS = DiscordUtil.getSatelliteGuildIdsWithoutBAE();
-  const pronounsRoles = ['name only/no pronoun', 'they/them', 'she/her', 'he/him', 'neopronoun'];
+  const pronounsRoles = [
+    "name only/no pronoun",
+    "they/them",
+    "she/her",
+    "he/him",
+    "neopronoun",
+  ];
 
-  if(newMember.roles.cache.size < oldMember.roles.cache.size) {
+  if (newMember.roles.cache.size < oldMember.roles.cache.size) {
     const removedRole = oldMember.roles.cache
-    .filter(r => !newMember.roles.cache.has(r.id))
-    .first()
-    .name.toLowerCase();
+      .filter((r) => !newMember.roles.cache.has(r.id))
+      .first()
+      .name.toLowerCase();
     if (pronounsRoles.includes(removedRole)) {
-      ALL_SATELLITE_GUILD_IDS.forEach(gId => DiscordUtil.removePronounsRoleInSatelliteServer(gId, newMember, removedRole, client));
+      ALL_SATELLITE_GUILD_IDS.forEach((gId) =>
+        DiscordUtil.removePronounsRoleInSatelliteServer(
+          gId,
+          newMember,
+          removedRole,
+          client
+        )
+      );
     }
     return;
   }
 
   const newRole = newMember.roles.cache
-    .filter(r => !oldMember.roles.cache.has(r.id))
+    .filter((r) => !oldMember.roles.cache.has(r.id))
     .first()
     .name.toLowerCase();
-  const passportRoles = ['level', 'time zone'].concat(pronounsRoles);
+  const passportRoles = ["level", "time zone"].concat(pronounsRoles);
 
-  if (!passportRoles.some(v => newRole.includes(v))) {
+  if (!passportRoles.some((v) => newRole.includes(v))) {
     return;
   }
 
   let roleType;
 
   if (pronounsRoles.includes(newRole)) {
-    roleType = 'pronouns';
+    roleType = "pronouns";
   } else {
-    roleType = passportRoles.filter(v => newRole.includes(v));
+    roleType = passportRoles.filter((v) => newRole.includes(v));
   }
 
-  ALL_SATELLITE_GUILD_IDS.forEach(gId => DiscordUtil.updatePassportRolesInSatelliteServer(gId, newMember, roleType, newRole, client));
+  ALL_SATELLITE_GUILD_IDS.forEach((gId) =>
+    DiscordUtil.updatePassportRolesInSatelliteServer(
+      gId,
+      newMember,
+      roleType,
+      newRole,
+      client
+    )
+  );
 });
 
 /*
@@ -220,6 +272,6 @@ client.on('voiceStateUpdate', (oldVoiceState, newVoiceState) => {
 
 */
 
-client.on('error', console.error);
+client.on("error", console.error);
 
 client.login(botToken);

@@ -25,6 +25,10 @@ Bang PD is a bot used in Bangtan Academy.
 - Run `npm install` to install node packages
 - Run `npm run dev` to start the bot. This will automatically listen to any changes you made without needed to restart the bot.
 
+### Linting
+- Run `npm run format` to execute eslint and prettier.
+- You may also run eslint and prettier separately by using `npm run lint` and `npm run prettier`, respectively. Append `:fix` to either of those commands to autocorrect any issues.
+
 ### Deployment
 
 - Zip the entire directory.
