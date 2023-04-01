@@ -1,67 +1,81 @@
-const { SlashCommandBuilder, roleMention } = require('@discordjs/builders');
-const { ApplicationCommandPermissionType } = require('discord-api-types/v9');
-const fs = require('fs');
-const path = require('path');
-const fileName = '../../customPermissions.json';
+const { SlashCommandBuilder, roleMention } = require("@discordjs/builders");
+const { ApplicationCommandPermissionType } = require("discord-api-types/v9");
+const fs = require("fs");
+const path = require("path");
+
+const fileName = "../../customPermissions.json";
 const pathToJson = path.resolve(__dirname, fileName);
 const file = require(pathToJson);
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('addpermissions')
-    .setDescription('Add permissions to command')
+    .setName("addpermissions")
+    .setDescription("Add permissions to command")
     .setDefaultPermission(false)
-    .addRoleOption(option =>
-      option.setName('role')
-        .setDescription('The role to add permission')
-        .setRequired(true))
-    .addStringOption(option =>
-      option.setName('command')
-        .setDescription('Name of the command to update permissions')
-        .setRequired(true)),
+    .addRoleOption((option) =>
+      option
+        .setName("role")
+        .setDescription("The role to add permission")
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("command")
+        .setDescription("Name of the command to update permissions")
+        .setRequired(true)
+    ),
   async execute(interaction) {
-    const options = interaction.options;
-    const roleID = options.getRole('role').id;
-    const commandName = options.getString('command');
+    const { options } = interaction;
+    const roleID = options.getRole("role").id;
+    const commandName = options.getString("command");
 
     const writeToFile = (commandId, permissions) => {
       if (commandId in file) {
-        file[commandId].permissions = file[commandId].permissions.concat(permissions);
+        file[commandId].permissions =
+          file[commandId].permissions.concat(permissions);
       } else {
         file[commandId] = {
-          id:cmd.id,
-          permissions:permissions
+          id: cmd.id,
+          permissions,
         };
       }
 
-      fs.writeFile(pathToJson, JSON.stringify(file), function writeJSON(err) {
-          if (err) {
-              console.log(err);
-              return false;
-          }
-          console.log(JSON.stringify(file));
-          console.log('writing to ' + pathToJson);
+      fs.writeFile(pathToJson, JSON.stringify(file), (err) => {
+        if (err) {
+          console.log(err);
+          return false;
+        }
+        console.log(JSON.stringify(file));
+        console.log(`writing to ${pathToJson}`);
       });
     };
 
-    const cmd = await interaction.guild.commands.fetch().then(commands => {
-      return commands.find(command => command.name === commandName);
-    });
+    const cmd = await interaction.guild.commands
+      .fetch()
+      .then((commands) =>
+        commands.find((command) => command.name === commandName)
+      );
     if (!cmd) {
-      return interaction.reply({ content: `Command ${commandName} not found. <a:shookysad:949689086665437184>` });
+      return interaction.reply({
+        content: `Command ${commandName} not found. <a:shookysad:949689086665437184>`,
+      });
     }
     const permissions = [
       {
         id: roleID,
         type: ApplicationCommandPermissionType.Role,
-        permission: true
-      }
+        permission: true,
+      },
     ];
 
     await cmd.permissions.add({ permissions });
 
     writeToFile(cmd.id, permissions);
 
-    interaction.reply({ content: `You added the role ${roleMention(roleID)} to use the command ${commandName}.` });
-  }
+    interaction.reply({
+      content: `You added the role ${roleMention(
+        roleID
+      )} to use the command ${commandName}.`,
+    });
+  },
 };

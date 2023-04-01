@@ -1,4 +1,4 @@
-const Sequelize = require('sequelize');
+const Sequelize = require("sequelize");
 
 async function asyncForEach(array, callback) {
   for (let index = 0; index < array.length; index += 1) {
@@ -8,9 +8,9 @@ async function asyncForEach(array, callback) {
 
 module.exports = class Hanja {
   constructor() {
-    this.sequelize = new Sequelize('database', 'username', 'password', {
-      host: 'localhost',
-      dialect: 'sqlite',
+    this.sequelize = new Sequelize("database", "username", "password", {
+      host: "localhost",
+      dialect: "sqlite",
       // operatorsAliases: false,
       logging: false,
 
@@ -22,15 +22,15 @@ module.exports = class Hanja {
       },
 
       // SQLite only
-      storage: './hanja/hanjadic.sqlite',
+      storage: "./hanja/hanjadic.sqlite",
     });
-    this.SimilarWord = this.sequelize.define('similarword', {
+    this.SimilarWord = this.sequelize.define("similarword", {
       hanja: Sequelize.STRING,
       hangul: Sequelize.STRING,
       english: Sequelize.STRING,
     });
 
-    this.Hanja = this.sequelize.define('hanja', {
+    this.Hanja = this.sequelize.define("hanja", {
       hanjas: Sequelize.STRING,
       definition: Sequelize.STRING,
     });
@@ -44,11 +44,13 @@ module.exports = class Hanja {
       hanjas: [],
     };
     const query = `'*${args}*'`;
-    const similarwords = await this.sequelize
-      .query(`select hanja, hangul, english from (select hanja, hangul, english from hanjas where hidden_index match ${query} union select hanja, hangul, english from hanjas where english match ${query} union select hanja, hangul, english from hanjas where hangul match ${query} union select hanja, hangul, english from hanjas where hanjas match ${query}) order by hangul`, {
+    const similarwords = await this.sequelize.query(
+      `select hanja, hangul, english from (select hanja, hangul, english from hanjas where hidden_index match ${query} union select hanja, hangul, english from hanjas where english match ${query} union select hanja, hangul, english from hanjas where hangul match ${query} union select hanja, hangul, english from hanjas where hanjas match ${query}) order by hangul`,
+      {
         model: this.SimilarWord,
         mapToModel: true,
-      });
+      }
+    );
 
     similarwords.forEach((similarword) => {
       const entry = {
@@ -61,18 +63,19 @@ module.exports = class Hanja {
     });
 
     const characters = [];
-    const split = args.split('');
+    const split = args.split("");
     split.forEach((char) => {
       characters.push(char);
     });
-    
 
     await asyncForEach(characters, async (character) => {
-      const hanjas = await this.sequelize
-        .query(`select hanjas, definition from hanja_definition where hanjas = '${character}'`, {
+      const hanjas = await this.sequelize.query(
+        `select hanjas, definition from hanja_definition where hanjas = '${character}'`,
+        {
           model: this.Hanja,
           mapToModel: true,
-        });
+        }
+      );
 
       hanjas.forEach((hanja) => {
         const entry = {

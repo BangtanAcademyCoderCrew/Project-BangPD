@@ -1,22 +1,25 @@
-const request = require('request');
-const Promise = require('promise');
-const { papagoUrl, papagoClientId, papagoClientSecret } = require('../apiconfig.json');
-
+const request = require("request");
+const Promise = require("promise");
+const {
+  papagoUrl,
+  papagoClientId,
+  papagoClientSecret,
+} = require("../apiconfig.json");
 
 module.exports = class Papago {
   translate(text, source, target, honorific) {
     this.options = {
       url: papagoUrl,
       form: {
-        'source': source,
-        'target': target,
-        'text': text,
-        'honorific': true
+        source,
+        target,
+        text,
+        honorific: true,
       },
       headers: {
-        'X-Naver-Client-Id': papagoClientId,
-        'X-Naver-Client-Secret': papagoClientSecret
-      }
+        "X-Naver-Client-Id": papagoClientId,
+        "X-Naver-Client-Secret": papagoClientSecret,
+      },
     };
 
     return new Promise((resolve, reject) => {
@@ -26,9 +29,9 @@ module.exports = class Papago {
           resolve({
             text: result.translatedText,
             source: result.srcLangType,
-            target: result.tarLangType
+            target: result.tarLangType,
           });
-        } catch(err) {
+        } catch (err) {
           console.log(err);
         }
       });

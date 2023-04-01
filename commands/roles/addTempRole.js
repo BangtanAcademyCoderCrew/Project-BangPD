@@ -1,43 +1,63 @@
 const { DateTime } = require("luxon");
-const DiscordUtil = require('../../common/discordutil.js');
-const { SlashCommandBuilder } = require('@discordjs/builders');
+const DiscordUtil = require("../../common/discordutil.js");
+const { SlashCommandBuilder } = require("@discordjs/builders");
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('temp-role')
-    .setDescription('Adds a role to users for a limited time. Attach a csv/txt file with a list of usernames, 1 per line')
-    .addStringOption(option => option.setName('deadline')
-      .setDescription('When is the time you would like to remove the role in CST? Format YYYY-MM-DD HH:MM')
-      .setRequired(true))
-    .addRoleOption(option => option.setName('role_id')
-      .setDescription('What role would you like to temporarily add to user?')
-      .setRequired(true))
-    .addStringOption(option => option.setName('file_url')
-      .setDescription('Add a file link instead of attachment. CSV or TXT file should list all usernames 1 per line')
-      .setRequired(true))
+    .setName("temp-role")
+    .setDescription(
+      "Adds a role to users for a limited time. Attach a csv/txt file with a list of usernames, 1 per line"
+    )
+    .addStringOption((option) =>
+      option
+        .setName("deadline")
+        .setDescription(
+          "When is the time you would like to remove the role in CST? Format YYYY-MM-DD HH:MM"
+        )
+        .setRequired(true)
+    )
+    .addRoleOption((option) =>
+      option
+        .setName("role_id")
+        .setDescription("What role would you like to temporarily add to user?")
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("file_url")
+        .setDescription(
+          "Add a file link instead of attachment. CSV or TXT file should list all usernames 1 per line"
+        )
+        .setRequired(true)
+    )
     .setDefaultPermission(false),
   async execute(interaction) {
     const options = interaction.options;
-    const fileUrl = options.getString('file_url');
-    const roleId = options.getRole('role_id');
+    const fileUrl = options.getString("file_url");
+    const roleId = options.getRole("role_id");
 
     await interaction.deferReply();
 
     // Validate deadline
-    const deadline = options.getString('deadline');
+    const deadline = options.getString("deadline");
     const deadlineDateTime = DateTime.fromSQL(deadline, {
       zone: "America/Chicago",
     });
 
     if (!deadlineDateTime.isValid) {
-      return await interaction.followUp({ content:'Invalid deadline provided. Please enter deadline in correct format. YYYY-MM-DD HH:MM'});
+      return await interaction.followUp({
+        content:
+          "Invalid deadline provided. Please enter deadline in correct format. YYYY-MM-DD HH:MM",
+      });
     }
 
     const deadlineInUTC = deadlineDateTime.toUTC();
     const currentTimeUTC = DateTime.utc();
 
     if (currentTimeUTC > deadlineInUTC) {
-      return await interaction.followUp({ content:'Invalid deadline provided. Deadline is in past.'});
+      return await interaction.followUp({
+        content: "Invalid deadline provided. Deadline is in past.",
+      });
     }
 
     // Handle attachment
@@ -45,40 +65,65 @@ module.exports = {
     let attachmentURL;
     if (!attachment && fileUrl?.length > 1) {
       attachmentURL = fileUrl;
-    }
-    else if (attachment) {
+    } else if (attachment) {
       attachmentURL = attachment.url;
-    }
-    else {
-      return interaction.reply({ content: "No valid file"})
+    } else {
+      return interaction.reply({ content: "No valid file" });
     }
 
     // Define removeRole
-    const removeRoleAtDeadline = (timeToRemoveRole, channel, roleToRemoveId, attachmentURL, message) => {
+    const removeRoleAtDeadline = (
+      timeToRemoveRole,
+      channel,
+      roleToRemoveId,
+      attachmentURL,
+      message
+    ) => {
       const currentTimeUTC = DateTime.utc();
 
-      const timeLeftBeforeRemovingRole = timeToRemoveRole.toMillis() - currentTimeUTC.toMillis();
+      const timeLeftBeforeRemovingRole =
+        timeToRemoveRole.toMillis() - currentTimeUTC.toMillis();
       // TODO: Maybe can use Duration
       if (timeLeftBeforeRemovingRole > 0) {
         setTimeout(
           () => {
-            DiscordUtil.openFileAndDo(attachmentURL, (member) => { member.roles.remove([roleToRemoveId]); }, message);
-            interaction.followUp({ content:`The role ${roleToRemoveId} has been removed`});
+            DiscordUtil.openFileAndDo(
+              attachmentURL,
+              (member) => {
+                member.roles.remove([roleToRemoveId]);
+              },
+              message
+            );
+            interaction.followUp({
+              content: `The role ${roleToRemoveId} has been removed`,
+            });
           },
           timeLeftBeforeRemovingRole,
           channel
         );
       }
-    }
+    };
 
     // Add role and remove at deadline
-    DiscordUtil.openFileAndDo(attachmentURL, (member) => { member.roles.add([roleId]); }, interaction);
-    removeRoleAtDeadline(deadlineInUTC, interaction.channel, roleId, attachmentURL, interaction);
+    DiscordUtil.openFileAndDo(
+      attachmentURL,
+      (member) => {
+        member.roles.add([roleId]);
+      },
+      interaction
+    );
+    removeRoleAtDeadline(
+      deadlineInUTC,
+      interaction.channel,
+      roleId,
+      attachmentURL,
+      interaction
+    );
 
-    const removalPromise =
-      `I will remove the role ${roleId} on:`;
-    const deadlineMessage =
-      `Deadline (CST): ${deadlineDateTime.toLocaleString(DateTime.DATETIME_SHORT)}`;
+    const removalPromise = `I will remove the role ${roleId} on:`;
+    const deadlineMessage = `Deadline (CST): ${deadlineDateTime.toLocaleString(
+      DateTime.DATETIME_SHORT
+    )}`;
     const newLine = "\n";
 
     const fullMessage = removalPromise.concat(
@@ -87,6 +132,6 @@ module.exports = {
       deadlineMessage
     );
 
-    return interaction.followUp({ content: fullMessage});
-  }
-}
+    return interaction.followUp({ content: fullMessage });
+  },
+};

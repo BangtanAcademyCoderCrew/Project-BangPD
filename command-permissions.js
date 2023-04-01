@@ -22,92 +22,101 @@
  * - rollCall: MANAGE_CHANNELS, MANAGE_ROLES
  */
 
-const { Permissions } = require('discord.js');
-const { REST } = require('@discordjs/rest');
-const { Routes, ApplicationCommandPermissionType } = require('discord-api-types/v9');
-const { clientId, guildId, botToken } = require('./config.json');
-const customPermissions = require('./customPermissions.json');
-
+const { Permissions } = require("discord.js");
+const { REST } = require("@discordjs/rest");
+const {
+  Routes,
+  ApplicationCommandPermissionType,
+} = require("discord-api-types/v9");
+const { clientId, guildId, botToken } = require("./config.json");
+const customPermissions = require("./customPermissions.json");
 
 const commandsWithPermissions = [
   // can MANAGE_ROLES and MANAGE_CHANNELS
   {
-    permissions: [Permissions.FLAGS.MANAGE_CHANNELS, Permissions.FLAGS.MANAGE_ROLES],
+    permissions: [
+      Permissions.FLAGS.MANAGE_CHANNELS,
+      Permissions.FLAGS.MANAGE_ROLES,
+    ],
     roleNames: [
-      'addrole',
-      'getreactions',
-      'temp-role',
-      'removerole',
-      'rollcall',
-      'get reactions'
-    ]
+      "addrole",
+      "getreactions",
+      "temp-role",
+      "removerole",
+      "rollcall",
+      "get reactions",
+    ],
   },
   // can MANAGE_ROLES
   {
     permissions: [Permissions.FLAGS.MANAGE_ROLES],
     roleNames: [
-      'addpermissions',
-      'addrolestouserinmessage',
-      'ccssgivetheapples',
-      'getusersinserver',
-      'getusernames',
-      'givetheapples',
-      'removepermissions',
-      'removerolestouserinmessage',
-      'role_in',
-      'role_rin',
-      'get user names',
-      'get users per server'
-    ]
+      "addpermissions",
+      "addrolestouserinmessage",
+      "ccssgivetheapples",
+      "getusersinserver",
+      "getusernames",
+      "givetheapples",
+      "removepermissions",
+      "removerolestouserinmessage",
+      "role_in",
+      "role_rin",
+      "get user names",
+      "get users per server",
+    ],
   },
   // can MANAGE_CHANNELS
   {
     permissions: [Permissions.FLAGS.MANAGE_CHANNELS],
-    roleNames: [
-      'setreminder'
-    ]
+    roleNames: ["setreminder"],
   },
   // can MANAGE_MESSAGES
   {
     permissions: [Permissions.FLAGS.MANAGE_MESSAGES],
-    roleNames: [
-      'areactivestudents'
-    ]
-  }
+    roleNames: ["areactivestudents"],
+  },
 ];
 
 module.exports = {
   setCommandPermissions: async (commands) => {
-    const rest = new REST({ version: '9' }).setToken(botToken);
-    const filteredCommands = commands.filter(command => command.default_permission === false);
-
-    const roles = await rest.get(
-      Routes.guildRoles(guildId)
+    const rest = new REST({ version: "9" }).setToken(botToken);
+    const filteredCommands = commands.filter(
+      (command) => command.default_permission === false
     );
+
+    const roles = await rest.get(Routes.guildRoles(guildId));
 
     // Build permissions body
     const permissionsBody = [];
-    commandsWithPermissions.forEach(obj => {
-      const rolesWithPermissions = roles.filter(role => {
-        const permission = new Permissions(role.permissions);
-        return permission.has(obj.permissions);
-      }).map(role => {
-        return {
+    commandsWithPermissions.forEach((obj) => {
+      const rolesWithPermissions = roles
+        .filter((role) => {
+          const permission = new Permissions(role.permissions);
+          return permission.has(obj.permissions);
+        })
+        .map((role) => ({
           id: role.id,
           type: ApplicationCommandPermissionType.Role,
-          permission: true
-        };
-      });
-      obj.roleNames.map(name => {
-        const comm = filteredCommands.find(command => command.name === name);
+          permission: true,
+        }));
+      obj.roleNames.map((name) => {
+        const comm = filteredCommands.find((command) => command.name === name);
         if (!comm) {
           return;
         }
 
         if (comm.id in customPermissions) {
-          permissionsBody.push({ id: comm.id, permissions: rolesWithPermissions.concat(customPermissions[comm.id].permissions) });
+          permissionsBody.push({
+            id: comm.id,
+            permissions: rolesWithPermissions.concat(
+              customPermissions[comm.id].permissions
+            ),
+          });
         } else {
-          permissionsBody.push({ id: comm.id, permissions: rolesWithPermissions });
+          permissionsBody.push({
+            id: comm.id,
+            permissions: rolesWithPermissions,
+          });
         }
       });
     });
@@ -120,5 +129,5 @@ module.exports = {
     } catch (error) {
       console.error(error);
     }
-  }
+  },
 };

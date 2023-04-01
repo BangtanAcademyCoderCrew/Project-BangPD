@@ -1,14 +1,14 @@
-const got = require('got');
-const cheerio = require('cheerio');
-const Promise = require('promise');
-const https = require('https');
-const rootCas = require('ssl-root-cas').create();
-const path = require('path');
+const got = require("got");
+const cheerio = require("cheerio");
+const Promise = require("promise");
+const https = require("https");
+const rootCas = require("ssl-root-cas").create();
+const path = require("path");
 
 module.exports = class KrDicApi {
   parseResult(html, maxSenses) {
     const $ = cheerio.load(html, { normalizeWhitespace: true });
-    this.entries = $('.search_result').children();
+    this.entries = $(".search_result").children();
     const count = this.entries.length;
     const dicEntries = [];
     let i;
@@ -18,14 +18,18 @@ module.exports = class KrDicApi {
       const entry = $(this.entries).eq(i).children();
       const title = entry.eq(0);
 
-      dicEntry.word = $(title).remove('sup').find('a').eq(0).text()
-        .replace(/\s+/g, ' ')
-        .replace(/[0-9]/g, '')
+      dicEntry.word = $(title)
+        .remove("sup")
+        .find("a")
+        .eq(0)
+        .text()
+        .replace(/\s+/g, " ")
+        .replace(/[0-9]/g, "")
         .trim();
       const h = title.text().match(/\(.*\)/);
       const p = title.text().match(/\[(.*?)\]/);
 
-      const s = $(entry).find('.star').children().length;
+      const s = $(entry).find(".star").children().length;
 
       dicEntry.stars = s;
 
@@ -37,56 +41,75 @@ module.exports = class KrDicApi {
 
       let pronunciation;
       if (p && p[1]) {
-        pronunciation = p[1].replace('듣기', '').trim();
+        pronunciation = p[1].replace("듣기", "").trim();
       }
 
       dicEntry.pronunciation = pronunciation;
 
-      const wordTypes = $(title).find('.word_att_type1').text()
-        .replace('「', '')
-        .replace('」', '')
-        .replace(/\s+/g, ' ')
+      const wordTypes = $(title)
+        .find(".word_att_type1")
+        .text()
+        .replace("「", "")
+        .replace("」", "")
+        .replace(/\s+/g, " ")
         .trim()
-        .split(' ');
+        .split(" ");
 
       dicEntry.wordType = wordTypes[0];
       dicEntry.wordTypeTranslated = wordTypes[1];
 
-      const senses = $(this.entries).eq(i).find('dd');
+      const senses = $(this.entries).eq(i).find("dd");
       const entrySenses = [];
       let j;
-      for(j = 0; j < senses.length; j += 3) {
+      for (j = 0; j < senses.length; j += 3) {
         const sense = {};
-        sense.meaning = senses.eq(j).text().trim().replace(/\d+/g, '').replace(/\s+/g, ' ').replace('. ', '').trim();
-        sense.definition = senses.eq(j + 1).text().replace(/\s+/g, ' ').trim();
-        sense.translation = senses.eq(j + 2).text().replace(/\s+/g, ' ').trim();
+        sense.meaning = senses
+          .eq(j)
+          .text()
+          .trim()
+          .replace(/\d+/g, "")
+          .replace(/\s+/g, " ")
+          .replace(". ", "")
+          .trim();
+        sense.definition = senses
+          .eq(j + 1)
+          .text()
+          .replace(/\s+/g, " ")
+          .trim();
+        sense.translation = senses
+          .eq(j + 2)
+          .text()
+          .replace(/\s+/g, " ")
+          .trim();
         entrySenses.push(sense);
       }
       dicEntry.senses = entrySenses;
       dicEntries.push(dicEntry);
     }
 
-    if (dicEntries.length === 1 && dicEntries[0].word === '') return [];
+    if (dicEntries.length === 1 && dicEntries[0].word === "") return [];
     return dicEntries;
   }
 
   searchWords(q, amount) {
-    //Needed to fix UNABLE_TO_VERIFY_LEAF_SIGNATURE issue - https://stackoverflow.com/a/60020493
-    let reqPath = path.join(__dirname, '../');
-    rootCas.addFile(path.resolve(reqPath, 'krdic_api_cert.pem'));
+    // Needed to fix UNABLE_TO_VERIFY_LEAF_SIGNATURE issue - https://stackoverflow.com/a/60020493
+    const reqPath = path.join(__dirname, "../");
+    rootCas.addFile(path.resolve(reqPath, "krdic_api_cert.pem"));
     https.globalAgent.options.ca = rootCas;
 
     this.url = `https://krdict.korean.go.kr/eng/dicSearch/search?nation=eng&nationCode=6&ParaWordNo=&mainSearchWord=${q}&blockCount=${amount}`;
-    const promise = new Promise((resolve, reject) =>(async () => {
-      try {
-        const response = await got(this.url);
-        resolve(this.parseResult(response.body));
-        // => '<!doctype html> ...'
-      } catch (error) {
-        console.log(error);
-        // => 'Internal server error ...'
-      }
-    })());
+    const promise = new Promise((resolve, reject) =>
+      (async () => {
+        try {
+          const response = await got(this.url);
+          resolve(this.parseResult(response.body));
+          // => '<!doctype html> ...'
+        } catch (error) {
+          console.log(error);
+          // => 'Internal server error ...'
+        }
+      })()
+    );
     return promise;
   }
 };
