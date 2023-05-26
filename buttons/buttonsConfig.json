@@ -1,6 +1,8 @@
 {
   "redAppleRoleId": "",
+  "greenAppleRoleId": "",
   "activeStudentRoleId": "",
+  "pausedStudentRoleId": "",
   "checkInRoleId": "",
   "libraryCardRoleId": ""
 }
