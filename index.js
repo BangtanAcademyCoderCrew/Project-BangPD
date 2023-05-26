@@ -2,6 +2,7 @@ const fs = require('fs');
 const { Client, Collection, Intents } = require('discord.js');
 const DiscordUtil = require('./common/discordutil');
 const { botToken, guildId, commandDirectories, buttonsDirectories } = require('./config.json');
+const { pausedStudentRoleId } = require('./buttons/buttonsConfig.json');
 const { deployCommands } = require('./deploy-commands');
 
 const client = new Client({
@@ -68,6 +69,20 @@ client.on('interactionCreate', async (interaction) => {
     } catch (error) {
       console.error(error);
       return interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+    }
+  }
+
+  if (interaction.isSelectMenu()) {
+    await interaction.deferUpdate();
+    const { customId, values } = interaction;
+    const selectMenuName = customId.split('_')[0];
+    if (selectMenuName === 'requestPause') {
+      const weeksToPause = values[0];
+      await interaction.member.roles.add([pausedStudentRoleId]);
+      await interaction.editReply({
+        content: `Your request to pause for ${weeksToPause} weeks was successful! 👍`,
+        components: []
+      });
     }
   }
 });

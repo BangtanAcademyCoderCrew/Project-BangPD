@@ -24,6 +24,7 @@ module.exports = {
             .setDescription('The type of button to send')
             .setRequired(false)
             .addChoice('Library Card Renewal', 'renewLibraryCard')
+            .addChoice('Request a Pause', 'requestPause')
             .setRequired(true))
     .addStringOption(option =>
         option.setName('emoji')
