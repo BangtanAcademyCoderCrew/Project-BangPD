@@ -135,11 +135,14 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
     return;
   }
 
-  const newRole = newMember.roles.cache
+  const newRoleInfo = newMember.roles.cache
     .filter(r => !oldMember.roles.cache.has(r.id))
-    .first()
-    .name.toLowerCase();
-  const passportRoles = ['level', 'time zone'].concat(pronounsRoles);
+    .first();
+  if (!newRoleInfo) {
+    return;
+  }
+  const newRole = newRoleInfo.name.toLowerCase();
+  const passportRoles = ['level', 'beginner', 'time zone'].concat(pronounsRoles);
 
   if (!passportRoles.some(v => newRole.includes(v))) {
     return;
@@ -149,6 +152,8 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
 
   if (pronounsRoles.includes(newRole)) {
     roleType = 'pronouns';
+  } else if (newRole == 'beginner') {
+    roleType = 'level';
   } else {
     roleType = passportRoles.filter(v => newRole.includes(v));
   }
